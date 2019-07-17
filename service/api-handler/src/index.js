@@ -1,8 +1,8 @@
 //"use strict";
 
-const AWS = require("aws-sdk");
+// const AWS = require("aws-sdk");
 const MCMA_AWS = require("mcma-aws");
-const uuidv4 = require('uuid/v4');
+// const uuidv4 = require('uuid/v4');
 
 // async functions to handle the different routes.
 
