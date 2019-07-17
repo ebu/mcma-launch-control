@@ -1,0 +1,15 @@
+{
+    "name": "service-api-handler",
+    "version": "0.0.0",
+    "description": "API gateway request handler for Launch Control Service",
+    "private": true,
+    "engines": {
+        "node": "~10.10.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "aws-sdk": "^2.493.0",
+        "mcma-aws": "0.1.0"
+    }
+}

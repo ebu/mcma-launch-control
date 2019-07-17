@@ -1,1 +1,4 @@
 /.gradle/
+/gradle.properties
+dist
+node_modules
