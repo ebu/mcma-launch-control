@@ -28,7 +28,7 @@ const addDeploymentConfig = async (requestContext) => {
         return;
     }
 
-    if (!/[0-9a-zA-Z\-]/.test(deploymentConfig.name)) {
+    if (!/^[0-9a-zA-Z\-]+$/.test(deploymentConfig.name)) {
         // throw new BadRequestError("DeploymentConfig has illegal characters in name");
         requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
         requestContext.response.statusMessage = "DeploymentConfig has illegal characters in name";
@@ -66,7 +66,7 @@ const putDeploymentConfig = async (requestContext) => {
 
     let deploymentConfigName = requestContext.request.pathVariables.name;
 
-    if (!/[0-9a-zA-Z\-]/.test(deploymentConfigName)) {
+    if (!/^[0-9a-zA-Z\-]+$/.test(deploymentConfigName)) {
         requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
         requestContext.response.statusMessage = "DeploymentConfig has illegal characters in name";
         return;
