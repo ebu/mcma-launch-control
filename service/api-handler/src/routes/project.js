@@ -5,7 +5,7 @@ const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
 const { McmaProject } = require("../model/project");
 
-const ROOT = "/projects"
+const URI_TEMPLATE = "/projects"
 
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
@@ -24,12 +24,12 @@ const createMcmaProject = async (requestContext) => {
     }
 
     project = new McmaProject(project);
-    project.onCreate(requestContext.publicUrl() + ROOT + "/" + project.name)
+    project.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name)
 
     let table = new DynamoDbTable(McmaProject, requestContext.tableName());
 
-    let oldProject = await table.get(project.id);
-    if (oldProject) {
+    let existingProject = await table.get(project.id);
+    if (existingProject) {
         requestContext.response.statusCode = 422;
         requestContext.response.statusMessage = "McmaProject with name '" + project.name + "' already exists.";
         return;
@@ -68,13 +68,18 @@ const updateMcmaProject = async (requestContext) => {
 
     requestContext.response.body = project;
 
-    Logger.info(JSON.stringify(requestContext.response, null, 2));
+    Logger.info("updateMcmaProject()", JSON.stringify(requestContext.response, null, 2));
 }
 
-const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaProject), McmaProject, ROOT)
+const onBeforeDeleteMcmaProject = async (requestContext) => {
+    // TODO check if project has deployments or components
+}
+
+const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaProject), McmaProject, URI_TEMPLATE)
     .addAll()
     .route(r => r.create).configure(r => r.overrideHandler(createMcmaProject))
     .route(r => r.update).configure(r => r.overrideHandler(updateMcmaProject))
+    .route(r => r.delete).configure(r => r.onStarted(onBeforeDeleteMcmaProject))
     .build();
 
 module.exports = routeCollection;

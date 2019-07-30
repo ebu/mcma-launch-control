@@ -5,7 +5,7 @@ const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
 const { McmaDeploymentConfig } = require("../model/deployment-config");
 
-const ROOT = "/deployment-configs"
+const URI_TEMPLATE = "/deployment-configs"
 
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
@@ -24,12 +24,12 @@ const createMcmaDeploymentConfig = async (requestContext) => {
     }
 
     deploymentConfig = new McmaDeploymentConfig(deploymentConfig);
-    deploymentConfig.onCreate(requestContext.publicUrl() + ROOT + "/" + deploymentConfig.name)
+    deploymentConfig.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + deploymentConfig.name)
 
     let table = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
 
-    let oldProject = await table.get(deploymentConfig.id);
-    if (oldProject) {
+    let existingDeploymentConfig = await table.get(deploymentConfig.id);
+    if (existingDeploymentConfig) {
         requestContext.response.statusCode = 422;
         requestContext.response.statusMessage = "McmaDeploymentConfig with name '" + deploymentConfig.name + "' already exists.";
         return;
@@ -68,10 +68,10 @@ const updateMcmaDeploymentConfig = async (requestContext) => {
 
     requestContext.response.body = deploymentConfig;
 
-    Logger.info(JSON.stringify(requestContext.response, null, 2));
+    Logger.info("updateMcmaDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
 }
 
-const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeploymentConfig), McmaDeploymentConfig, ROOT)
+const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeploymentConfig), McmaDeploymentConfig, URI_TEMPLATE)
     .addAll()
     .route(r => r.create).configure(r => r.overrideHandler(createMcmaDeploymentConfig))
     .route(r => r.update).configure(r => r.overrideHandler(updateMcmaDeploymentConfig))
