@@ -1,8 +1,8 @@
 const { Resource } = require ("@mcma/core")
 
-class McmaDeploymentConfig extends Resource {
+class McmaProject extends Resource {
     constructor(config) {
-        super("McmaDeploymentConfig", config)
+        super("McmaProject", config)
 
         this.id = (config && config.id) || null;
         this.name = (config && config.name) || null;
@@ -12,5 +12,5 @@ class McmaDeploymentConfig extends Resource {
 }
 
 module.exports = {
-    McmaDeploymentConfig
+    McmaProject
 }

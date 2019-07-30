@@ -3,9 +3,11 @@
 const { McmaApiRouteCollection } = require("@mcma/api");
 const { } = require("@mcma/aws-api-gateway")
 const deploymentConfigRoutes = require("./routes/deployment-config");
+const projectRoutes = require("./routes/project");
 
 const routeCollection = new McmaApiRouteCollection();
 routeCollection.addRoutes(deploymentConfigRoutes);
+routeCollection.addRoutes(projectRoutes);
 
 const restController = routeCollection.toApiGatewayApiController();
 
