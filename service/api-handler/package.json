@@ -9,8 +9,12 @@
     "main": "src/index.js",
     "license": "Apache-2.0",
     "dependencies": {
-        "aws-sdk": "^2.499.0",
-        "@mcma/aws-api-gateway": "^0.5.0",
-        "@mcma/aws-dynamodb": "^0.5.0"
+        "aws-sdk": "^2.503.0",
+        "@mcma/core": "^0.5.2",
+        "@mcma/data": "^0.5.2",
+        "@mcma/api": "^0.5.2",
+        "@mcma/client": "^0.5.2",
+        "@mcma/aws-api-gateway": "^0.5.2",
+        "@mcma/aws-dynamodb": "^0.5.2"
     }
 }

@@ -9,17 +9,18 @@ const URI_TEMPLATE = "/projects"
 
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
-const createMcmaProject = async (requestContext) => {
-    Logger.info("createMcmaProject()", JSON.stringify(requestContext.request, null, 2));
+const createProject = async (requestContext) => {
+    Logger.info("createProject()", JSON.stringify(requestContext.request, null, 2));
 
-    let project = requestContext.isBadRequestDueToMissingBody()
-    if (!project) {
+    if (!requestContext.hasRequestBody()) {
+        requestContext.setResponseBadRequestDueToMissingBody();
         return;
     }
 
+    let project = requestContext.getRequestBody();
+    
     if (!nameRegExp.test(project.name)) {
-        requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
-        requestContext.response.statusMessage = "McmaProject has illegal characters in name.";
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject has illegal characters in name.");
         return;
     }
 
@@ -30,33 +31,33 @@ const createMcmaProject = async (requestContext) => {
 
     let existingProject = await table.get(project.id);
     if (existingProject) {
-        requestContext.response.statusCode = 422;
-        requestContext.response.statusMessage = "McmaProject with name '" + project.name + "' already exists.";
+        requestContext.setResponseStatusCode(HttpStatusCode.UNPROCESSABLE_ENTITY, "McmaProject with name '" + project.name + "' already exists.");
         return;
     }
 
     project = await table.put(project.id, project);
 
-    requestContext.resourceCreated(project);
+    requestContext.setResponseResourceCreated(project);
 
-    Logger.info("createMcmaProject()", JSON.stringify(requestContext.response, null, 2));
+    Logger.info("createProject()", JSON.stringify(requestContext.response, null, 2));
 }
 
-const updateMcmaProject = async (requestContext) => {
-    Logger.info("updateMcmaProject()", JSON.stringify(requestContext.request, null, 2));
+const updateProject = async (requestContext) => {
+    Logger.info("updateProject()", JSON.stringify(requestContext.request, null, 2));
+
+    if (!requestContext.hasRequestBody()) {
+        requestContext.setResponseBadRequestDueToMissingBody();
+        return;
+    }
 
     let projectName = requestContext.request.pathVariables.id;
 
     if (!nameRegExp.test(projectName)) {
-        requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
-        requestContext.response.statusMessage = "McmaProject has illegal characters in name.";
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject has illegal characters in name.");
         return;
     }
 
-    let project = requestContext.isBadRequestDueToMissingBody()
-    if (!project) {
-        return;
-    }
+    let project = requestContext.getRequestBody();
 
     project.name = projectName;
 
@@ -66,20 +67,20 @@ const updateMcmaProject = async (requestContext) => {
     let table = new DynamoDbTable(McmaProject, requestContext.tableName());
     project = await table.put(project.id, project);
 
-    requestContext.response.body = project;
+    requestContext.setResponseBody(project);
 
-    Logger.info("updateMcmaProject()", JSON.stringify(requestContext.response, null, 2));
+    Logger.info("updateProject()", JSON.stringify(requestContext.response, null, 2));
 }
 
-const onBeforeDeleteMcmaProject = async (requestContext) => {
+const onBeforeDeleteProject = async (requestContext) => {
     // TODO check if project has deployments or components
 }
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaProject), McmaProject, URI_TEMPLATE)
     .addAll()
-    .route(r => r.create).configure(r => r.overrideHandler(createMcmaProject))
-    .route(r => r.update).configure(r => r.overrideHandler(updateMcmaProject))
-    .route(r => r.delete).configure(r => r.onStarted(onBeforeDeleteMcmaProject))
+    .route(r => r.create).configure(r => r.overrideHandler(createProject))
+    .route(r => r.update).configure(r => r.overrideHandler(updateProject))
+    .route(r => r.delete).configure(r => r.onStarted(onBeforeDeleteProject))
     .build();
 
 module.exports = routeCollection;

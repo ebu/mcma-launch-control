@@ -9,17 +9,18 @@ const URI_TEMPLATE = "/deployment-configs"
 
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
-const createMcmaDeploymentConfig = async (requestContext) => {
-    Logger.info("createMcmaDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
+const createDeploymentConfig = async (requestContext) => {
+    Logger.info("createDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
 
-    let deploymentConfig = requestContext.isBadRequestDueToMissingBody()
-    if (!deploymentConfig) {
+    if (!requestContext.hasRequestBody()) {
+        requestContext.setResponseBadRequestDueToMissingBody();
         return;
     }
 
+    let deploymentConfig = requestContext.getRequestBody();
+    
     if (!nameRegExp.test(deploymentConfig.name)) {
-        requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
-        requestContext.response.statusMessage = "McmaDeploymentConfig has illegal characters in name.";
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig has illegal characters in name.");
         return;
     }
 
@@ -30,33 +31,33 @@ const createMcmaDeploymentConfig = async (requestContext) => {
 
     let existingDeploymentConfig = await table.get(deploymentConfig.id);
     if (existingDeploymentConfig) {
-        requestContext.response.statusCode = 422;
-        requestContext.response.statusMessage = "McmaDeploymentConfig with name '" + deploymentConfig.name + "' already exists.";
+        requestContext.setResponseStatusCode(HttpStatusCode.UNPROCESSABLE_ENTITY, "McmaDeploymentConfig with name '" + deploymentConfig.name + "' already exists.");
         return;
     }
 
     deploymentConfig = await table.put(deploymentConfig.id, deploymentConfig);
 
-    requestContext.resourceCreated(deploymentConfig);
+    requestContext.setResponseResourceCreated(deploymentConfig);
 
-    Logger.info("createMcmaDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
+    Logger.info("createDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
 }
 
-const updateMcmaDeploymentConfig = async (requestContext) => {
-    Logger.info("updateMcmaDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
+const updateDeploymentConfig = async (requestContext) => {
+    Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
+
+    if (!requestContext.hasRequestBody()) {
+        requestContext.setResponseBadRequestDueToMissingBody();
+        return;
+    }
 
     let deploymentConfigName = requestContext.request.pathVariables.id;
 
     if (!nameRegExp.test(deploymentConfigName)) {
-        requestContext.response.statusCode = HttpStatusCode.BAD_REQUEST;
-        requestContext.response.statusMessage = "McmaDeploymentConfig has illegal characters in name.";
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig has illegal characters in name.");
         return;
     }
 
-    let deploymentConfig = requestContext.isBadRequestDueToMissingBody()
-    if (!deploymentConfig) {
-        return;
-    }
+    let deploymentConfig = requestContext.getRequestBody();
 
     deploymentConfig.name = deploymentConfigName;
 
@@ -66,15 +67,15 @@ const updateMcmaDeploymentConfig = async (requestContext) => {
     let table = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
     deploymentConfig = await table.put(deploymentConfig.id, deploymentConfig);
 
-    requestContext.response.body = deploymentConfig;
+    requestContext.setResponseBody(deploymentConfig);
 
-    Logger.info("updateMcmaDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
+    Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
 }
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeploymentConfig), McmaDeploymentConfig, URI_TEMPLATE)
     .addAll()
-    .route(r => r.create).configure(r => r.overrideHandler(createMcmaDeploymentConfig))
-    .route(r => r.update).configure(r => r.overrideHandler(updateMcmaDeploymentConfig))
+    .route(r => r.create).configure(r => r.overrideHandler(createDeploymentConfig))
+    .route(r => r.update).configure(r => r.overrideHandler(updateDeploymentConfig))
     .build();
 
 module.exports = routeCollection;
