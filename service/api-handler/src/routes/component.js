@@ -26,7 +26,7 @@ const queryComponent = async (requestContext) => {
     let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName())
     let resources = await componentTable.query((resource) => resource.id.startsWith(projectId));
 
-    requestContext.response.body = resources;
+    requestContext.setResponseBody(resources);
 
     Logger.info("queryComponent()", JSON.stringify(requestContext.response, null, 2));
 }
