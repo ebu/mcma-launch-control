@@ -6,14 +6,15 @@ const deploymentConfigRoutes = require("./routes/deployment-config");
 const projectRoutes = require("./routes/project");
 const componentRoutes = require("./routes/component");
 const deploymentRoutes = require("./routes/deployment");
+const deployedComponentRoutes = require("./routes/deployed-component");
 
-const routeCollection = new McmaApiRouteCollection();
-routeCollection.addRoutes(deploymentConfigRoutes);
-routeCollection.addRoutes(projectRoutes);
-routeCollection.addRoutes(componentRoutes);
-routeCollection.addRoutes(deploymentRoutes);
-
-const restController = routeCollection.toApiGatewayApiController();
+const restController = new McmaApiRouteCollection()
+    .addRoutes(deploymentConfigRoutes)
+    .addRoutes(projectRoutes)
+    .addRoutes(componentRoutes)
+    .addRoutes(deploymentRoutes)
+    .addRoutes(deployedComponentRoutes)
+    .toApiGatewayApiController();
 
 exports.handler = async (event, context) => {
     console.log(JSON.stringify(event, null, 2), JSON.stringify(context, null, 2));

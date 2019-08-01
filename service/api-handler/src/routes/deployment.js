@@ -111,7 +111,7 @@ const deleteDeployment = async (requestContext) => {
     }
 
     if (deployment.status == McmaDeploymentStatus.DEPLOYING || deployment.status == McmaDeploymentStatus.DESTROYING) {
-        requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in a transient state. Try again later");
+        requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
         return;
     }
 
@@ -131,6 +131,6 @@ const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvi
     .build()
     .addRoute("GET", URI_TEMPLATE, queryDeployment)
     .addRoute("POST", URI_TEMPLATE_2, updateDeployment)
-    .addRoute("DELETE", URI_TEMPLATE_2, deleteDeployment)
+    .addRoute("DELETE", URI_TEMPLATE_2, deleteDeployment);
 
 module.exports = routeCollection;
