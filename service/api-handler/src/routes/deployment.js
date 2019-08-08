@@ -4,10 +4,7 @@ const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
-const { McmaDeployment } = require("../model/deployment");
-const { McmaDeploymentConfig } = require("../model/deployment-config");
-const { McmaDeploymentStatus } = require("../model/deployment-status");
-const { McmaProject } = require("../model/project");
+const { McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } = require("commons");
 
 const PROJECTS_PATH = "/projects";
 const DEPLOYMENTS_PATH = "/deployments";
@@ -62,7 +59,7 @@ const updateDeployment = async (requestContext) => {
     let deployment = await deploymentTable.get(deploymentId);
     if (deployment) {
         if (deployment.status == McmaDeploymentStatus.DEPLOYING || deployment.status == McmaDeploymentStatus.DESTROYING) {
-            requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in a transient state. Try again later");
+            requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
             return;
         }
     }

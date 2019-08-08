@@ -3,7 +3,7 @@ const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
-const { McmaProject } = require("../model/project");
+const { McmaProject } = require("commons");
 
 const URI_TEMPLATE = "/projects"
 
@@ -17,18 +17,17 @@ const createProject = async (requestContext) => {
         return;
     }
 
-    let project = requestContext.getRequestBody();
+    let project = new McmaProject(requestContext.getRequestBody());
     
     if (!nameRegExp.test(project.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject has illegal characters in name.");
         return;
     }
-
-    project = new McmaProject(project);
+    
     project.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name)
 
     let table = new DynamoDbTable(McmaProject, requestContext.tableName());
-
+    
     let existingProject = await table.get(project.id);
     if (existingProject) {
         requestContext.setResponseStatusCode(HttpStatusCode.UNPROCESSABLE_ENTITY, "McmaProject with name '" + project.name + "' already exists.");
@@ -57,13 +56,10 @@ const updateProject = async (requestContext) => {
         return;
     }
 
-    let project = requestContext.getRequestBody();
-
+    let project = new McmaProject(requestContext.getRequestBody());
     project.name = projectName;
-
-    project = new McmaProject(project);
     project.onUpsert(requestContext.publicUrl() + requestContext.request.path);
-
+    
     let table = new DynamoDbTable(McmaProject, requestContext.tableName());
     project = await table.put(project.id, project);
 

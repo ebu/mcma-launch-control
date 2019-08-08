@@ -3,8 +3,7 @@ const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
-const { McmaProject } = require("../model/project");
-const { McmaComponent } = require("../model/component");
+const { McmaComponent, McmaProject } = require("commons");
 
 const PROJECTS_PATH = "/projects";
 const COMPONENTS_PATH = "/components";
@@ -47,16 +46,15 @@ const createComponent = async (requestContext) => {
         return;
     }
 
-    let component = requestContext.getRequestBody();
+    let component = new McmaComponent(requestContext.getRequestBody());
 
     if (!nameRegExp.test(component.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaComponent has illegal characters in name.");
         return;
     }
 
-    component = new McmaComponent(component);
-    component.onCreate(projectId + COMPONENTS_PATH + "/" + component.name)
-
+    component.onCreate(projectId + COMPONENTS_PATH + "/" + component.name);
+    
     let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
 
     let existingComponent = await componentTable.get(component.id);
@@ -95,11 +93,9 @@ const updateComponent = async (requestContext) => {
         return;
     }
 
-    let component = requestContext.getRequestBody();
+    let component = new McmaComponent(requestContext.getRequestBody());
 
     component.name = componentName;
-
-    component = new McmaComponent(component);
     component.onUpsert(requestContext.publicUrl() + requestContext.request.path);
 
     let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());

@@ -1,0 +1,15 @@
+{
+    "name": "commons",
+    "version": "0.0.0",
+    "description": "Library with shared type definitions",
+    "private": true,
+    "engines": {
+        "node": "~10.15.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@mcma/core": "^0.5.3",
+        "aws-sdk": "^2.505.0"
+    }
+}

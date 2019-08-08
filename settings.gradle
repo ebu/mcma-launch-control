@@ -1,3 +1,4 @@
-include "deployment",
+include "commons",
+        "deployment",
         "service",
         "service:api-handler"
