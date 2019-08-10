@@ -1,7 +1,7 @@
 {
-    "name": "service-api-handler",
+    "name": "service-worker",
     "version": "0.0.0",
-    "description": "API gateway request handler for Launch Control Service",
+    "description": "Worker lambda for Launch Control Service",
     "private": true,
     "engines": {
         "node": "~10.15.0"
@@ -9,13 +9,11 @@
     "main": "src/index.js",
     "license": "Apache-2.0",
     "dependencies": {
-        "@mcma/api": "^0.5.3",
-        "@mcma/aws-api-gateway": "^0.5.3",
         "@mcma/aws-dynamodb": "^0.5.3",
-        "@mcma/aws-lambda-worker-invoker": "^0.5.3",
         "@mcma/client": "^0.5.3",
         "@mcma/core": "^0.5.3",
         "@mcma/data": "^0.5.3",
+        "@mcma/worker": "^0.5.3",
         "aws-sdk": "^2.507.0",
         "commons": "file:../../commons"
     }

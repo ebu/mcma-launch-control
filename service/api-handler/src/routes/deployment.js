@@ -1,8 +1,7 @@
-
-
 const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
+const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
 
 const { McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } = require("commons");
 
@@ -11,6 +10,8 @@ const DEPLOYMENTS_PATH = "/deployments";
 const DEPLOYMENTS_CONFIG_PATH = "/deployment-configs"
 const URI_TEMPLATE = PROJECTS_PATH + "/{projectId}" + DEPLOYMENTS_PATH;
 const URI_TEMPLATE_2 = URI_TEMPLATE + "/{deploymentId}"
+
+const worker = new LambdaWorkerInvoker();
 
 const queryDeployment = async (requestContext) => {
     Logger.info("queryDeployment()", JSON.stringify(requestContext.request, null, 2));
@@ -73,6 +74,12 @@ const updateDeployment = async (requestContext) => {
     requestContext.setResponseBody(deployment);
 
     Logger.info("updateDeployment()", JSON.stringify(requestContext.response, null, 2));
+
+    await worker.invoke(
+        process.env.ServiceWorkerLambdaFunctionName,
+        "updateDeployment",
+        requestContext,
+        { deploymentId });
 }
 
 const deleteDeployment = async (requestContext) => {
@@ -121,6 +128,12 @@ const deleteDeployment = async (requestContext) => {
     requestContext.setResponseStatusCode(HttpStatusCode.ACCEPTED);
 
     Logger.info("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
+
+    await worker.invoke(
+        process.env.ServiceWorkerLambdaFunctionName,
+        "deleteDeployment",
+        requestContext,
+        { deploymentId });
 }
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeployment), McmaDeployment, URI_TEMPLATE)

@@ -36,8 +36,28 @@ resource "aws_lambda_function" "service_api_handler" {
   runtime          = "nodejs10.x"
   timeout          = "30"
   memory_size      = "256"
+
+  environment {
+    variables = {
+      ServiceWorkerLambdaFunctionName = "${aws_lambda_function.service_worker.function_name}"
+    }
+  }
 }
 
+#################################
+#  aws_lambda_function : service-worker
+#################################
+
+resource "aws_lambda_function" "service_worker" {
+  filename         = "../service/worker/dist/lambda.zip"
+  function_name    = "${format("%.64s", "${var.global_prefix}-service-worker")}"
+  role             = "${aws_iam_role.iam_for_exec_lambda.arn}"
+  handler          = "index.handler"
+  source_code_hash = "${filebase64sha256("../service/worker/dist/lambda.zip")}"
+  runtime          = "nodejs10.x"
+  timeout          = "900"
+  memory_size      = "3008"
+}
 
 ##############################
 #  aws_api_gateway_rest_api:  service_api

@@ -1,4 +1,5 @@
 include "commons",
         "deployment",
         "service",
-        "service:api-handler"
+        "service:api-handler",
+        "service:worker"

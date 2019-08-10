@@ -41,3 +41,13 @@ resource "aws_iam_role_policy_attachment" "role_policy_dynamodb" {
   policy_arn = "${aws_iam_policy.dynamodb_policy.arn}"
 }
 
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "${var.global_prefix}-policy-lambda"
+  description = "Policy to allow invoking lambda functions"
+  policy      = "${file("policies/allow-invoke-lambda.json")}"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role_policy_lambda" {
+  role       = "${aws_iam_role.iam_for_exec_lambda.name}"
+  policy_arn = "${aws_iam_policy.lambda_policy.arn}"
+}
