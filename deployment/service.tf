@@ -29,17 +29,17 @@ resource "aws_dynamodb_table" "service_table" {
 
 resource "aws_lambda_function" "service_api_handler" {
   filename         = "../service/api-handler/dist/lambda.zip"
-  function_name    = "${format("%.64s", "${var.global_prefix}-service-api-handler")}"
-  role             = "${aws_iam_role.iam_for_exec_lambda.arn}"
+  function_name    = format("%.64s", "${var.global_prefix}-service-api-handler")
+  role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
-  source_code_hash = "${filebase64sha256("../service/api-handler/dist/lambda.zip")}"
+  source_code_hash = filebase64sha256("../service/api-handler/dist/lambda.zip")
   runtime          = "nodejs10.x"
   timeout          = "30"
   memory_size      = "256"
 
   environment {
     variables = {
-      ServiceWorkerLambdaFunctionName = "${aws_lambda_function.service_worker.function_name}"
+      ServiceWorkerLambdaFunctionName = aws_lambda_function.service_worker.function_name
     }
   }
 }
@@ -50,10 +50,10 @@ resource "aws_lambda_function" "service_api_handler" {
 
 resource "aws_lambda_function" "service_worker" {
   filename         = "../service/worker/dist/lambda.zip"
-  function_name    = "${format("%.64s", "${var.global_prefix}-service-worker")}"
-  role             = "${aws_iam_role.iam_for_exec_lambda.arn}"
+  function_name    = format("%.64s", "${var.global_prefix}-service-worker")
+  role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
-  source_code_hash = "${filebase64sha256("../service/worker/dist/lambda.zip")}"
+  source_code_hash = filebase64sha256("../service/worker/dist/lambda.zip")
   runtime          = "nodejs10.x"
   timeout          = "900"
   memory_size      = "3008"
@@ -68,22 +68,22 @@ resource "aws_api_gateway_rest_api" "service_api" {
 }
 
 resource "aws_api_gateway_resource" "service_api_resource" {
-  rest_api_id = "${aws_api_gateway_rest_api.service_api.id}"
-  parent_id   = "${aws_api_gateway_rest_api.service_api.root_resource_id}"
+  rest_api_id = aws_api_gateway_rest_api.service_api.id
+  parent_id   = aws_api_gateway_rest_api.service_api.root_resource_id
   path_part   = "{proxy+}"
 }
 
 resource "aws_api_gateway_method" "service_options_method" {
-  rest_api_id   = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id   = "${aws_api_gateway_resource.service_api_resource.id}"
+  rest_api_id   = aws_api_gateway_rest_api.service_api.id
+  resource_id   = aws_api_gateway_resource.service_api_resource.id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_method_response" "service_options_200" {
-  rest_api_id = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id = "${aws_api_gateway_resource.service_api_resource.id}"
-  http_method = "${aws_api_gateway_method.service_options_method.http_method}"
+  rest_api_id = aws_api_gateway_rest_api.service_api.id
+  resource_id = aws_api_gateway_resource.service_api_resource.id
+  http_method = aws_api_gateway_method.service_options_method.http_method
   status_code = "200"
 
   response_models = {
@@ -98,9 +98,9 @@ resource "aws_api_gateway_method_response" "service_options_200" {
 }
 
 resource "aws_api_gateway_integration" "service_options_integration" {
-  rest_api_id = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id = "${aws_api_gateway_resource.service_api_resource.id}"
-  http_method = "${aws_api_gateway_method.service_options_method.http_method}"
+  rest_api_id = aws_api_gateway_rest_api.service_api.id
+  resource_id = aws_api_gateway_resource.service_api_resource.id
+  http_method = aws_api_gateway_method.service_options_method.http_method
   type        = "MOCK"
 
   request_templates = {
@@ -109,10 +109,10 @@ resource "aws_api_gateway_integration" "service_options_integration" {
 }
 
 resource "aws_api_gateway_integration_response" "service_options_integration_response" {
-  rest_api_id = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id = "${aws_api_gateway_resource.service_api_resource.id}"
-  http_method = "${aws_api_gateway_method.service_options_method.http_method}"
-  status_code = "${aws_api_gateway_method_response.service_options_200.status_code}"
+  rest_api_id = aws_api_gateway_rest_api.service_api.id
+  resource_id = aws_api_gateway_resource.service_api_resource.id
+  http_method = aws_api_gateway_method.service_options_method.http_method
+  status_code = aws_api_gateway_method_response.service_options_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
@@ -126,16 +126,16 @@ resource "aws_api_gateway_integration_response" "service_options_integration_res
 }
 
 resource "aws_api_gateway_method" "service_api_method" {
-  rest_api_id   = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id   = "${aws_api_gateway_resource.service_api_resource.id}"
+  rest_api_id   = aws_api_gateway_rest_api.service_api.id
+  resource_id   = aws_api_gateway_resource.service_api_resource.id
   http_method   = "ANY"
   authorization = "AWS_IAM"
 }
 
 resource "aws_api_gateway_integration" "service_api_method_integration" {
-  rest_api_id             = "${aws_api_gateway_rest_api.service_api.id}"
-  resource_id             = "${aws_api_gateway_resource.service_api_resource.id}"
-  http_method             = "${aws_api_gateway_method.service_api_method.http_method}"
+  rest_api_id             = aws_api_gateway_rest_api.service_api.id
+  resource_id             = aws_api_gateway_resource.service_api_resource.id
+  http_method             = aws_api_gateway_method.service_api_method.http_method
   type                    = "AWS_PROXY"
   uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${aws_lambda_function.service_api_handler.function_name}/invocations"
   integration_http_method = "POST"
@@ -144,7 +144,7 @@ resource "aws_api_gateway_integration" "service_api_method_integration" {
 resource "aws_lambda_permission" "apigw_service_api_handler" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.service_api_handler.arn}"
+  function_name = aws_lambda_function.service_api_handler.arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_id}:${aws_api_gateway_rest_api.service_api.id}/*/${aws_api_gateway_method.service_api_method.http_method}/*"
 }
@@ -155,16 +155,16 @@ resource "aws_api_gateway_deployment" "service_deployment" {
     "aws_api_gateway_integration.service_api_method_integration",
   ]
 
-  rest_api_id = "${aws_api_gateway_rest_api.service_api.id}"
-  stage_name  = "${var.environment_type}"
+  rest_api_id = aws_api_gateway_rest_api.service_api.id
+  stage_name  = var.environment_type
 
   variables = {
-    "TableName"      = "${aws_dynamodb_table.service_table.name}"
-    "PublicUrl"      = "${local.service_url}"
-    "DeploymentHash" = "${filesha256("./service.tf")}"
+    "TableName"      = aws_dynamodb_table.service_table.name
+    "PublicUrl"      = local.service_url
+    "DeploymentHash" = filesha256("./service.tf")
   }
 }
 
 locals {
-  service_url  = "https://${aws_api_gateway_rest_api.service_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.environment_type}"
+  service_url = "https://${aws_api_gateway_rest_api.service_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.environment_type}"
 }

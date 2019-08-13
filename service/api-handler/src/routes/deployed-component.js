@@ -34,7 +34,7 @@ const queryDeployedComponent = async (requestContext) => {
     requestContext.setResponseBody(resources);
 
     Logger.info("queryDeployedComponent()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeployedComponent), McmaDeployment, URI_TEMPLATE)
     .route(r => r.get).add()

@@ -1,5 +1,7 @@
 import { Resource } from "@mcma/core";
 
+interface Map<K, V> {}
+
 export class McmaComponent extends Resource {
     constructor(properties: any);
 

@@ -1,4 +1,3 @@
-
 const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
@@ -22,13 +21,13 @@ const queryComponent = async (requestContext) => {
         return;
     }
 
-    let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName())
+    let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
     let resources = await componentTable.query((resource) => resource.id.startsWith(projectId));
 
     requestContext.setResponseBody(resources);
 
     Logger.info("queryComponent()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const createComponent = async (requestContext) => {
     Logger.info("createComponent()", JSON.stringify(requestContext.request, null, 2));
@@ -54,7 +53,7 @@ const createComponent = async (requestContext) => {
     }
 
     component.onCreate(projectId + COMPONENTS_PATH + "/" + component.name);
-    
+
     let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
 
     let existingComponent = await componentTable.get(component.id);
@@ -68,7 +67,7 @@ const createComponent = async (requestContext) => {
     requestContext.setResponseResourceCreated(component);
 
     Logger.info("createComponent()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const updateComponent = async (requestContext) => {
     Logger.info("updateComponent()", JSON.stringify(requestContext.request, null, 2));
@@ -104,7 +103,7 @@ const updateComponent = async (requestContext) => {
     requestContext.setResponseBody(component);
 
     Logger.info("updateComponent()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaComponent), McmaComponent, URI_TEMPLATE)
     .addAll()

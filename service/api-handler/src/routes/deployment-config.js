@@ -1,11 +1,10 @@
-
 const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
 const { McmaDeploymentConfig } = require("commons");
 
-const URI_TEMPLATE = "/deployment-configs"
+const URI_TEMPLATE = "/deployment-configs";
 
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
@@ -18,7 +17,7 @@ const createDeploymentConfig = async (requestContext) => {
     }
 
     let deploymentConfig = new McmaDeploymentConfig(requestContext.getRequestBody());
-    
+
     if (!nameRegExp.test(deploymentConfig.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig has illegal characters in name.");
         return;
@@ -67,7 +66,7 @@ const updateDeploymentConfig = async (requestContext) => {
     requestContext.setResponseBody(deploymentConfig);
 
     Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeploymentConfig), McmaDeploymentConfig, URI_TEMPLATE)
     .addAll()

@@ -1,8 +1,8 @@
-const { Resource } = require ("@mcma/core")
+const { Resource } = require("@mcma/core");
 
 class McmaDeployedComponent extends Resource {
     constructor(config) {
-        super("McmaDeployedComponent", config)
+        super("McmaDeployedComponent", config);
 
         this.dateCreated = (config && config.dateCreated) || null;
         this.dateModified = (config && config.dateModified) || null;
@@ -18,4 +18,4 @@ class McmaDeployedComponent extends Resource {
 
 module.exports = {
     McmaDeployedComponent
-}
+};
