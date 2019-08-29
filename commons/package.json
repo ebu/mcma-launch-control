@@ -8,8 +8,10 @@
     },
     "main": "src/index.js",
     "license": "Apache-2.0",
-    "dependencies": {
-        "@mcma/core": "^0.5.3",
-        "aws-sdk": "^2.508.0"
+    "devDependencies": {
+        "@mcma/core": "^0.5.3"
+    },
+    "peerDependencies": {
+        "@mcma/core": "^0.5.3"
     }
 }

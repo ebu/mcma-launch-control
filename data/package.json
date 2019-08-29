@@ -1,0 +1,26 @@
+{
+    "name": "data",
+    "version": "0.0.0",
+    "description": "Library with DataController for doing DynamoDB operations",
+    "private": true,
+    "engines": {
+        "node": "~10.15.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "commons": "file:../commons"
+    },
+    "devDependencies": {
+        "@mcma/aws-dynamodb": "^0.5.3",
+        "@mcma/core": "^0.5.3",
+        "@mcma/data": "^0.5.3",
+        "aws-sdk": "^2.519.0"
+    },
+    "peerDependencies": {
+        "@mcma/aws-dynamodb": "^0.5.3",
+        "@mcma/core": "^0.5.3",
+        "@mcma/data": "^0.5.3",
+        "aws-sdk": "^2.519.0"
+    }
+}

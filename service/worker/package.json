@@ -16,6 +16,7 @@
         "@mcma/worker": "^0.5.3",
         "aws-sdk": "^2.508.0",
         "commons": "file:../../commons",
+        "data": "file:../../data",
         "lambda-git": "^0.1.2"
     }
 }

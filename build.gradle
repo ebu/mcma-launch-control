@@ -19,8 +19,8 @@ allprojects {
 }
 
 def getVersionNodeJS = { ->
-    def stdout = new ByteArrayOutputStream();
-    def stderr = new ByteArrayOutputStream();
+    def stdout = new ByteArrayOutputStream()
+    def stderr = new ByteArrayOutputStream()
     try {
         exec {
             commandLine nodeExecutable
@@ -28,7 +28,7 @@ def getVersionNodeJS = { ->
             standardOutput stdout
             errorOutput stderr
         }
-    } catch (Exception ex) {}
+    } catch (Exception ignored) {}
 
     return stdout.toString().trim().replace("v", "")
 }
@@ -39,7 +39,7 @@ task verifyNodeJS {
     doLast {
         def versionNodeJs = getVersionNodeJS()
         if (versionNodeJs != requiredVersionNodeJS) {
-            throw new Exception("Required Node version " + requiredVersionNodeJS + " not installed. Detected version " + versionNodeJs);
+            throw new Exception("Required Node version " + requiredVersionNodeJS + " not installed. Detected version " + versionNodeJs)
         }      
     }
 }
@@ -78,7 +78,7 @@ subprojects {
 }
 
 afterEvaluate {
-    // avoiding simultanous connections to npmjs.com
+    // avoiding simultaneous connections to npmjs.com
     def prevTask = null
     project.subprojects.each {
         def task = it.tasks.find { task -> task.name.contains('npmUpdate') }
@@ -86,7 +86,7 @@ afterEvaluate {
             if (prevTask != null) {
                 task.mustRunAfter(prevTask)
             }
-            prevTask = task;
+            prevTask = task
         }
     }
 
@@ -97,7 +97,7 @@ afterEvaluate {
             if (prevTask != null) {
                 task.mustRunAfter(prevTask)
             }
-            prevTask = task;
+            prevTask = task
         }
     }
 }

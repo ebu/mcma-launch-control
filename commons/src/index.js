@@ -12,4 +12,4 @@ module.exports = {
     McmaDeploymentStatus,
     McmaDeployment,
     McmaProject
-}
+};

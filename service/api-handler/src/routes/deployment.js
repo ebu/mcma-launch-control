@@ -59,7 +59,7 @@ const updateDeployment = async (requestContext) => {
 
     let deployment = await deploymentTable.get(deploymentId);
     if (deployment) {
-        if (deployment.status == McmaDeploymentStatus.DEPLOYING || deployment.status == McmaDeploymentStatus.DESTROYING) {
+        if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
             requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
             return;
         }
@@ -77,7 +77,7 @@ const updateDeployment = async (requestContext) => {
         process.env.ServiceWorkerLambdaFunctionName,
         "updateDeployment",
         requestContext.getAllContextVariables(),
-        { deploymentId });
+        { projectId, deploymentId });
 
     Logger.info("updateDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
@@ -114,7 +114,7 @@ const deleteDeployment = async (requestContext) => {
         return;
     }
 
-    if (deployment.status == McmaDeploymentStatus.DEPLOYING || deployment.status == McmaDeploymentStatus.DESTROYING) {
+    if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
         requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
         return;
     }
@@ -123,7 +123,7 @@ const deleteDeployment = async (requestContext) => {
     deployment.status = McmaDeploymentStatus.DESTROYING;
     deployment.onUpsert(deploymentId);
 
-    deployment = await deploymentTable.put(deployment.id, deployment);
+    await deploymentTable.put(deployment.id, deployment);
 
     requestContext.setResponseStatusCode(HttpStatusCode.ACCEPTED);
 
@@ -131,7 +131,7 @@ const deleteDeployment = async (requestContext) => {
         process.env.ServiceWorkerLambdaFunctionName,
         "deleteDeployment",
         requestContext.getAllContextVariables(),
-        { deploymentId });
+        { projectId, deploymentId });
 
     Logger.info("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
