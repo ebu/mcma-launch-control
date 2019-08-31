@@ -39,7 +39,8 @@ export enum McmaDeploymentStatus {
 export class McmaDeployment extends Resource {
     constructor(properties: any);
 
-    mcmaDeploymentConfig: string;
+    project: string;
+    config: string;
     status: McmaDeploymentStatus;
     statusMessage: string;
     projectName: string;

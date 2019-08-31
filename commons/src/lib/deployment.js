@@ -1,18 +1,18 @@
 const { Resource } = require("@mcma/core");
 
 class McmaDeployment extends Resource {
-    constructor(config) {
-        super("McmaDeployment", config);
+    constructor(properties) {
+        super("McmaDeployment", properties);
 
-        this.dateCreated = (config && config.dateCreated) || null;
-        this.dateModified = (config && config.dateModified) || null;
+        this.dateCreated = (properties && properties.dateCreated) || null;
+        this.dateModified = (properties && properties.dateModified) || null;
 
-        this.id = (config && config.id) || null;
-        this.mcmaDeploymentConfig = (config && config.mcmaDeploymentConfig) || null;
-        this.status = (config && config.status) || null;
-        this.statusMessage = (config && config.statusMessage) || null;
-        this.projectName = (config && config.projectName);
-        this.variables = (config && config.variables) || {};
+        this.id = (properties && properties.id) || null;
+        this.project = (properties && properties.project) || null;
+        this.config = (properties && properties.config) || null;
+        this.status = (properties && properties.status) || null;
+        this.statusMessage = (properties && properties.statusMessage) || null;
+        this.variables = (properties && properties.variables) || {};
     }
 }
 

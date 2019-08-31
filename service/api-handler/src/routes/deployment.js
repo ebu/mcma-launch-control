@@ -3,7 +3,8 @@ const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
 
-const { McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } = require("commons");
+const { McmaDeployment, McmaDeploymentStatus } = require("commons");
+const { DataController } = require("data");
 
 const PROJECTS_PATH = "/projects";
 const DEPLOYMENTS_PATH = "/deployments";
@@ -15,10 +16,10 @@ const worker = new LambdaWorkerInvoker();
 
 const queryDeployment = async (requestContext) => {
     Logger.info("queryDeployment()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
         return;
@@ -34,42 +35,40 @@ const queryDeployment = async (requestContext) => {
 
 const updateDeployment = async (requestContext) => {
     Logger.info("updateDeployment()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
     let deploymentName = requestContext.request.pathVariables.deploymentId;
-
     let deploymentConfigId = requestContext.publicUrl() + DEPLOYMENTS_CONFIG_PATH + "/" + deploymentName;
-    let deploymentConfigTable = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
-    let deploymentConfig = await deploymentConfigTable.get(deploymentConfigId);
+    let deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
     if (!deploymentConfig) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
         return;
     }
 
-    let deploymentTable = new DynamoDbTable(McmaDeployment, requestContext.tableName());
-
     let deploymentId = requestContext.publicUrl() + requestContext.request.path;
-
-    let deployment = await deploymentTable.get(deploymentId);
+    let deployment = await dc.getDeployment(deploymentId);
     if (deployment) {
         if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
             requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
             return;
         }
+    } else {
+        deployment = new McmaDeployment();
+        deployment.project = projectId;
+        deployment.config = deploymentConfigId;
     }
 
-    deployment = new McmaDeployment(deployment);
     deployment.status = McmaDeploymentStatus.DEPLOYING;
     deployment.onUpsert(deploymentId);
 
-    deployment = await deploymentTable.put(deployment.id, deployment);
+    deployment = await dc.setDeployment(deployment);
 
     requestContext.setResponseBody(deployment);
 
@@ -77,38 +76,32 @@ const updateDeployment = async (requestContext) => {
         process.env.ServiceWorkerLambdaFunctionName,
         "updateDeployment",
         requestContext.getAllContextVariables(),
-        { projectId, deploymentId });
+        { projectId, deploymentConfigId, deploymentId });
 
     Logger.info("updateDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const deleteDeployment = async (requestContext) => {
     Logger.info("deleteDeployment()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
     let deploymentName = requestContext.request.pathVariables.deploymentId;
-
     let deploymentConfigId = requestContext.publicUrl() + DEPLOYMENTS_CONFIG_PATH + "/" + deploymentName;
-    let deploymentConfigTable = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
-    let deploymentConfig = await deploymentConfigTable.get(deploymentConfigId);
+    let deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
     if (!deploymentConfig) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
         return;
     }
 
-    let deploymentTable = new DynamoDbTable(McmaDeployment, requestContext.tableName());
-
     let deploymentId = requestContext.publicUrl() + requestContext.request.path;
-
-    let deployment = await deploymentTable.get(deploymentId);
-
+    let deployment = await dc.getDeployment(deploymentId);
     if (!deployment) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeployment '" + deploymentId + "' does not exist.");
         return;
@@ -119,11 +112,10 @@ const deleteDeployment = async (requestContext) => {
         return;
     }
 
-    deployment = new McmaDeployment(deployment);
     deployment.status = McmaDeploymentStatus.DESTROYING;
     deployment.onUpsert(deploymentId);
 
-    await deploymentTable.put(deployment.id, deployment);
+    await dc.setDeployment(deployment);
 
     requestContext.setResponseStatusCode(HttpStatusCode.ACCEPTED);
 
@@ -131,7 +123,7 @@ const deleteDeployment = async (requestContext) => {
         process.env.ServiceWorkerLambdaFunctionName,
         "deleteDeployment",
         requestContext.getAllContextVariables(),
-        { projectId, deploymentId });
+        { projectId, deploymentConfigId, deploymentId });
 
     Logger.info("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
 };

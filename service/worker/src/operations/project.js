@@ -2,7 +2,7 @@ const { Logger } = require("@mcma/core");
 
 const { DataController } = require("data");
 
-const { CodeCommit } = require("./codecommit");
+const { CodeCommit } = require("./tools/codecommit");
 
 const createProject = async (workerRequest) => {
     let dc = new DataController(workerRequest.tableName());

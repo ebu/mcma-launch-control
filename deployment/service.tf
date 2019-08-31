@@ -59,7 +59,12 @@ resource "aws_lambda_function" "service_worker" {
   memory_size      = "3008"
 
   environment {
-    variables = {
+    variables = { // TODO: Supply the variables through AWS Systems Manager Parameter Store instead of passing them here, as this is not secure
+      AwsAccountId = var.aws_account_id
+      AwsAccessKey = var.aws_access_key
+      AwsSecretKey = var.aws_secret_key
+      AwsRegion = var.aws_region
+
       AwsCodeCommitUsername = var.aws_code_commit_username
       AwsCodeCommitPassword = var.aws_code_commit_password
     }
