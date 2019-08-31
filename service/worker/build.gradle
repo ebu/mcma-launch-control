@@ -1,0 +1,9 @@
+task copyTerraformBin(type: Copy) {
+    from "externals/terraform"
+    into "dist/staging/bin"
+}
+
+build {
+    dependsOn copyTerraformBin
+    fileMode 0755
+}

@@ -36,6 +36,6 @@ const deleteProject = async (workerRequest) => {
 };
 
 module.exports = {
-  createProject,
-  deleteProject
+    createProject,
+    deleteProject
 };

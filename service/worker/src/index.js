@@ -2,7 +2,7 @@ const { Logger } = require("@mcma/core");
 const { WorkerBuilder, WorkerRequest } = require("@mcma/worker");
 
 const { createProject, deleteProject } = require("./operations/project");
-const { updateDeployment, deleteDeployment} = require("./operations/deployment");
+const { updateDeployment, deleteDeployment } = require("./operations/deployment");
 
 const worker =
     new WorkerBuilder()
