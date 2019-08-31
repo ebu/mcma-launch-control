@@ -1,17 +1,17 @@
-def requiredVersionNodeJS = "10.15.3"
+def requiredVersionNodeJS = "8.10.0"
 
 allprojects {
     ext {
         if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            nodeExecutable = ["node"]
-            ngExecutable = ["cmd", "/c", "ng"]
-            npmExecutable = ["cmd", "/c", "npm"]
-            terraformExecutable = ["cmd", "/c", "terraform"]
+            nodeExecutable = Arrays.asList("node")
+            ngExecutable = Arrays.asList("cmd", "/c", "ng")
+            npmExecutable = Arrays.asList("cmd", "/c", "npm")
+            terraformExecutable = Arrays.asList("cmd", "/c", "terraform")
         } else {
-            nodeExecutable = ["node"]
-            ngExecutable = ["ng"]
-            npmExecutable = ["npm"]
-            terraformExecutable = ["terraform"]
+            nodeExecutable = Arrays.asList("node")
+            ngExecutable = Arrays.asList("ng")
+            npmExecutable = Arrays.asList("npm")
+            terraformExecutable = Arrays.asList("terraform")
         }
 
         awsAvailableLibraries = [".bin", "aws-sdk", "base64-js", "buffer", "dynamodb-doc", "events", "ieee754", "isarray", "jmespath", "punycode", "querystring", "sax", "url", "xml2js", "xmlbuilder"]
