@@ -133,6 +133,7 @@ const updateDeployment = async (workerRequest) => {
 
             await Git.addFiles();
             if (await Git.hasChanges()) {
+                await Git.pull();
                 await Git.commit("Updating Terraform configuration");
                 await Git.push();
             }
@@ -142,6 +143,7 @@ const updateDeployment = async (workerRequest) => {
 
             await Git.addFiles();
             if (await Git.hasChanges()) {
+                await Git.pull();
                 await Git.commit("Deployment '" + deploymentConfig.name + "' is updated");
                 await Git.push();
             }
@@ -193,6 +195,7 @@ const deleteDeployment = async (workerRequest) => {
 
             await Git.addFiles();
             if (await Git.hasChanges()) {
+                await Git.pull();
                 await Git.commit("Deployment '" + deploymentConfig.name + "' is destroyed");
                 await Git.push();
             }

@@ -116,6 +116,16 @@ class Git {
         Logger.info("stderr:", stderr);
     }
 
+    static async pull() {
+        await Git.init();
+
+        let cmd = "git pull";
+        Logger.info(cmd);
+        const { stdout, stderr } = await exec(cmd, options);
+        Logger.info("stdout:", stdout);
+        Logger.info("stderr:", stderr);
+    }
+
     static async push() {
         await Git.init();
 
@@ -126,7 +136,7 @@ class Git {
         Logger.info("stderr:", stderr);
     }
 
-    static async list() {
+    static async listFiles() {
         let cmd = "find " + options.cwd;
         Logger.info(cmd);
         const { stdout, stderr } = await exec(cmd);

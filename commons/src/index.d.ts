@@ -7,7 +7,7 @@ export class McmaComponent extends Resource {
 
     name: string;
     displayName: string;
-    mcmaModule: string;
+    module: string;
     variables: Map<string, string>;
 }
 
@@ -16,7 +16,7 @@ export class McmaDeployedComponent extends Resource {
 
     name: string;
     displayName: string;
-    mcmaModule: string;
+    module: string;
     inputVariables: Map<string, string>;
     outputVariables: Map<string, string>;
 }

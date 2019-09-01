@@ -10,7 +10,7 @@ class McmaComponent extends Resource {
         this.id = (properties && properties.id) || null;
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
-        this.mcmaModule = (properties && properties.mcmaModule) || null;
+        this.module = (properties && properties.module) || null;
         this.variables = (properties && properties.variables) || {};
     }
 }
