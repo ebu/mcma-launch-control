@@ -43,7 +43,6 @@ export class McmaDeployment extends Resource {
     config: string;
     status: McmaDeploymentStatus;
     statusMessage: string;
-    projectName: string;
     variables: Map<string, string>;
 }
 

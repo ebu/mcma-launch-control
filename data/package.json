@@ -15,7 +15,7 @@
         "@mcma/aws-dynamodb": "^0.5.3",
         "@mcma/core": "^0.5.3",
         "@mcma/data": "^0.5.3",
-        "aws-sdk": "^2.519.0"
+        "aws-sdk": "^2.521.0"
     },
     "peerDependencies": {
         "@mcma/aws-dynamodb": "^0.5.3",
