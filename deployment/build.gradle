@@ -35,6 +35,8 @@ task generateTerraformTFVarsJson {
 
 task terraformInit(type: Exec) {
     inputs.file "main.tf"
+    inputs.file "repository.tf"
+    inputs.file "service.tf"
     outputs.upToDateWhen { file(".terraform").exists() }
     commandLine terraformExecutable
     args "init"

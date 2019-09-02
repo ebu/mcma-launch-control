@@ -10,6 +10,10 @@ provider "aws" {
   region     = var.aws_region
 }
 
+provider "template" {
+  version = "~> 2.1.2"
+}
+
 ##################################
 # aws_iam_role : iam_for_exec_lambda
 ##################################
