@@ -44,17 +44,12 @@ const generateMainTfJson = () => {
             }
         ],
 
-        resource: [
+        module: [
             {
-                aws_s3_bucket: [
-                    {
-                        test_bucket: {
-                            bucket: "ch.ebu.mcma.test-bucket.${var.deployment_config_name}",
-                            acl: "private",
-                            force_destroy: true
-                        }
-                    }
-                ]
+                aws_s3_bucket: {
+                    source: "https://s3-eu-west-1.amazonaws.com/pt.rovers.mcma.launch-control.repository/aws_s3_bucket.zip",
+                    bucket_name: "ch.ebu.mcma.test-bucket.${var.deployment_config_name}"
+                }
             }
         ]
     };

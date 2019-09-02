@@ -45,6 +45,7 @@ task verifyNodeJS {
 }
 
 task build {
+    dependsOn "modules:build"
     dependsOn "service:build"
 }
 

@@ -1,6 +1,8 @@
 include "commons",
         "data",
         "deployment",
+        "modules",
+        "modules:aws_s3_bucket",
         "service",
         "service:api-handler",
         "service:worker"

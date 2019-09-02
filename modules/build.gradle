@@ -1,0 +1,17 @@
+task build {
+    dependsOn "aws_s3_bucket:build"
+}
+
+subprojects {
+    task copySource (type: Copy) {
+        from "src"
+        into "dist/staging/"
+    }
+
+    task build (type: Zip) {
+        dependsOn copySource
+        archiveName "module.zip"
+        destinationDir file("dist")
+        from "dist/staging"
+    }
+}
