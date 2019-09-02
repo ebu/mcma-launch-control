@@ -61,8 +61,7 @@ resource "aws_lambda_function" "service_worker" {
   environment {
     variables = {
       // TODO: Supply the variables through AWS Systems Manager Parameter Store instead of passing them here
-      GlobalPrefix            = var.global_prefix
-      LaunchControlRepository = "https://s3${var.aws_region != "us-east-1" ? "-" : ""}${var.aws_region != "us-east-1" ? var.aws_region : ""}.amazonaws.com/${aws_s3_bucket.repository.id}"
+      GlobalPrefix = var.global_prefix
 
       AwsAccountId = var.aws_account_id
       AwsAccessKey = var.aws_access_key

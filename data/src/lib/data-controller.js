@@ -1,5 +1,5 @@
 const { DynamoDbTable } = require("@mcma/aws-dynamodb");
-const { McmaProject, McmaDeploymentConfig, McmaDeployment } = require("commons");
+const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } = require("commons");
 
 class DataController {
     constructor(tableName) {
@@ -7,6 +7,7 @@ class DataController {
         this.projectTable = new DynamoDbTable(McmaProject, this.tableName);
         this.deploymentConfigTable = new DynamoDbTable(McmaDeploymentConfig, this.tableName);
         this.deploymentTable = new DynamoDbTable(McmaDeployment, this.tableName);
+        this.componentTable = new DynamoDbTable(McmaComponent, this.tableName);
     }
 
     async getProject(projectId) {
@@ -99,6 +100,43 @@ class DataController {
             return false;
         }
         await this.deploymentTable.delete(deploymentId);
+        return true;
+    }
+
+    async getComponents(projectId) {
+        let resources = await this.componentTable.query((resource) => resource.id.startsWith(projectId));
+        resources.map(value => new McmaComponent(value));
+        return resources;
+    }
+
+    async getComponent(componentId) {
+        let component;
+        try {
+            component = await this.componentTable.get(componentId);
+        } catch (ignored) {
+        }
+
+        if (!component) {
+            return null;
+        }
+        return new McmaComponent(component);
+    }
+
+    async setComponent(component) {
+        if (typeof component.id !== "string") {
+            throw new Error("McmaComponent missing id");
+        }
+
+        component = await this.componentTable.put(component.id, component);
+        return new McmaComponent(component);
+    }
+
+    async deleteComponent(componentId) {
+        let component = await this.getComponent(componentId);
+        if (!component) {
+            return false;
+        }
+        await this.componentTable.delete(componentId);
         return true;
     }
 }

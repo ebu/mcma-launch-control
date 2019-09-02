@@ -12,7 +12,6 @@ const { Git } = require("./tools/git");
 const REPOSITORY_DIR = "/tmp/repo";
 
 const GLOBAL_PREFIX = process.env.GlobalPrefix;
-const LAUNCH_CONTROL_REPOSITORY = process.env.LaunchControlRepository;
 
 const AWS_ACCOUNT_ID = process.env.AwsAccountId;
 const AWS_ACCESS_KEY = process.env.AwsAccessKey;
@@ -27,7 +26,38 @@ const generateGitIgnore = () => ".terraform\n" +
     "terraform.tfstate.backup\n" +
     "terraform.tfvars.json\n";
 
-const generateMainTfJson = () => {
+const generateMainTfJson = (components) => {
+    let providers = [];
+
+    providers.push({
+        aws: {
+            version: "~> 2.25",
+            access_key: "${var.aws_access_key}",
+            secret_key: "${var.aws_secret_key}",
+            region: "${var.aws_region}",
+        }
+    });
+
+    let modules = [];
+
+    for (const component of components) {
+        let variables = {};
+
+        for (const variable in component.variables) {
+            if (component.variables.hasOwnProperty(variable)) {
+                variables[variable] = component.variables[variable];
+            }
+        }
+
+        variables.source = component.module;
+
+        let module = {};
+        module[component.name] = variables;
+        component.variables;
+
+        modules.push(module)
+    }
+
     let mainTfJson = {
         terraform: {
             required_version: ">= 0.12.0",
@@ -35,35 +65,8 @@ const generateMainTfJson = () => {
                 local: {}
             }
         },
-
-        provider: [
-            {
-                aws: {
-                    version: "~> 2.25",
-                    access_key: "${var.aws_access_key}",
-                    secret_key: "${var.aws_secret_key}",
-                    region: "${var.aws_region}",
-                }
-            }
-        ],
-
-        module: [
-            {
-                aws_s3_bucket: {
-                    source: LAUNCH_CONTROL_REPOSITORY + "/aws_s3_bucket.zip",
-                    bucket_name: "${var.project_prefix}.test-bucket"
-                }
-            },
-            {
-                aws_service_registry: {
-                    source: LAUNCH_CONTROL_REPOSITORY + "/aws_service_registry.zip",
-                    module_prefix: "${var.project_prefix}.service-registry",
-                    stage_name: "${var.stage_name}",
-                    aws_account_id: "${var.aws_account_id}",
-                    aws_region: "${var.aws_region}"
-                }
-            }
-        ]
+        provider: providers,
+        module: modules
     };
 
     return JSON.stringify(mainTfJson, null, 2);
@@ -118,6 +121,7 @@ const updateDeployment = async (workerRequest) => {
         let project = await dc.getProject(workerRequest.input.projectId);
         let deployment = await dc.getDeployment(workerRequest.input.deploymentId);
         let deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
+        let components = await dc.getComponents(workerRequest.input.projectId);
 
         Logger.info(JSON.stringify(project, null, 2));
         Logger.info(JSON.stringify(deployment, null, 2));
@@ -142,7 +146,7 @@ const updateDeployment = async (workerRequest) => {
             let isNewRepository = await Git.isNew();
 
             await Git.writeFile(".gitignore", generateGitIgnore());
-            await Git.writeFile("main.tf.json", generateMainTfJson());
+            await Git.writeFile("main.tf.json", generateMainTfJson(components));
             await Git.writeFile("variables.tf.json", generateVariablesTfJson());
             await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
 
