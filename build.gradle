@@ -75,7 +75,6 @@ subprojects {
 
     task clean(type: Delete) {
         delete "build"
-        delete "dist"
         delete "node_modules"
     }
 }

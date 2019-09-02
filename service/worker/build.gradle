@@ -1,6 +1,6 @@
 task copyTerraformBin(type: Copy) {
     from "externals/terraform"
-    into "dist/staging/bin"
+    into "build/staging/bin"
 }
 
 build {

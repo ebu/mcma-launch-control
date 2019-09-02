@@ -86,4 +86,3 @@ deploy.dependsOn(terraformApply)
 
 task destroy {}
 destroy.dependsOn(terraformDestroy)
-destroy.dependsOn(clean)
