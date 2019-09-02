@@ -1,5 +1,6 @@
 /.gradle/
 /gradle.properties
+build
 dist
 node_modules
 terraform.tfvars

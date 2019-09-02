@@ -66,6 +66,7 @@ const updateDeployment = async (requestContext) => {
     }
 
     deployment.status = McmaDeploymentStatus.DEPLOYING;
+    deployment.statusMessage = null;
     deployment.onUpsert(deploymentId);
 
     deployment = await dc.setDeployment(deployment);
@@ -113,6 +114,7 @@ const deleteDeployment = async (requestContext) => {
     }
 
     deployment.status = McmaDeploymentStatus.DESTROYING;
+    deployment.statusMessage = null;
     deployment.onUpsert(deploymentId);
 
     await dc.setDeployment(deployment);

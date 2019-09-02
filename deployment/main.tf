@@ -19,12 +19,12 @@ provider "template" {
 ##################################
 
 resource "aws_iam_role" "iam_for_exec_lambda" {
-  name               = format("%.64s", "${var.global_prefix}-lambda-exec-role")
+  name               = format("%.64s", "${var.project_prefix}.lambda-exec-role")
   assume_role_policy = file("policies/lambda-allow-assume-role.json")
 }
 
 resource "aws_iam_policy" "log_policy" {
-  name        = "${var.global_prefix}-policy-log"
+  name        = "${var.project_prefix}.policy-log"
   description = "Policy to write to log"
   policy      = file("policies/allow-full-logs.json")
 }
@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy_log" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy" {
-  name        = "${var.global_prefix}-policy-dynamodb"
+  name        = "${var.project_prefix}.policy-dynamodb"
   description = "Policy to Access DynamoDB"
   policy      = file("policies/allow-full-dynamodb.json")
 }
@@ -46,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy_dynamodb" {
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "${var.global_prefix}-policy-lambda"
+  name        = "${var.project_prefix}.policy-lambda"
   description = "Policy to allow invoking lambda functions"
   policy      = file("policies/allow-invoke-lambda.json")
 }
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy_lambda" {
 }
 
 resource "aws_iam_policy" "codecommit_policy" {
-  name        = "${var.global_prefix}-policy-codecommit"
+  name        = "${var.project_prefix}.policy-codecommit"
   description = "Policy to allow using codecommit"
   policy      = file("policies/allow-full-codecommit.json")
 }

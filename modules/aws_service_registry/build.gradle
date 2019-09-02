@@ -1,0 +1,40 @@
+task copyTerraform(type: Copy) {
+    from "src"
+    into "build/staging"
+}
+
+task copyApiHandler(type: Copy) {
+    dependsOn "api-handler:build"
+    from file("api-handler/build/dist/lambda.zip")
+    into "build/staging/lambdas"
+    rename { "api-handler.zip" }
+}
+
+task build(type: Zip) {
+    dependsOn copyApiHandler
+    dependsOn copyTerraform
+    archiveName "module.zip"
+    destinationDir file("build/dist")
+    from "build/staging"
+}
+
+subprojects {
+    task copyNodeModules(type: Copy) {
+        dependsOn npmInstall
+        from "node_modules"
+        into "build/staging/node_modules"
+        exclude awsAvailableLibraries
+    }
+
+    task copySource(type: Copy) {
+        from "src"
+        into "build/staging/"
+    }
+
+    task build(type: Zip) {
+        dependsOn copySource, copyNodeModules
+        archiveName "lambda.zip"
+        destinationDir file("build/dist")
+        from "build/staging"
+    }
+}

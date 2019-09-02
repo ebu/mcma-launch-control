@@ -94,6 +94,18 @@ class Git {
         Logger.info("stderr:", stderr);
     }
 
+    static async isNew() {
+        await Git.init();
+
+        let cmd = "git rev-parse HEAD &> /dev/null || echo 1";
+        Logger.info(cmd);
+        const { stdout, stderr } = await exec(cmd, options);
+        Logger.info("stdout:", stdout);
+        Logger.info("stderr:", stderr);
+
+        return !!stdout;
+    }
+
     static async hasChanges() {
         await Git.init();
 

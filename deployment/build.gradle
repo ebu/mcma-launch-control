@@ -1,8 +1,8 @@
 import groovy.json.JsonOutput
 
 task generateTerraformTFVarsJson {
-    inputs.property("ENVIRONMENT_NAME", "${environmentName}")
-    inputs.property("ENVIRONMENT_TYPE", "${environmentType}")
+    inputs.property("GLOBAL_PREFIX", "${globalPrefix}")
+    inputs.property("STAGE_NAME", "${stageName}")
     inputs.property("AWS_ACCOUNT_ID", "${awsAccountId}")
     inputs.property("AWS_ACCESS_KEY", "${awsAccessKey}")
     inputs.property("AWS_SECRET_KEY", "${awsSecretKey}")
@@ -15,9 +15,9 @@ task generateTerraformTFVarsJson {
     outputs.file(propertyFile)
     doLast {
         def data = [
-                global_prefix           : "${environmentName}.${environmentType}".replace(".", "-"),
-                environment_name        : "${environmentName}",
-                environment_type        : "${environmentType}",
+                global_prefix           : "${globalPrefix}",
+                project_prefix          : "${globalPrefix}.launch-control.${stageName}",
+                stage_name              : "${stageName}",
                 aws_account_id          : "${awsAccountId}",
                 aws_access_key          : "${awsAccessKey}",
                 aws_secret_key          : "${awsSecretKey}",
@@ -28,15 +28,13 @@ task generateTerraformTFVarsJson {
 
         def json = JsonOutput.toJson(data)
         def jsonPretty = JsonOutput.prettyPrint(json)
-        
+
         propertyFile.write(jsonPretty)
     }
 }
 
 task terraformInit(type: Exec) {
     inputs.file "main.tf"
-    inputs.file "repository.tf"
-    inputs.file "service.tf"
     outputs.upToDateWhen { file(".terraform").exists() }
     commandLine terraformExecutable
     args "init"

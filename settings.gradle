@@ -3,6 +3,8 @@ include "commons",
         "deployment",
         "modules",
         "modules:aws_s3_bucket",
+        "modules:aws_service_registry",
+        "modules:aws_service_registry:api-handler",
         "service",
         "service:api-handler",
         "service:worker"

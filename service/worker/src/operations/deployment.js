@@ -11,7 +11,10 @@ const { Git } = require("./tools/git");
 
 const REPOSITORY_DIR = "/tmp/repo";
 
-// const AWS_ACCOUNT_ID = process.env.AwsAccountId;
+const GLOBAL_PREFIX = process.env.GlobalPrefix;
+const LAUNCH_CONTROL_REPOSITORY = process.env.LaunchControlRepository;
+
+const AWS_ACCOUNT_ID = process.env.AwsAccountId;
 const AWS_ACCESS_KEY = process.env.AwsAccessKey;
 const AWS_SECRET_KEY = process.env.AwsSecretKey;
 const AWS_REGION = process.env.AwsRegion;
@@ -47,8 +50,17 @@ const generateMainTfJson = () => {
         module: [
             {
                 aws_s3_bucket: {
-                    source: "https://s3-eu-west-1.amazonaws.com/pt.rovers.mcma.launch-control.repository/aws_s3_bucket.zip",
-                    bucket_name: "ch.ebu.mcma.test-bucket.${var.deployment_config_name}"
+                    source: LAUNCH_CONTROL_REPOSITORY + "/aws_s3_bucket.zip",
+                    bucket_name: "${var.project_prefix}.test-bucket"
+                }
+            },
+            {
+                aws_service_registry: {
+                    source: LAUNCH_CONTROL_REPOSITORY + "/aws_service_registry.zip",
+                    module_prefix: "${var.project_prefix}.service-registry",
+                    stage_name: "${var.stage_name}",
+                    aws_account_id: "${var.aws_account_id}",
+                    aws_region: "${var.aws_region}"
                 }
             }
         ]
@@ -61,10 +73,12 @@ generateVariablesTfJson = () => {
     let variablesTfJson = {
         variable: [
             {
+                project_prefix: {},
+                stage_name: {},
+                aws_account_id: {},
                 aws_access_key: {},
                 aws_secret_key: {},
-                aws_region: {},
-                deployment_config_name: {}
+                aws_region: {}
             }
         ]
     };
@@ -72,12 +86,14 @@ generateVariablesTfJson = () => {
     return JSON.stringify(variablesTfJson, null, 2);
 };
 
-generateTerraformTfVarsJson = (deploymentConfig) => {
+generateTerraformTfVarsJson = (project, deploymentConfig) => {
     let terraformTfVarsJson = {
+        project_prefix: GLOBAL_PREFIX + "." + project.name + "." + deploymentConfig.name,
+        stage_name: deploymentConfig.name,
+        aws_account_id: AWS_ACCOUNT_ID,
         aws_access_key: AWS_ACCESS_KEY,
         aws_secret_key: AWS_SECRET_KEY,
-        aws_region: AWS_REGION,
-        deployment_config_name: deploymentConfig.name
+        aws_region: AWS_REGION
     };
     return JSON.stringify(terraformTfVarsJson, null, 2);
 };
@@ -112,6 +128,8 @@ const updateDeployment = async (workerRequest) => {
             return;
         }
 
+        let errorMessage = null;
+
         try {
             Git.setWorkingDir(REPOSITORY_DIR);
             Terraform.setWorkingDir(REPOSITORY_DIR);
@@ -121,29 +139,38 @@ const updateDeployment = async (workerRequest) => {
             await Git.clone(repoUrl);
             await Git.config("Launch Control", "launch-control@mcma.ebu.ch");
 
+            let isNewRepository = await Git.isNew();
+
             await Git.writeFile(".gitignore", generateGitIgnore());
             await Git.writeFile("main.tf.json", generateMainTfJson());
             await Git.writeFile("variables.tf.json", generateVariablesTfJson());
-            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(deploymentConfig));
+            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
 
             await Git.addFiles();
-            if (await Git.hasChanges()) {
-                await Git.pull();
+            if (isNewRepository || await Git.hasChanges()) {
+                if (!isNewRepository) {
+                    await Git.pull();
+                }
                 await Git.commit("Updating Terraform configuration");
                 await Git.push();
             }
 
-            await Terraform.init(deploymentConfig.name);
-            await Terraform.apply();
+            try {
+                await Terraform.init(deploymentConfig.name);
+                await Terraform.apply();
+            } catch (error) {
+                errorMessage = error.message;
+            }
 
             await Git.addFiles();
             if (await Git.hasChanges()) {
                 await Git.pull();
-                await Git.commit("Deployment '" + deploymentConfig.name + "' is updated");
+                await Git.commit("Deployment '" + deploymentConfig.name + "' is updated " + (errorMessage ? "with errors during deployment" : "successfully"));
                 await Git.push();
             }
 
-            deployment.status = McmaDeploymentStatus.OK;
+            deployment.status = errorMessage ? McmaDeploymentStatus.ERROR : McmaDeploymentStatus.OK;
+            deployment.statusMessage = errorMessage;
         } catch (error) {
             Logger.error(error);
             deployment.status = McmaDeploymentStatus.ERROR;

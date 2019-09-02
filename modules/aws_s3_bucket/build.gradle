@@ -1,0 +1,11 @@
+task copyTerraform(type: Copy) {
+    from "src"
+    into "build/staging/"
+}
+
+task build(type: Zip) {
+    dependsOn copyTerraform
+    archiveName "module.zip"
+    destinationDir file("build/dist")
+    from "build/staging"
+}

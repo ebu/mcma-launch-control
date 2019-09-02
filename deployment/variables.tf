@@ -1,8 +1,6 @@
-
 variable "global_prefix" {}
-
-variable "environment_name" {}
-variable "environment_type" {}
+variable "project_prefix" {}
+variable "stage_name" {}
 
 variable "aws_account_id" {}
 variable "aws_access_key" {}

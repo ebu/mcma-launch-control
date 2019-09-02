@@ -3,7 +3,7 @@
 ##################################
 
 resource "aws_dynamodb_table" "service_table" {
-  name           = "${var.global_prefix}-service"
+  name           = "${var.project_prefix}-service"
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "resource_type"
@@ -29,7 +29,7 @@ resource "aws_dynamodb_table" "service_table" {
 
 resource "aws_lambda_function" "service_api_handler" {
   filename         = "../service/api-handler/dist/lambda.zip"
-  function_name    = format("%.64s", "${var.global_prefix}-service-api-handler")
+  function_name    = format("%.64s", replace("${var.project_prefix}-service-api-handler", "/[^a-zA-Z0-9_]+/", "-" ))
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("../service/api-handler/dist/lambda.zip")
@@ -50,7 +50,7 @@ resource "aws_lambda_function" "service_api_handler" {
 
 resource "aws_lambda_function" "service_worker" {
   filename         = "../service/worker/dist/lambda.zip"
-  function_name    = format("%.64s", "${var.global_prefix}-service-worker")
+  function_name    = format("%.64s", replace("${var.project_prefix}-service-worker", "/[^a-zA-Z0-9_]+/", "-" ))
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("../service/worker/dist/lambda.zip")
@@ -59,11 +59,15 @@ resource "aws_lambda_function" "service_worker" {
   memory_size      = "3008"
 
   environment {
-    variables = { // TODO: Supply the variables through AWS Systems Manager Parameter Store instead of passing them here, as this is not secure
+    variables = {
+      // TODO: Supply the variables through AWS Systems Manager Parameter Store instead of passing them here
+      GlobalPrefix            = var.global_prefix
+      LaunchControlRepository = "https://s3${var.aws_region != "us-east-1" ? "-" : ""}${var.aws_region != "us-east-1" ? var.aws_region : ""}.amazonaws.com/${aws_s3_bucket.repository.id}"
+
       AwsAccountId = var.aws_account_id
       AwsAccessKey = var.aws_access_key
       AwsSecretKey = var.aws_secret_key
-      AwsRegion = var.aws_region
+      AwsRegion    = var.aws_region
 
       AwsCodeCommitUsername = var.aws_code_commit_username
       AwsCodeCommitPassword = var.aws_code_commit_password
@@ -75,7 +79,7 @@ resource "aws_lambda_function" "service_worker" {
 #  aws_api_gateway_rest_api:  service_api
 ##############################
 resource "aws_api_gateway_rest_api" "service_api" {
-  name        = "${var.global_prefix}-service-api"
+  name        = "${var.project_prefix}-service-api"
   description = "Launch Control Service Rest Api"
 }
 
@@ -168,7 +172,7 @@ resource "aws_api_gateway_deployment" "service_deployment" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.service_api.id
-  stage_name  = var.environment_type
+  stage_name  = var.stage_name
 
   variables = {
     "TableName"      = aws_dynamodb_table.service_table.name
@@ -178,5 +182,5 @@ resource "aws_api_gateway_deployment" "service_deployment" {
 }
 
 locals {
-  service_url = "https://${aws_api_gateway_rest_api.service_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.environment_type}"
+  service_url = "https://${aws_api_gateway_rest_api.service_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
 }
