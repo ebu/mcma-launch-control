@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
-    selector: 'ngx-two-columns-layout',
-    styleUrls: ['./two-columns.layout.scss'],
+    selector: "ngx-two-columns-layout",
+    styleUrls: ["./two-columns.layout.scss"],
     template: `
     <nb-layout windowMode>
       <nb-layout-header fixed>
@@ -19,10 +19,6 @@ import { Component } from '@angular/core';
       <nb-layout-column>
         <ng-content select="router-outlet"></ng-content>
       </nb-layout-column>
-
-      <nb-layout-footer fixed>
-        <ngx-footer></ngx-footer>
-      </nb-layout-footer>
 
     </nb-layout>
   `,

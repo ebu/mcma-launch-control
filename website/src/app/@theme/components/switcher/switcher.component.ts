@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 @Component({
-    selector: 'ngx-switcher',
-    styleUrls: ['./switcher.component.scss'],
+    selector: "ngx-switcher",
+    styleUrls: ["./switcher.component.scss"],
     template: `
     <label class="switch-label" [class.vertical]="vertical">
       <span class="first" [class.active]="vertical || isFirstValue()">

@@ -89,7 +89,7 @@ task generateWebsiteFilesTfJson {
 
                 def filename = "file_${relativePath.replaceAll("[^a-zA-Z0-9]", "-")}"
                 def object = [
-                    filename : props,
+                    "${filename}" : props,
                 ]
 
                 aws_s3_bucket_object.add(object)

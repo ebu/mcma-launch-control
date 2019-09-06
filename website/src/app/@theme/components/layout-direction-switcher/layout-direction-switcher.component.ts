@@ -1,10 +1,10 @@
-import { Component, OnDestroy, Input } from '@angular/core';
-import { NbLayoutDirectionService, NbLayoutDirection } from '@nebular/theme';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Component, OnDestroy, Input } from "@angular/core";
+import { NbLayoutDirectionService, NbLayoutDirection } from "@nebular/theme";
+import { takeUntil } from "rxjs/operators";
+import { Subject } from "rxjs";
 
 @Component({
-    selector: 'ngx-layout-direction-switcher',
+    selector: "ngx-layout-direction-switcher",
     template: `
     <ngx-switcher
       [firstValue]="directions.RTL"

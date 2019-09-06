@@ -1,10 +1,12 @@
-import { NgModule, ModuleWithProviders } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgModule, ModuleWithProviders } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
-import { UserService } from './users.service';
+import { UserService } from "./users.service";
+import { LaunchControlService } from "./launch-control.service";
 
 const SERVICES = [
     UserService,
+    LaunchControlService,
 ];
 
 @NgModule({

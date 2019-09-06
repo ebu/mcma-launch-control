@@ -1,37 +1,37 @@
-import { NbJSThemeOptions, COSMIC_THEME as baseTheme } from '@nebular/theme';
+import { NbJSThemeOptions, COSMIC_THEME as baseTheme } from "@nebular/theme";
 
 const baseThemeVariables = baseTheme.variables;
 
 export const COSMIC_THEME = {
-    name: 'cosmic',
-    base: 'cosmic',
+    name: "cosmic",
+    base: "cosmic",
     variables: {
         temperature: {
-            arcFill: ['#2ec7fe', '#31ffad', '#7bff24', '#fff024', '#f7bd59'],
+            arcFill: ["#2ec7fe", "#31ffad", "#7bff24", "#fff024", "#f7bd59"],
             arcEmpty: baseThemeVariables.bg2,
-            thumbBg: '#ffffff',
-            thumbBorder: '#ffffff',
+            thumbBg: "#ffffff",
+            thumbBorder: "#ffffff",
         },
 
         solar: {
             gradientLeft: baseThemeVariables.primary,
             gradientRight: baseThemeVariables.primary,
-            shadowColor: 'rgba(0, 0, 0, 0)',
+            shadowColor: "rgba(0, 0, 0, 0)",
             secondSeriesFill: baseThemeVariables.bg2,
-            radius: ['70%', '90%'],
+            radius: ["70%", "90%"],
         },
 
         traffic: {
             tooltipBg: baseThemeVariables.bg,
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipExtraCss: 'box-shadow: 0px 2px 46px 0 rgba(50, 50, 89); border-radius: 10px; padding: 4px 16px;',
+            tooltipExtraCss: "box-shadow: 0px 2px 46px 0 rgba(50, 50, 89); border-radius: 10px; padding: 4px 16px;",
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
+            tooltipFontWeight: "normal",
 
             yAxisSplitLine: baseThemeVariables.separator,
 
             lineBg: baseThemeVariables.border2,
-            lineShadowBlur: '14',
+            lineShadowBlur: "14",
             itemColor: baseThemeVariables.border2,
             itemBorderColor: baseThemeVariables.border2,
             itemEmphasisBorderColor: baseThemeVariables.primary,
@@ -44,19 +44,19 @@ export const COSMIC_THEME = {
         electricity: {
             tooltipBg: baseThemeVariables.bg,
             tooltipLineColor: baseThemeVariables.fgText,
-            tooltipLineWidth: '0',
+            tooltipLineWidth: "0",
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipExtraCss: 'box-shadow: 0px 2px 46px 0 rgba(0, 255, 170, 0.35); border-radius: 10px; padding: 8px 24px;',
+            tooltipExtraCss: "box-shadow: 0px 2px 46px 0 rgba(0, 255, 170, 0.35); border-radius: 10px; padding: 8px 24px;",
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
+            tooltipFontWeight: "normal",
 
             axisLineColor: baseThemeVariables.border3,
             xAxisTextColor: baseThemeVariables.fg,
             yAxisSplitLine: baseThemeVariables.separator,
 
             itemBorderColor: baseThemeVariables.border2,
-            lineStyle: 'dotted',
-            lineWidth: '6',
+            lineStyle: "dotted",
+            lineWidth: "6",
             lineGradFrom: baseThemeVariables.success,
             lineGradTo: baseThemeVariables.warning,
             lineShadow: baseThemeVariables.bg4,
@@ -79,46 +79,46 @@ export const COSMIC_THEME = {
             firstAnimationBarColor: baseThemeVariables.primary,
             secondAnimationBarColor: baseThemeVariables.success,
 
-            splitLineStyleOpacity: '1',
-            splitLineStyleWidth: '1',
+            splitLineStyleOpacity: "1",
+            splitLineStyleWidth: "1",
             splitLineStyleColor: baseThemeVariables.border2,
 
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
-            tooltipFontSize: '16',
+            tooltipFontWeight: "normal",
+            tooltipFontSize: "16",
             tooltipBg: baseThemeVariables.bg,
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipBorderWidth: '1',
-            tooltipExtraCss: 'border-radius: 10px; padding: 4px 16px;',
+            tooltipBorderWidth: "1",
+            tooltipExtraCss: "border-radius: 10px; padding: 4px 16px;",
         },
 
         trafficBarEchart: {
             gradientFrom: baseThemeVariables.warningLight,
             gradientTo: baseThemeVariables.warning,
             shadow: baseThemeVariables.warningLight,
-            shadowBlur: '5',
+            shadowBlur: "5",
 
             axisTextColor: baseThemeVariables.fgText,
-            axisFontSize: '12',
+            axisFontSize: "12",
 
             tooltipBg: baseThemeVariables.bg,
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipExtraCss: 'border-radius: 10px; padding: 4px 16px;',
+            tooltipExtraCss: "border-radius: 10px; padding: 4px 16px;",
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
+            tooltipFontWeight: "normal",
         },
 
         countryOrders: {
             countryBorderColor: baseThemeVariables.border4,
             countryFillColor: baseThemeVariables.bg3,
-            countryBorderWidth: '1',
+            countryBorderWidth: "1",
             hoveredCountryBorderColor: baseThemeVariables.primary,
             hoveredCountryFillColor: baseThemeVariables.primaryLight,
-            hoveredCountryBorderWidth: '1',
+            hoveredCountryBorderWidth: "1",
 
             chartAxisLineColor: baseThemeVariables.border4,
             chartAxisTextColor: baseThemeVariables.fg,
-            chartAxisFontSize: '16',
+            chartAxisFontSize: "16",
             chartGradientTo: baseThemeVariables.primary,
             chartGradientFrom: baseThemeVariables.primaryLight,
             chartAxisSplitLine: baseThemeVariables.separator,
@@ -134,9 +134,9 @@ export const COSMIC_THEME = {
             textColor: baseThemeVariables.fgText,
             axisLineColor: baseThemeVariables.fgText,
             splitLineColor: baseThemeVariables.separator,
-            itemHoverShadowColor: 'rgba(0, 0, 0, 0.5)',
+            itemHoverShadowColor: "rgba(0, 0, 0, 0.5)",
             tooltipBackgroundColor: baseThemeVariables.primary,
-            areaOpacity: '1',
+            areaOpacity: "1",
         },
 
         chartjs: {
@@ -146,22 +146,22 @@ export const COSMIC_THEME = {
 
         orders: {
             tooltipBg: baseThemeVariables.bg,
-            tooltipLineColor: 'rgba(0, 0, 0, 0)',
-            tooltipLineWidth: '0',
+            tooltipLineColor: "rgba(0, 0, 0, 0)",
+            tooltipLineWidth: "0",
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipExtraCss: 'border-radius: 10px; padding: 8px 24px;',
+            tooltipExtraCss: "border-radius: 10px; padding: 8px 24px;",
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
-            tooltipFontSize: '20',
+            tooltipFontWeight: "normal",
+            tooltipFontSize: "20",
 
             axisLineColor: baseThemeVariables.border4,
-            axisFontSize: '16',
+            axisFontSize: "16",
             axisTextColor: baseThemeVariables.fg,
             yAxisSplitLine: baseThemeVariables.separator,
 
             itemBorderColor: baseThemeVariables.primary,
-            lineStyle: 'solid',
-            lineWidth: '4',
+            lineStyle: "solid",
+            lineWidth: "4",
 
             // first line
             firstAreaGradFrom: baseThemeVariables.bg2,
@@ -172,16 +172,16 @@ export const COSMIC_THEME = {
             secondLineGradFrom: baseThemeVariables.primary,
             secondLineGradTo: baseThemeVariables.primary,
 
-            secondAreaGradFrom: 'rgba(161, 110, 255, 0.8)',
-            secondAreaGradTo: 'rgba(161, 110, 255, 0.5)',
+            secondAreaGradFrom: "rgba(161, 110, 255, 0.8)",
+            secondAreaGradTo: "rgba(161, 110, 255, 0.5)",
             secondShadowLineDarkBg: baseThemeVariables.primary,
 
             // third line
             thirdLineGradFrom: baseThemeVariables.success,
             thirdLineGradTo: baseThemeVariables.successLight,
 
-            thirdAreaGradFrom: 'rgba(0, 214, 143, 0.7)',
-            thirdAreaGradTo: 'rgba(0, 214, 143, 0.4)',
+            thirdAreaGradFrom: "rgba(0, 214, 143, 0.7)",
+            thirdAreaGradTo: "rgba(0, 214, 143, 0.4)",
             thirdShadowLineDarkBg: baseThemeVariables.success,
         },
 
@@ -190,25 +190,25 @@ export const COSMIC_THEME = {
             textColor: baseThemeVariables.fgText,
             axisLineColor: baseThemeVariables.border4,
             splitLineColor: baseThemeVariables.separator,
-            areaOpacity: '1',
+            areaOpacity: "1",
 
-            axisFontSize: '16',
+            axisFontSize: "16",
             axisTextColor: baseThemeVariables.fg,
 
             // first bar
             firstLineGradFrom: baseThemeVariables.bg2,
             firstLineGradTo: baseThemeVariables.bg2,
-            firstLineShadow: 'rgba(0, 0, 0, 0)',
+            firstLineShadow: "rgba(0, 0, 0, 0)",
 
             // second bar
             secondLineGradFrom: baseThemeVariables.primary,
             secondLineGradTo: baseThemeVariables.primary,
-            secondLineShadow: 'rgba(0, 0, 0, 0)',
+            secondLineShadow: "rgba(0, 0, 0, 0)",
 
             // third bar
             thirdLineGradFrom: baseThemeVariables.success,
             thirdLineGradTo: baseThemeVariables.successLight,
-            thirdLineShadow: 'rgba(0, 0, 0, 0)',
+            thirdLineShadow: "rgba(0, 0, 0, 0)",
         },
 
         orderProfitLegend: {
@@ -219,31 +219,31 @@ export const COSMIC_THEME = {
 
         visitors: {
             tooltipBg: baseThemeVariables.bg,
-            tooltipLineColor: 'rgba(0, 0, 0, 0)',
-            tooltipLineWidth: '1',
+            tooltipLineColor: "rgba(0, 0, 0, 0)",
+            tooltipLineWidth: "1",
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipExtraCss: 'border-radius: 10px; padding: 8px 24px;',
+            tooltipExtraCss: "border-radius: 10px; padding: 8px 24px;",
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
-            tooltipFontSize: '20',
+            tooltipFontWeight: "normal",
+            tooltipFontSize: "20",
 
             axisLineColor: baseThemeVariables.border4,
-            axisFontSize: '16',
+            axisFontSize: "16",
             axisTextColor: baseThemeVariables.fg,
             yAxisSplitLine: baseThemeVariables.separator,
 
             itemBorderColor: baseThemeVariables.primary,
-            lineStyle: 'dotted',
-            lineWidth: '6',
-            lineGradFrom: '#ffffff',
-            lineGradTo: '#ffffff',
-            lineShadow: 'rgba(0, 0, 0, 0)',
+            lineStyle: "dotted",
+            lineWidth: "6",
+            lineGradFrom: "#ffffff",
+            lineGradTo: "#ffffff",
+            lineShadow: "rgba(0, 0, 0, 0)",
 
             areaGradFrom: baseThemeVariables.primary,
             areaGradTo: baseThemeVariables.primaryLight,
 
-            innerLineStyle: 'solid',
-            innerLineWidth: '1',
+            innerLineStyle: "solid",
+            innerLineWidth: "1",
 
             innerAreaGradFrom: baseThemeVariables.success,
             innerAreaGradTo: baseThemeVariables.success,
@@ -257,15 +257,15 @@ export const COSMIC_THEME = {
         visitorsPie: {
             firstPieGradientLeft: baseThemeVariables.success,
             firstPieGradientRight: baseThemeVariables.successLight,
-            firstPieShadowColor: 'rgba(0, 0, 0, 0)',
-            firstPieRadius: ['70%', '90%'],
+            firstPieShadowColor: "rgba(0, 0, 0, 0)",
+            firstPieRadius: ["70%", "90%"],
 
             secondPieGradientLeft: baseThemeVariables.warning,
             secondPieGradientRight: baseThemeVariables.warningLight,
-            secondPieShadowColor: 'rgba(0, 0, 0, 0)',
-            secondPieRadius: ['60%', '95%'],
-            shadowOffsetX: '0',
-            shadowOffsetY: '3',
+            secondPieShadowColor: "rgba(0, 0, 0, 0)",
+            secondPieRadius: ["60%", "95%"],
+            shadowOffsetX: "0",
+            shadowOffsetY: "3",
         },
 
         visitorsPieLegend: {
@@ -274,22 +274,22 @@ export const COSMIC_THEME = {
         },
 
         earningPie: {
-            radius: ['65%', '100%'],
-            center: ['50%', '50%'],
+            radius: ["65%", "100%"],
+            center: ["50%", "50%"],
 
-            fontSize: '22',
+            fontSize: "22",
 
             firstPieGradientLeft: baseThemeVariables.success,
             firstPieGradientRight: baseThemeVariables.success,
-            firstPieShadowColor: 'rgba(0, 0, 0, 0)',
+            firstPieShadowColor: "rgba(0, 0, 0, 0)",
 
             secondPieGradientLeft: baseThemeVariables.primary,
             secondPieGradientRight: baseThemeVariables.primary,
-            secondPieShadowColor: 'rgba(0, 0, 0, 0)',
+            secondPieShadowColor: "rgba(0, 0, 0, 0)",
 
             thirdPieGradientLeft: baseThemeVariables.warning,
             thirdPieGradientRight: baseThemeVariables.warning,
-            thirdPieShadowColor: 'rgba(0, 0, 0, 0)',
+            thirdPieShadowColor: "rgba(0, 0, 0, 0)",
         },
 
         earningLine: {
@@ -297,12 +297,12 @@ export const COSMIC_THEME = {
             gradTo: baseThemeVariables.primary,
 
             tooltipTextColor: baseThemeVariables.fgText,
-            tooltipFontWeight: 'normal',
-            tooltipFontSize: '16',
+            tooltipFontWeight: "normal",
+            tooltipFontSize: "16",
             tooltipBg: baseThemeVariables.bg,
             tooltipBorderColor: baseThemeVariables.border2,
-            tooltipBorderWidth: '1',
-            tooltipExtraCss: 'border-radius: 10px; padding: 4px 16px;',
+            tooltipBorderWidth: "1",
+            tooltipExtraCss: "border-radius: 10px; padding: 4px 16px;",
         },
     },
 } as NbJSThemeOptions;

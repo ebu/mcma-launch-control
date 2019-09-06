@@ -7,9 +7,14 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+ij_javascript_force_quote_style = true
+ij_javascript_use_double_quotes = true
+ij_typescript_force_quote_style = true
+ij_typescript_use_double_quotes = true
 
 [*.tf]
 indent_size = 2
+
 
 [*.md]
 max_line_length = off

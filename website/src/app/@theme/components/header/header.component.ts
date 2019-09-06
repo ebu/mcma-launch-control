@@ -1,14 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from '@nebular/theme';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeService } from "@nebular/theme";
 
-import { UserData } from '../../../@core/data/users';
-import { map, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { UserData } from "../../../@core/data/users";
+import { map, takeUntil } from "rxjs/operators";
+import { Subject } from "rxjs";
 
 @Component({
-    selector: 'ngx-header',
-    styleUrls: ['./header.component.scss'],
-    templateUrl: './header.component.html',
+    selector: "ngx-header",
+    styleUrls: ["./header.component.scss"],
+    templateUrl: "./header.component.html",
 })
 export class HeaderComponent implements OnInit, OnDestroy {
 
@@ -18,26 +18,26 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     themes = [
         {
-            value: 'default',
-            name: 'Light',
+            value: "default",
+            name: "Light",
         },
         {
-            value: 'dark',
-            name: 'Dark',
+            value: "dark",
+            name: "Dark",
         },
         {
-            value: 'cosmic',
-            name: 'Cosmic',
+            value: "cosmic",
+            name: "Cosmic",
         },
         {
-            value: 'corporate',
-            name: 'Corporate',
+            value: "corporate",
+            name: "Corporate",
         },
     ];
 
-    currentTheme = 'default';
+    currentTheme = "default";
 
-    userMenu = [{ title: 'Profile' }, { title: 'Log out' }];
+    userMenu = [{ title: "Profile" }, { title: "Log out" }];
 
     constructor(private sidebarService: NbSidebarService,
                 private menuService: NbMenuService,
@@ -79,7 +79,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     toggleSidebar(): boolean {
-        this.sidebarService.toggle(true, 'menu-sidebar');
+        this.sidebarService.toggle(true, "menu-sidebar");
 
         return false;
     }
