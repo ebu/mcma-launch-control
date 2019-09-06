@@ -1,0 +1,9 @@
+task build(type: Exec) {
+    dependsOn npmInstall
+    inputs.file "package.json"
+    inputs.file "package-lock.json"
+    inputs.dir "src"
+    outputs.dir "dist"
+    commandLine npmExecutable
+    args "run", "build:prod"
+}

@@ -1,5 +1,5 @@
 #########################
-# Provider registration 
+# Provider registration
 #########################
 
 provider "aws" {

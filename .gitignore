@@ -10,3 +10,4 @@ terraform.tfstate.backup
 .terraform.tfstate.lock.info
 .idea
 terraform.tfvars.json
+/deployment/website_files.tf.json

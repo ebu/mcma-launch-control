@@ -3,7 +3,7 @@
 #########################
 
 variable "module_prefix" {
-  type = string
+  type        = string
   description = "Prefix for all managed resources in this module"
 }
 

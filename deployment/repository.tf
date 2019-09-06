@@ -2,7 +2,7 @@ locals {
   repository_bucket_name = "${var.project_prefix}.repository"
 }
 
-data "template_file" "s3_public_read_policy_website" {
+data "template_file" "s3_public_read_policy_repository" {
   template = file("policies/s3-public-read.json")
 
   vars = {
@@ -13,7 +13,7 @@ data "template_file" "s3_public_read_policy_website" {
 resource "aws_s3_bucket" "repository" {
   bucket        = local.repository_bucket_name
   acl           = "public-read"
-  policy        = data.template_file.s3_public_read_policy_website.rendered
+  policy        = data.template_file.s3_public_read_policy_repository.rendered
   force_destroy = true
 
   website {

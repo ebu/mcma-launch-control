@@ -1,4 +1,4 @@
-def requiredVersionNodeJS = "8.10.0"
+def requiredVersionNodeJS = "10.15.3"
 
 allprojects {
     ext {

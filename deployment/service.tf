@@ -166,6 +166,8 @@ resource "aws_lambda_permission" "apigw_service_api_handler" {
 
 resource "aws_api_gateway_deployment" "service_deployment" {
   depends_on = [
+    "aws_api_gateway_method.service_options_method",
+    "aws_api_gateway_integration.service_options_integration",
     "aws_api_gateway_method.service_api_method",
     "aws_api_gateway_integration.service_api_method_integration",
   ]
