@@ -1,29 +1,29 @@
 import groovy.json.JsonOutput
 
 task generateTerraformTFVarsJson {
-    inputs.property("GLOBAL_PREFIX", "${globalPrefix}")
-    inputs.property("STAGE_NAME", "${stageName}")
-    inputs.property("AWS_ACCOUNT_ID", "${awsAccountId}")
-    inputs.property("AWS_ACCESS_KEY", "${awsAccessKey}")
-    inputs.property("AWS_SECRET_KEY", "${awsSecretKey}")
-    inputs.property("AWS_REGION", "${awsRegion}")
-    inputs.property("AWS_CODE_COMMIT_USERNAME", "${awsCodeCommitUsername}")
-    inputs.property("AWS_CODE_COMMIT_PASSWORD", "${awsCodeCommitPassword}")
+    inputs.property("GLOBAL_PREFIX", globalPrefix)
+    inputs.property("STAGE_NAME", stageName)
+    inputs.property("AWS_ACCOUNT_ID", awsAccountId)
+    inputs.property("AWS_ACCESS_KEY", awsAccessKey)
+    inputs.property("AWS_SECRET_KEY", awsSecretKey)
+    inputs.property("AWS_REGION", awsRegion)
+    inputs.property("AWS_CODE_COMMIT_USERNAME", awsCodeCommitUsername)
+    inputs.property("AWS_CODE_COMMIT_PASSWORD", awsCodeCommitPassword)
 
     def propertyFile = file("${projectDir}/terraform.tfvars.json")
 
     outputs.file(propertyFile)
     doLast {
         def data = [
-            global_prefix           : "${globalPrefix}",
+            global_prefix           : globalPrefix,
             project_prefix          : "${globalPrefix}.launch-control.${stageName}",
-            stage_name              : "${stageName}",
-            aws_account_id          : "${awsAccountId}",
-            aws_access_key          : "${awsAccessKey}",
-            aws_secret_key          : "${awsSecretKey}",
-            aws_region              : "${awsRegion}",
-            aws_code_commit_username: "${awsCodeCommitUsername}",
-            aws_code_commit_password: "${awsCodeCommitPassword}"
+            stage_name              : stageName,
+            aws_account_id          : awsAccountId,
+            aws_access_key          : awsAccessKey,
+            aws_secret_key          : awsSecretKey,
+            aws_region              : awsRegion,
+            aws_code_commit_username: awsCodeCommitUsername,
+            aws_code_commit_password: awsCodeCommitPassword
         ]
 
         def json = JsonOutput.toJson(data)
@@ -89,7 +89,7 @@ task generateWebsiteFilesTfJson {
 
                 def filename = "file_${relativePath.replaceAll("[^a-zA-Z0-9]", "-")}"
                 def object = [
-                    "${filename}" : props,
+                    "${filename}": props,
                 ]
 
                 aws_s3_bucket_object.add(object)
@@ -100,6 +100,28 @@ task generateWebsiteFilesTfJson {
         def jsonPretty = JsonOutput.prettyPrint(json)
 
         websiteFileTfJson.write(jsonPretty)
+    }
+}
+
+task generateAwsCredentialsJson {
+    inputs.property("AWS_ACCESS_KEY", awsAccessKey)
+    inputs.property("AWS_SECRET_KEY", awsSecretKey)
+    inputs.property("AWS_REGION", awsRegion)
+
+    def awsCredentialsJson = file("aws-credentials.json")
+    outputs.file(awsCredentialsJson)
+
+    doLast {
+        def data = [
+            accessKeyId    : awsAccessKey,
+            secretAccessKey: awsSecretKey,
+            region         : awsRegion
+        ]
+
+        def json = JsonOutput.toJson(data)
+        def jsonPretty = JsonOutput.prettyPrint(json)
+
+        awsCredentialsJson.write(jsonPretty)
     }
 }
 
@@ -148,16 +170,31 @@ task terraformDestroy(type: Exec) {
 task terraformOutput(type: Exec) {
     mustRunAfter terraformApply
     inputs.file("terraform.tfstate")
-    outputs.file("terraform.output")
+    outputs.file("terraform.output.json")
     commandLine terraformExecutable
-    args "output"
+    args "output", "-json"
     doFirst {
-        standardOutput new FileOutputStream("${projectDir}/terraform.output")
+        standardOutput new FileOutputStream("${projectDir}/terraform.output.json")
     }
 }
 
+task runPostDeployScript(type: Exec) {
+    dependsOn generateAwsCredentialsJson
+    dependsOn terraformOutput
+    dependsOn "post-deploy:npmInstall"
+    inputs.file "terraform.output.json"
+    inputs.file "./post-deploy/src/index.js"
+    inputs.file "./post-deploy/package.json"
+    outputs.upToDateWhen { false }
+    commandLine nodeExecutable
+    args "post-deploy/src/index.js", "${projectDir}/terraform.output.json"
+}
+
 clean {
-    delete "${projectDir}/terraform.output"
+    delete "${projectDir}/terraform.output.json"
+    delete "${projectDir}/terraform.tfvars.json"
+    delete "${projectDir}/aws-credentials.json"
+    delete "${projectDir}/website_files.tf.json"
 }
 
 task plan {}
@@ -165,6 +202,7 @@ plan.dependsOn(terraformPlan)
 
 task deploy {}
 deploy.dependsOn(terraformApply)
+deploy.dependsOn(runPostDeployScript)
 
 task destroy {}
 destroy.dependsOn(terraformDestroy)

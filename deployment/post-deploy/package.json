@@ -1,0 +1,14 @@
+{
+    "name": "launch-control-post-deploy",
+    "version": "0.0.0",
+    "description": "Post deployment script for Launch Control",
+    "private": true,
+    "engines": {
+        "node": "~10.15.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "aws-sdk": "^2.524.0"
+    }
+}

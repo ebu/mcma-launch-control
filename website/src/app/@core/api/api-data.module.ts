@@ -17,10 +17,10 @@ const SERVICES = [
         ...SERVICES,
     ],
 })
-export class MockDataModule {
+export class ApiDataModule {
     static forRoot(): ModuleWithProviders {
         return <ModuleWithProviders>{
-            ngModule: MockDataModule,
+            ngModule: ApiDataModule,
             providers: [
                 ...SERVICES,
             ],

@@ -48,6 +48,7 @@ task verifyNodeJS {
 task build {
     dependsOn "modules:build"
     dependsOn "service:build"
+    dependsOn "website:build"
 }
 
 task clean {}
