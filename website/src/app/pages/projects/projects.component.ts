@@ -15,7 +15,7 @@ export class ProjectsComponent implements OnDestroy {
     projects: McmaProject[] = [];
 
     constructor(private launchControlService: LaunchControlData) {
-        launchControlService.getProjects()
+        this.launchControlService.getProjects()
             .pipe(takeWhile(() => this.alive))
             .subscribe(projects => this.projects = projects);
     }
