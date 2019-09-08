@@ -1,14 +1,19 @@
-<div class="list row">
-    <div class="col-md-12 col-lg-6 col-xxxl-6">
-        <nb-card class="list-card">
-            <nb-card-header>Projects</nb-card-header>
-            <nb-card-body>
-                <nb-list>
-                    <nb-list-item *ngFor="let project of projects">
-                        {{ project.displayName }}
-                    </nb-list-item>
-                </nb-list>
-            </nb-card-body>
-        </nb-card>
-    </div>
-</div>
+<nb-card>
+    <nb-card-header>
+        <div class="row show-grid">
+            <div class="col-md-11">
+                <div>Projects</div>
+            </div>
+            <div class="col-md-1">
+                <button nbButton status="primary" (click)="onCreate($event)">
+                    Add
+                </button>
+            </div>
+        </div>
+    </nb-card-header>
+
+    <nb-card-body>
+        <ng2-smart-table [settings]="settings" [source]="source" (create)="onCreate($event)" (edit)="onEdit($event)" (delete)="onDelete($event)">
+        </ng2-smart-table>
+    </nb-card-body>
+</nb-card>

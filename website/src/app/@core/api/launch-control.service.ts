@@ -5,14 +5,16 @@ import { McmaProject } from "commons";
 
 import { LaunchControlData } from "../data/launch-control";
 import { map, switchMap } from "rxjs/operators";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { ConfigService } from "../utils";
 
-// const httpOptions = {
-//     headers: new HttpHeaders({
-//         "Content-Type": "application/json",
-//     }),
-// };
+const httpOptions = {
+    headers: new HttpHeaders({
+        "Content-Type": "application/json",
+    }),
+};
+
+const castToProject = result => new McmaProject(result);
 
 @Injectable()
 export class LaunchControlService extends LaunchControlData {
@@ -21,23 +23,33 @@ export class LaunchControlService extends LaunchControlData {
         super();
     }
 
-
     getProjects(): Observable<McmaProject[]> {
         return this.config.get<string>("service_url").pipe(
-            map(serviceUrl => serviceUrl + "/projects"),
-            switchMap(projectsUrl => this.http.get(projectsUrl)),
-            map(result => {
-                const projects: McmaProject[] = [];
-
-                if (result instanceof Array) {
-                    for (const item of result) {
-                        projects.push(new McmaProject(item));
-                    }
-                }
-
-                return projects;
-            }),
+            switchMap(serviceUrl => this.http.get(serviceUrl + "/projects")),
+            map(result => (<McmaProject[]>result).map(castToProject)),
         );
+    }
 
+    getProject(projectId: string): Observable<McmaProject> {
+        return this.http.get(projectId).pipe(
+            map(castToProject),
+        );
+    }
+
+    setProject(project: McmaProject): Observable<McmaProject> {
+        if (!project.id) {
+            return this.config.get<string>("service_url").pipe(
+                switchMap(serviceUrl => this.http.post(serviceUrl + "/projects", project, httpOptions)),
+                map(castToProject),
+            );
+        } else {
+            return this.http.put(project.id, project, httpOptions).pipe(
+                map(castToProject),
+            );
+        }
+    }
+
+    deleteProject(projectId: string): Observable<any> {
+        return this.http.delete(projectId);
     }
 }

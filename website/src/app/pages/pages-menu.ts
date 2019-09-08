@@ -12,9 +12,9 @@ export const MENU_ITEMS: NbMenuItem[] = [
         icon: "grid-outline",
         link: "/pages/projects",
     },
-    {
-        title: "Settings",
-        icon: "settings-2-outline",
-        link: "/pages/settings",
-    },
+    // {
+    //     title: "Settings",
+    //     icon: "settings-2-outline",
+    //     link: "/pages/settings",
+    // },
 ];
