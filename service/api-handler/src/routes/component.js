@@ -47,6 +47,16 @@ const createComponent = async (requestContext) => {
 
     let component = new McmaComponent(requestContext.getRequestBody());
 
+    if (!component.name) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaComponent is missing the name.");
+        return;
+    }
+
+    if (!component.displayName) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaComponent is missing the display name.");
+        return;
+    }
+
     if (!nameRegExp.test(component.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaComponent has illegal characters in name.");
         return;

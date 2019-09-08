@@ -1,8 +1,13 @@
 import { Component, OnDestroy } from "@angular/core";
 import { LaunchControlData } from "../../@core/data/launch-control";
-import { takeWhile } from "rxjs/operators";
+import { map, switchMap, takeWhile } from "rxjs/operators";
 
 import { LocalDataSource } from "ng2-smart-table";
+import { NbDialogService } from "@nebular/theme";
+import { AddProjectDialogComponent } from "./dialogs/add-project-dialog.component";
+
+import { McmaProject } from "commons";
+import { DeleteProjectDialogComponent } from "./dialogs/delete-project-dialog.component";
 
 @Component({
     selector: "mcma-projects",
@@ -51,7 +56,7 @@ export class ProjectsComponent implements OnDestroy {
 
     source: LocalDataSource = new LocalDataSource();
 
-    constructor(private launchControlService: LaunchControlData) {
+    constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService) {
         this.launchControlService.getProjects()
             .pipe(takeWhile(() => this.alive))
             .subscribe(projects => this.source.load(projects));
@@ -61,23 +66,28 @@ export class ProjectsComponent implements OnDestroy {
         this.alive = false;
     }
 
-    onCreate(event): void {
-        console.log(event);
+    onCreate(): void {
+        this.dialogService.open(AddProjectDialogComponent).onClose.pipe(
+            takeWhile(projectDetails => !!projectDetails),
+            map(projectDetails => new McmaProject(projectDetails)),
+            switchMap(project => this.launchControlService.setProject(project)),
+            switchMap(() => this.launchControlService.getProjects()),
+        ).subscribe(projects => this.source.load(projects));
     }
 
     onEdit(event): void {
         console.log(event);
     }
 
-    onDeleteConfirm(event): void {
-        if (window.confirm("Are you sure you want to delete?")) {
-            event.confirm.resolve();
-        } else {
-            event.confirm.reject();
-        }
-    }
-
     onDelete(event): void {
-        console.log(event);
+        this.dialogService.open(DeleteProjectDialogComponent, {
+            context: {
+                projectName: event.data.name,
+            },
+        }).onClose.pipe(
+            takeWhile(projectName => projectName === event.data.name),
+            switchMap(() => this.launchControlService.deleteProject(event.data.id)),
+            switchMap(() => this.launchControlService.getProjects()),
+        ).subscribe( projects => this.source.load(projects));
     }
 }

@@ -1,0 +1,13 @@
+<nb-card>
+    <nb-card-header>Are you sure you want to delete Project '{{projectName}}'?</nb-card-header>
+    <nb-card-body>
+        <div class="form-group">
+            <label for="projectName" class="label">To confirm this action type '{{projectName}}'</label>
+            <input #name type="text" nbInput fullWidth id="projectName" placeholder="Name">
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <button class="cancel" nbButton (click)="cancel()">Cancel</button>
+        <button nbButton status="danger" [disabled]="projectName !== name.value" (click)="submit(name.value)">Submit</button>
+    </nb-card-footer>
+</nb-card>

@@ -1,0 +1,17 @@
+<nb-card>
+    <nb-card-header>Add a new Project</nb-card-header>
+    <nb-card-body>
+        <div class="form-group">
+            <label for="projectName" class="label">Name</label>
+            <input #projectName type="text" nbInput fullWidth id="projectName" placeholder="Name">
+        </div>
+        <div class="form-group">
+            <label for="projectDisplayName" class="label">Display Name</label>
+            <input #projectDisplayName type="text" nbInput fullWidth id="projectDisplayName" placeholder="Display Name">
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <button class="cancel" nbButton status="danger" (click)="cancel()">Cancel</button>
+        <button nbButton status="success" (click)="submit(projectName.value, projectDisplayName.value)">Submit</button>
+    </nb-card-footer>
+</nb-card>

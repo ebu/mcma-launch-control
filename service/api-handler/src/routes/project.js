@@ -21,13 +21,23 @@ const createProject = async (requestContext) => {
 
     let project = new McmaProject(requestContext.getRequestBody());
 
+    if (!project.name) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject is missing the name.");
+        return;
+    }
+
+    if (!project.displayName) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject is missing the display name.");
+        return;
+    }
+
     if (!nameRegExp.test(project.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaProject has illegal characters in name.");
         return;
     }
 
     let projectId = requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name;
-    project.onCreate(projectId)
+    project.onCreate(projectId);
 
     let table = new DynamoDbTable(McmaProject, requestContext.tableName());
 
@@ -48,7 +58,7 @@ const createProject = async (requestContext) => {
         { projectId });
 
     Logger.info("createProject()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const updateProject = async (requestContext) => {
     Logger.info("updateProject()", JSON.stringify(requestContext.request, null, 2));
@@ -86,6 +96,7 @@ const updateProject = async (requestContext) => {
 };
 
 const onBeforeDeleteProject = async (requestContext) => {
+    Logger.info(requestContext);
     // TODO check if project has deployments or components
 };
 

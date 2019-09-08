@@ -18,12 +18,22 @@ const createDeploymentConfig = async (requestContext) => {
 
     let deploymentConfig = new McmaDeploymentConfig(requestContext.getRequestBody());
 
+    if (!deploymentConfig.name) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig is missing the name.");
+        return;
+    }
+
+    if (!deploymentConfig.displayName) {
+        requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig is missing the display name.");
+        return;
+    }
+
     if (!nameRegExp.test(deploymentConfig.name)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BAD_REQUEST, "McmaDeploymentConfig has illegal characters in name.");
         return;
     }
 
-    deploymentConfig.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + deploymentConfig.name)
+    deploymentConfig.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + deploymentConfig.name);
 
     let table = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
 
@@ -38,7 +48,7 @@ const createDeploymentConfig = async (requestContext) => {
     requestContext.setResponseResourceCreated(deploymentConfig);
 
     Logger.info("createDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
-}
+};
 
 const updateDeploymentConfig = async (requestContext) => {
     Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
