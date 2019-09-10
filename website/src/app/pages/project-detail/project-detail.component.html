@@ -1,12 +1,42 @@
 <nb-card>
     <nb-card-header>
         <div class="row show-grid">
-            <div class="col-md-11">
-                <div>Project {{project?.displayName}}</div>
+            <div class="col-md-12">
+                <h4>Project {{project?.displayName}}</h4>
             </div>
         </div>
     </nb-card-header>
 
     <nb-card-body>
+
+        <div class="row show-grid marginBottom">
+            <div class="col-md-11">
+                <h6>Components</h6>
+            </div>
+            <div class="col-md-1">
+                <button nbButton (click)="onAddComponent()">
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="componentSettings"
+                         [source]="componentSource"
+                         (edit)="onEditComponent($event)"
+                         (delete)="onDeleteComponent($event)">
+        </ng2-smart-table>
+
+        <div class="row show-grid marginTop">
+            <div class="col-md-12">
+                <h6>Deployments</h6>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="deploymentSettings"
+                         [source]="deploymentSource"
+                         (edit)="onUpdateDeployment($event)"
+                         (delete)="onDeleteDeployment($event)">
+        </ng2-smart-table>
+
     </nb-card-body>
 </nb-card>

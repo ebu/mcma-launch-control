@@ -8,7 +8,8 @@ import { NbDialogRef } from "@nebular/theme";
 })
 export class DeleteProjectDialogComponent {
 
-    @Input() projectName: string;
+    @Input() projectCode: string;
+    @Input() projectDisplayName: string;
 
     constructor(protected ref: NbDialogRef<DeleteProjectDialogComponent>) {
     }

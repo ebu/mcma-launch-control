@@ -25,12 +25,12 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             cancelButtonContent: "<i class=\"nb-close\"></i>",
         },
         edit: {
-            editButtonContent: "<i class=\"nb-edit\"></i>",
+            editButtonContent: "<i class=\"nb-edit\" title=\"Edit\"></i>",
             saveButtonContent: "<i class=\"nb-checkmark\"></i>",
             cancelButtonContent: "<i class=\"nb-close\"></i>",
         },
         delete: {
-            deleteButtonContent: "<i class=\"nb-trash\"></i>",
+            deleteButtonContent: "<i class=\"nb-trash\" title=\"Delete\"></i>",
         },
 
         mode: "external",
@@ -44,7 +44,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
         columns: {
             name: {
-                title: "Name",
+                title: "Code",
                 type: "string",
             },
             displayName: {
@@ -87,11 +87,12 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     onDelete(event): void {
         this.dialogService.open(DeleteProjectDialogComponent, {
             context: {
-                projectName: event.data.name,
+                projectCode: event.data.name,
+                projectDisplayName: event.data.displayName,
             },
         }).onClose.pipe(
             takeWhile(projectName => projectName === event.data.name),
-            switchMap(() => this.launchControlService.deleteProject(event.data.id)),
+            switchMap(() => this.launchControlService.deleteProject(event.data.name)),
             switchMap(() => this.launchControlService.getProjects()),
             takeWhile(() => this.alive),
         ).subscribe(projects => this.source.load(projects));

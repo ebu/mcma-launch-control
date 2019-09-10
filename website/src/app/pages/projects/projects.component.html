@@ -2,7 +2,7 @@
     <nb-card-header>
         <div class="row show-grid">
             <div class="col-md-11">
-                <div>Projects</div>
+                <h4>Projects</h4>
             </div>
             <div class="col-md-1">
                 <button nbButton (click)="onCreate()">
@@ -13,7 +13,10 @@
     </nb-card-header>
 
     <nb-card-body>
-        <ng2-smart-table [settings]="settings" [source]="source" (edit)="onEdit($event)" (delete)="onDelete($event)">
+        <ng2-smart-table [settings]="settings"
+                         [source]="source"
+                         (edit)="onEdit($event)"
+                         (delete)="onDelete($event)">
         </ng2-smart-table>
     </nb-card-body>
 </nb-card>
