@@ -6,6 +6,7 @@ import { PagesComponent } from "./pages.component";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { PagesRoutingModule } from "./pages-routing.module";
+import { ProjectDetailModule } from "./project-detail/project-detail.module";
 
 @NgModule({
     imports: [
@@ -14,6 +15,7 @@ import { PagesRoutingModule } from "./pages-routing.module";
         NbMenuModule,
         DashboardModule,
         ProjectsModule,
+        ProjectDetailModule,
     ],
     declarations: [
         PagesComponent,

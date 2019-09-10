@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 
@@ -8,13 +8,14 @@ import { AddProjectDialogComponent } from "./dialogs/add-project-dialog.componen
 
 import { McmaProject } from "commons";
 import { DeleteProjectDialogComponent } from "./dialogs/delete-project-dialog.component";
+import { Router } from "@angular/router";
 
 @Component({
     selector: "mcma-projects",
     templateUrl: "./projects.component.html",
     styleUrls: ["projects.component.scss"],
 })
-export class ProjectsComponent implements OnDestroy {
+export class ProjectsComponent implements OnInit, OnDestroy {
     private alive = true;
 
     settings = {
@@ -56,7 +57,10 @@ export class ProjectsComponent implements OnDestroy {
 
     source: LocalDataSource = new LocalDataSource();
 
-    constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService) {
+    constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService, private router: Router) {
+    }
+
+    ngOnInit(): void {
         this.launchControlService.getProjects()
             .pipe(takeWhile(() => this.alive))
             .subscribe(projects => this.source.load(projects));
@@ -72,11 +76,12 @@ export class ProjectsComponent implements OnDestroy {
             map(projectDetails => new McmaProject(projectDetails)),
             switchMap(project => this.launchControlService.setProject(project)),
             switchMap(() => this.launchControlService.getProjects()),
+            takeWhile(() => this.alive),
         ).subscribe(projects => this.source.load(projects));
     }
 
     onEdit(event): void {
-        console.log(event);
+        this.router.navigate(["pages/projects", event.data.name]);
     }
 
     onDelete(event): void {
@@ -88,6 +93,7 @@ export class ProjectsComponent implements OnDestroy {
             takeWhile(projectName => projectName === event.data.name),
             switchMap(() => this.launchControlService.deleteProject(event.data.id)),
             switchMap(() => this.launchControlService.getProjects()),
-        ).subscribe( projects => this.source.load(projects));
+            takeWhile(() => this.alive),
+        ).subscribe(projects => this.source.load(projects));
     }
 }

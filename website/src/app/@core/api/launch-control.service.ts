@@ -30,8 +30,9 @@ export class LaunchControlService extends LaunchControlData {
         );
     }
 
-    getProject(projectId: string): Observable<McmaProject> {
-        return this.http.get(projectId).pipe(
+    getProject(projectName: string): Observable<McmaProject> {
+        return this.config.get<string>("service_url").pipe(
+            switchMap(serviceUrl => this.http.get(serviceUrl + "/projects/" + projectName)),
             map(castToProject),
         );
     }

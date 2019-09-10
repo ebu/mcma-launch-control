@@ -5,7 +5,7 @@ import { McmaProject } from "commons";
 export abstract class LaunchControlData {
     abstract getProjects(): Observable<McmaProject[]>;
 
-    abstract getProject(projectId: string): Observable<McmaProject>;
+    abstract getProject(projectName: string): Observable<McmaProject>;
 
     abstract setProject(project: McmaProject): Observable<McmaProject>;
 
