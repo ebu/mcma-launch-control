@@ -46,6 +46,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             name: {
                 title: "Code",
                 type: "string",
+                width: "15%",
             },
             displayName: {
                 title: "Display Name",

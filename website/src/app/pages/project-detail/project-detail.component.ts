@@ -55,6 +55,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             name: {
                 title: "Code",
                 type: "string",
+                width: "15%",
             },
             displayName: {
                 title: "Display Name",
@@ -94,19 +95,22 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             name: {
                 title: "Code",
                 type: "string",
+                width: "15%",
             },
             displayName: {
                 title: "Display Name",
                 type: "string",
-                width: "75%",
+                width: "30%",
             },
             status: {
                 title: "Status",
                 type: "string",
+                width: "10%",
             },
             statusMessage: {
                 title: "Status Message",
                 type: "string",
+                width: "35%",
             },
         },
 
