@@ -11,6 +11,8 @@ import { LaunchControlData } from "./data/launch-control";
 import { UserService } from "./api/users.service";
 import { LaunchControlService } from "./api/launch-control.service";
 import { ApiDataModule } from "./api/api-data.module";
+import { ModuleRepositoryService } from "./api/module-repository.service";
+import { ModuleRepositoryData } from "./data/module-repository";
 
 const socialLinks = [
     {
@@ -33,6 +35,7 @@ const socialLinks = [
 const DATA_SERVICES = [
     { provide: UserData, useClass: UserService },
     { provide: LaunchControlData, useClass: LaunchControlService },
+    { provide: ModuleRepositoryData, useClass: ModuleRepositoryService },
 ];
 
 export class NbSimpleRoleProvider extends NbRoleProvider {

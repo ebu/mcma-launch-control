@@ -3,8 +3,8 @@ const McmaDeploymentStatus = {
     ERROR: "ERROR",
     DEPLOYING: "DEPLOYING",
     DESTROYING: "DESTROYING"
-}
+};
 
 module.exports = {
-    McmaDeploymentStatus
-}
+    McmaDeploymentStatus,
+};

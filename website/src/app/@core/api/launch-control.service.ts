@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 
-import { McmaDeploymentConfig, McmaProject, McmaComponent, McmaDeployment } from "commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaProject } from "commons";
 
 import { LaunchControlData } from "../data/launch-control";
 import { map, switchMap } from "rxjs/operators";
@@ -107,16 +107,10 @@ export class LaunchControlService extends LaunchControlData {
     }
 
     setComponent(projectName: string, component: McmaComponent): Observable<McmaComponent> {
-        if (!component.id) {
-            return this.config.get<string>("service_url").pipe(
-                switchMap(serviceUrl => this.http.post(serviceUrl + "/projects/" + projectName + "/components", component, httpOptions)),
-                map(castToComponent),
-            );
-        } else {
-            return this.http.put(component.id, component, httpOptions).pipe(
-                map(castToComponent),
-            );
-        }
+        return this.config.get<string>("service_url").pipe(
+            switchMap(serviceUrl => this.http.put(serviceUrl + "/projects/" + projectName + "/components/" + component.name, component, httpOptions)),
+            map(castToComponent),
+        );
     }
 
     deleteComponent(projectName: string, componentName: string): Observable<any> {

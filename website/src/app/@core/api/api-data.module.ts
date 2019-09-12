@@ -3,10 +3,12 @@ import { CommonModule } from "@angular/common";
 
 import { UserService } from "./users.service";
 import { LaunchControlService } from "./launch-control.service";
+import { ModuleRepositoryService } from "./module-repository.service";
 
 const SERVICES = [
     UserService,
     LaunchControlService,
+    ModuleRepositoryService,
 ];
 
 @NgModule({

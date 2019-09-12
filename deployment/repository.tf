@@ -1,5 +1,6 @@
 locals {
   repository_bucket_name = "${var.project_prefix}.repository"
+  repository_url         = "https://s3${var.aws_region != "us-east-1" ? "-${var.aws_region}" : ""}.amazonaws.com/${local.repository_bucket_name}"
 }
 
 data "template_file" "s3_public_read_policy_repository" {

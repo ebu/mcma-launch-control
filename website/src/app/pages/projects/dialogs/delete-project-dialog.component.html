@@ -1,5 +1,5 @@
 <nb-card>
-    <nb-card-header>Are you sure you want to delete Project {{projectDisplayName}}?</nb-card-header>
+    <nb-card-header><h5>Are you sure you want to delete Project {{projectDisplayName}}?</h5></nb-card-header>
     <nb-card-body>
         <div class="form-group">
             <label for="projectName" class="label">To confirm this action type '{{projectCode}}'</label>
@@ -8,6 +8,6 @@
     </nb-card-body>
     <nb-card-footer>
         <button class="cancel" nbButton (click)="cancel()">Cancel</button>
-        <button nbButton status="danger" [disabled]="projectCode !== name.value" (click)="submit(name.value)">Submit</button>
+        <button nbButton status="danger" [disabled]="projectCode !== name.value" (click)="submit(name.value)">Delete</button>
     </nb-card-footer>
 </nb-card>

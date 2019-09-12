@@ -17,5 +17,5 @@ class McmaDeployment extends Resource {
 }
 
 module.exports = {
-    McmaDeployment
+    McmaDeployment,
 };

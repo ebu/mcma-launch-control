@@ -9,7 +9,9 @@ async function main(terraformOutputJson) {
 
     console.log("Uploading deployment configuration to website");
     let config = {
-        service_url: terraformOutput.service_url.value
+        service_url: terraformOutput.service_url.value,
+        repository_bucket_name: terraformOutput.repository_bucket_name.value,
+        repository_url: terraformOutput.repository_url.value,
     };
 
     let s3Params = {

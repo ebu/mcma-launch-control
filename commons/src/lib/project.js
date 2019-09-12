@@ -15,5 +15,5 @@ class McmaProject extends Resource {
 }
 
 module.exports = {
-    McmaProject
+    McmaProject,
 };

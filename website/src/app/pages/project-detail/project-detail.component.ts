@@ -1,9 +1,13 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaDeployment, McmaDeploymentConfig, McmaProject } from "commons";
-import { takeWhile } from "rxjs/operators";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaProject } from "commons";
+import { iif, of } from "rxjs";
+import { switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { LocalDataSource } from "ng2-smart-table";
+import { NbDialogService } from "@nebular/theme";
+import { EditComponentDialogComponent } from "./dialogs/edit-component-dialog.component";
+import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialog.component";
 
 @Component({
     selector: "mcma-project-detail",
@@ -101,7 +105,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
     deploymentSource: LocalDataSource = new LocalDataSource();
 
-    constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute) {
+    constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute, private dialogService: NbDialogService) {
     }
 
     ngOnInit(): void {
@@ -111,7 +115,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
         this.launchControlService.getDeploymentConfigs()
             .pipe(takeWhile(() => this.alive))
-            .subscribe(deploymentConfigs => this.loadDeployments(deploymentConfigs, this.projectDeployments));
+            .subscribe(deploymentConfigs => this.innerLoadDeployments(deploymentConfigs, this.projectDeployments));
     }
 
     ngOnDestroy(): void {
@@ -121,16 +125,23 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     private loadProject(project: McmaProject) {
         this.project = project;
 
-        this.launchControlService.getComponents(project.name)
-            .pipe(takeWhile(() => this.alive))
-            .subscribe(components => this.componentSource.load(components));
-
-        this.launchControlService.getDeployments(project.name)
-            .pipe(takeWhile(() => this.alive))
-            .subscribe(deployments => this.loadDeployments(this.deploymentConfigs, deployments));
+        this.loadComponents();
+        this.loadDeployments();
     }
 
-    private loadDeployments(deploymentConfigs: McmaDeploymentConfig[], projectDeployments: McmaDeployment[]) {
+    private loadComponents() {
+        this.launchControlService.getComponents(this.project.name)
+            .pipe(takeWhile(() => this.alive))
+            .subscribe(components => this.componentSource.load(components));
+    }
+
+    private loadDeployments() {
+        this.launchControlService.getDeployments(this.project.name)
+            .pipe(takeWhile(() => this.alive))
+            .subscribe(deployments => this.innerLoadDeployments(this.deploymentConfigs, deployments));
+    }
+
+    private innerLoadDeployments(deploymentConfigs: McmaDeploymentConfig[], projectDeployments: McmaDeployment[]) {
         this.deploymentConfigs = deploymentConfigs;
         this.projectDeployments = projectDeployments;
 
@@ -161,15 +172,37 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     }
 
     onAddComponent() {
-
+        this.dialogService.open(EditComponentDialogComponent, {
+            context: {
+                component: new McmaComponent(),
+            },
+        }).onClose.pipe(
+            takeWhile(component => !!component),
+            switchMap(component => this.launchControlService.setComponent(this.project.name, component)),
+        ).subscribe(() => this.loadComponents());
     }
 
     onEditComponent(event) {
-        console.log(event);
+        this.dialogService.open(EditComponentDialogComponent, {
+            context: {
+                component: new McmaComponent(event.data),
+            },
+        }).onClose.pipe(
+            takeWhile(component => !!component),
+            switchMap(component => this.launchControlService.setComponent(this.project.name, component)),
+            switchMap(component => iif(() => event.data.name !== component.name, this.launchControlService.deleteComponent(this.project.name, event.data.name), of(component))),
+        ).subscribe(() => this.loadComponents());
     }
 
     onDeleteComponent(event) {
-        console.log(event);
+        this.dialogService.open(DeleteComponentDialogComponent, {
+            context: {
+                component: new McmaComponent(event.data),
+            },
+        }).onClose.pipe(
+            takeWhile(doDelete => doDelete),
+            switchMap(() => this.launchControlService.deleteComponent(this.project.name, event.data.name)),
+        ).subscribe(() => this.loadComponents());
     }
 
     onUpdateDeployment(event) {

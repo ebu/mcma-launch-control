@@ -1,0 +1,48 @@
+<nb-card>
+    <nb-card-header>
+        <h5 style="width:25em">{{action}} Component</h5>
+    </nb-card-header>
+    <nb-card-body>
+        <div class="form-group">
+            <label for="componentCode" class="label">Code</label>
+            <input id="componentCode"
+                   type="text" nbInput fullWidth
+                   placeholder="Code"
+                   [(ngModel)]="componentCode">
+        </div>
+        <div class="form-group">
+            <label for="componentDisplayName" class="label">Display Name</label>
+            <input id="componentDisplayName"
+                   type="text" nbInput fullWidth
+                   placeholder="Display Name"
+                   [(ngModel)]="componentDisplayName">
+        </div>
+        <div class="form-group">
+            <label for="componentModule" class="label">Module</label>
+            <nb-select id="componentModule"
+                       fullWidth
+                       placeholder="Module"
+                       (selectedChange)="onModuleChange($event)"
+                       [(selected)]="componentModule">
+                <nb-option *ngFor="let module of modules" [value]="module.id">{{module.displayName}}</nb-option>
+            </nb-select>
+        </div>
+
+        <h6>Variables</h6>
+        <div class="form-group row" *ngFor="let variable of componentVariables">
+            <label for="varInput" class="label col-sm-3 col-form-label">{{variable.name}}:</label>
+            <div class="col-sm-9">
+                <input #variableValue
+                       id="varInput"
+                       type="text"
+                       nbInput fullWidth
+                       [value]="variable.value"
+                       (change)="onVariableChange(variable.name, variableValue.value)">
+            </div>
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <button class="cancel" nbButton (click)="cancel()">Cancel</button>
+        <button nbButton (click)="submit()">OK</button>
+    </nb-card-footer>
+</nb-card>
