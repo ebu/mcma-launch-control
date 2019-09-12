@@ -2,7 +2,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { NgModule } from "@angular/core";
 
 import { PagesComponent } from "./pages.component";
-import { DashboardComponent } from "./dashboard/dashboard.component";
+// import { DashboardComponent } from "./dashboard/dashboard.component";
 import { ProjectDetailComponent } from "./project-detail/project-detail.component";
 import { ProjectsComponent } from "./projects/projects.component";
 
@@ -10,10 +10,10 @@ const routes: Routes = [{
     path: "",
     component: PagesComponent,
     children: [
-        {
-            path: "dashboard",
-            component: DashboardComponent,
-        },
+        // {
+        //     path: "dashboard",
+        //     component: DashboardComponent,
+        // },
         {
             path: "projects",
             component: ProjectsComponent,
@@ -24,7 +24,7 @@ const routes: Routes = [{
         },
         {
             path: "",
-            redirectTo: "dashboard",
+            redirectTo: "projects",
             pathMatch: "full",
         },
     ],

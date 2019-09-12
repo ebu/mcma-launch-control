@@ -88,7 +88,45 @@
     bottom: 15px;
     box-shadow: 0 3px 3px 0 rgba(61, 175, 255, 1);
     animation: spin 1.5s linear infinite
-}</style>
+}
+
+.rotating-loop .nb-loop {
+    animation: 2s linear infinite spin;
+}
+
+.rotating-loop .ng2-smart-action-edit-edit {
+    pointer-events: none;
+    cursor: pointer;
+}
+
+.rotating-trash .nb-trash {
+    animation: 2s linear infinite spin;
+}
+
+
+.rotating-trash .ng2-smart-action-delete-delete {
+    pointer-events: none;
+    cursor: pointer;
+}
+
+.disabled-loop .nb-loop {
+    color: #ddd;
+}
+
+.disabled-loop .ng2-smart-action-edit-edit {
+    pointer-events: none;
+    cursor: pointer;
+}
+
+.disabled-trash .nb-trash {
+    color: #ddd;
+}
+
+.disabled-trash .ng2-smart-action-delete-delete {
+    pointer-events: none;
+    cursor: pointer;
+}
+</style>
 <div id="nb-global-spinner" class="spinner">
     <div class="blob blob-0"></div>
     <div class="blob blob-1"></div>
