@@ -142,7 +142,7 @@ export class LaunchControlService extends LaunchControlData {
 
     deleteDeployment(projectName: string, deploymentName: string): Observable<any> {
         return this.config.get<string>("service_url").pipe(
-            switchMap(serviceUrl => this.http.delete(serviceUrl + "/projects/" + projectName + "/components/" + deploymentName)),
+            switchMap(serviceUrl => this.http.delete(serviceUrl + "/projects/" + projectName + "/deployments/" + deploymentName)),
         );
     }
 }

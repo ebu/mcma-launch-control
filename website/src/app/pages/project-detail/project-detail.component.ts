@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaProject } from "commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } from "commons";
 import { iif, of } from "rxjs";
 import { switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
@@ -9,6 +9,8 @@ import { NbDialogService } from "@nebular/theme";
 import { EditComponentDialogComponent } from "./dialogs/edit-component-dialog.component";
 import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialog.component";
 
+const equal = require("fast-deep-equal");
+
 @Component({
     selector: "mcma-project-detail",
     templateUrl: "./project-detail.component.html",
@@ -16,6 +18,8 @@ import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialo
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
     private alive = true;
+
+    private deploymentReloadScheduled: boolean = false;
 
     project: McmaProject;
 
@@ -100,10 +104,30 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 title: "Status",
                 type: "string",
             },
+            statusMessage: {
+                title: "Status Message",
+                type: "string",
+            },
+        },
+
+        rowClassFunction: (row) => {
+            switch (row.data.status) {
+                case McmaDeploymentStatus.DEPLOYING:
+                    return "rotating-loop disabled-trash";
+                case McmaDeploymentStatus.DESTROYING:
+                    return "rotating-trash disabled-loop";
+                case McmaDeploymentStatus.OK:
+                case McmaDeploymentStatus.ERROR:
+                    return "";
+                default:
+                    return "disabled-trash";
+            }
         },
     };
 
     deploymentSource: LocalDataSource = new LocalDataSource();
+
+    private deployments = [];
 
     constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute, private dialogService: NbDialogService) {
     }
@@ -155,6 +179,8 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             deploymentMap[deployment.config] = deployment;
         }
 
+        let transient = false;
+
         const deployments = [];
 
         for (const config of this.deploymentConfigs) {
@@ -164,11 +190,26 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 name: config.name,
                 displayName: config.displayName,
                 status: deployment ? deployment.status : "",
-                statusMessage: deployment ? deployment.status : "",
+                statusMessage: deployment ? deployment.statusMessage : "",
             });
+
+            if (deployment && deployment.status !== McmaDeploymentStatus.OK && deployment.status !== McmaDeploymentStatus.ERROR) {
+                transient = true;
+            }
         }
 
-        this.deploymentSource.load(deployments);
+        if (!equal(this.deployments, deployments)) {
+            this.deploymentSource.load(deployments);
+            this.deployments = deployments;
+        }
+
+        if (transient && !this.deploymentReloadScheduled) {
+            this.deploymentReloadScheduled = true;
+            setTimeout(() => {
+                this.loadDeployments();
+                this.deploymentReloadScheduled = false;
+            }, 2000);
+        }
     }
 
     onAddComponent() {
@@ -206,11 +247,11 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     }
 
     onUpdateDeployment(event) {
-        console.log(event);
+        this.launchControlService.updateDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
     }
 
     onDeleteDeployment(event) {
-        console.log(event);
+        this.launchControlService.deleteDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
     }
 
 }

@@ -42,6 +42,7 @@
         "classlist.js": "1.1.20150312",
         "core-js": "2.5.1",
         "eva-icons": "^1.1.1",
+        "fast-deep-equal": "^2.0.1",
         "intl": "1.2.5",
         "ionicons": "2.0.1",
         "nebular-icons": "1.1.0",
