@@ -35,7 +35,33 @@ export class ModuleRepositoryService extends ModuleRepositoryData {
                         name: "aws_service_registry",
                         version: "0.0.1",
                         displayName: "AWS MCMA Service Registry",
-                        description: "The MCMA Service Registry service as a central 'yellow pages' for services to discover what other services are available.",
+                        description: "The MCMA Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
+                        inputParameters: [
+                            new McmaModuleParameter({
+                                name: "module_prefix",
+                                type: "string",
+                            }),
+                            new McmaModuleParameter({
+                                name: "stage_name",
+                                type: "string",
+                            }),
+                            new McmaModuleParameter({
+                                name: "aws_account_id",
+                                type: "string",
+                            }),
+                            new McmaModuleParameter({
+                                name: "aws_region",
+                                type: "string",
+                            }),
+                        ],
+                    }),
+                    new McmaModule({
+                        id: repositoryUrl + "/aws_media_repository.zip",
+                        provider: "ebu",
+                        name: "aws_media_repository",
+                        version: "0.0.1",
+                        displayName: "AWS MCMA Media Repository",
+                        description: "The MCMA Service Registry is used for tracking assets and their corresponding data files.",
                         inputParameters: [
                             new McmaModuleParameter({
                                 name: "module_prefix",

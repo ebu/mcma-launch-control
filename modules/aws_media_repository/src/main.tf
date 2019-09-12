@@ -30,10 +30,10 @@ resource "aws_iam_role_policy_attachment" "role_policy_dynamodb" {
 }
 
 ##################################
-# aws_dynamodb_table : service_registry_table
+# aws_dynamodb_table : media_repository_table
 ##################################
 
-resource "aws_dynamodb_table" "service_registry_table" {
+resource "aws_dynamodb_table" "media_repository_table" {
   name           = var.module_prefix
   read_capacity  = 1
   write_capacity = 1
@@ -70,30 +70,30 @@ resource "aws_lambda_function" "service-registry-api-handler" {
 }
 
 ##############################
-#  aws_api_gateway_rest_api:  service_registry_api
+#  aws_api_gateway_rest_api:  media_repository_api
 ##############################
-resource "aws_api_gateway_rest_api" "service_registry_api" {
+resource "aws_api_gateway_rest_api" "media_repository_api" {
   name        = var.module_prefix
   description = "Service Registry Rest Api"
 }
 
-resource "aws_api_gateway_resource" "service_registry_api_resource" {
-  rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
-  parent_id   = aws_api_gateway_rest_api.service_registry_api.root_resource_id
+resource "aws_api_gateway_resource" "media_repository_api_resource" {
+  rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
+  parent_id   = aws_api_gateway_rest_api.media_repository_api.root_resource_id
   path_part   = "{proxy+}"
 }
 
-resource "aws_api_gateway_method" "service_registry_options_method" {
-  rest_api_id   = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id   = aws_api_gateway_resource.service_registry_api_resource.id
+resource "aws_api_gateway_method" "media_repository_options_method" {
+  rest_api_id   = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id   = aws_api_gateway_resource.media_repository_api_resource.id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_method_response" "service_registry_options_200" {
-  rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id = aws_api_gateway_resource.service_registry_api_resource.id
-  http_method = aws_api_gateway_method.service_registry_options_method.http_method
+resource "aws_api_gateway_method_response" "media_repository_options_200" {
+  rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id = aws_api_gateway_resource.media_repository_api_resource.id
+  http_method = aws_api_gateway_method.media_repository_options_method.http_method
   status_code = "200"
 
   response_models = {
@@ -107,10 +107,10 @@ resource "aws_api_gateway_method_response" "service_registry_options_200" {
   }
 }
 
-resource "aws_api_gateway_integration" "service_registry_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id = aws_api_gateway_resource.service_registry_api_resource.id
-  http_method = aws_api_gateway_method.service_registry_options_method.http_method
+resource "aws_api_gateway_integration" "media_repository_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id = aws_api_gateway_resource.media_repository_api_resource.id
+  http_method = aws_api_gateway_method.media_repository_options_method.http_method
   type        = "MOCK"
 
   request_templates = {
@@ -118,11 +118,11 @@ resource "aws_api_gateway_integration" "service_registry_options_integration" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "service_registry_options_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id = aws_api_gateway_resource.service_registry_api_resource.id
-  http_method = aws_api_gateway_method.service_registry_options_method.http_method
-  status_code = aws_api_gateway_method_response.service_registry_options_200.status_code
+resource "aws_api_gateway_integration_response" "media_repository_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id = aws_api_gateway_resource.media_repository_api_resource.id
+  http_method = aws_api_gateway_method.media_repository_options_method.http_method
+  status_code = aws_api_gateway_method_response.media_repository_options_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
@@ -135,17 +135,17 @@ resource "aws_api_gateway_integration_response" "service_registry_options_integr
   }
 }
 
-resource "aws_api_gateway_method" "service_registry_api_method" {
-  rest_api_id   = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id   = aws_api_gateway_resource.service_registry_api_resource.id
+resource "aws_api_gateway_method" "media_repository_api_method" {
+  rest_api_id   = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id   = aws_api_gateway_resource.media_repository_api_resource.id
   http_method   = "ANY"
   authorization = "AWS_IAM"
 }
 
-resource "aws_api_gateway_integration" "service_registry_api_method-integration" {
-  rest_api_id             = aws_api_gateway_rest_api.service_registry_api.id
-  resource_id             = aws_api_gateway_resource.service_registry_api_resource.id
-  http_method             = aws_api_gateway_method.service_registry_api_method.http_method
+resource "aws_api_gateway_integration" "media_repository_api_method-integration" {
+  rest_api_id             = aws_api_gateway_rest_api.media_repository_api.id
+  resource_id             = aws_api_gateway_resource.media_repository_api_resource.id
+  http_method             = aws_api_gateway_method.media_repository_api_method.http_method
   type                    = "AWS_PROXY"
   uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${aws_lambda_function.service-registry-api-handler.function_name}/invocations"
   integration_http_method = "POST"
@@ -156,26 +156,25 @@ resource "aws_lambda_permission" "apigw_service-registry-api-handler" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.service-registry-api-handler.arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_id}:${aws_api_gateway_rest_api.service_registry_api.id}/*/${aws_api_gateway_method.service_registry_api_method.http_method}/*"
+  source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_id}:${aws_api_gateway_rest_api.media_repository_api.id}/*/${aws_api_gateway_method.media_repository_api_method.http_method}/*"
 }
 
-resource "aws_api_gateway_deployment" "service_registry_deployment" {
+resource "aws_api_gateway_deployment" "media_repository_deployment" {
   depends_on = [
-    "aws_api_gateway_method.service_registry_api_method",
-    "aws_api_gateway_integration.service_registry_api_method-integration",
+    "aws_api_gateway_method.media_repository_api_method",
+    "aws_api_gateway_integration.media_repository_api_method-integration",
   ]
 
-  rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
+  rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
   stage_name  = var.stage_name
 
   variables = {
-    "TableName" = aws_dynamodb_table.service_registry_table.name
-    "PublicUrl" = local.service_registry_url
+    "TableName" = aws_dynamodb_table.media_repository_table.name
+    "PublicUrl" = local.media_repository_url
   }
 }
 
 locals {
-  service_registry_url       = "https://${aws_api_gateway_rest_api.service_registry_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
-  service_registry_auth_type = "AWS4"
-  services_url               = "${local.service_registry_url}/services"
+  media_repository_url       = "https://${aws_api_gateway_rest_api.media_repository_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
+  media_repository_auth_type = "AWS4"
 }
