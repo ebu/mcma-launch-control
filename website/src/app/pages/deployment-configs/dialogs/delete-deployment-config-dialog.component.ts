@@ -2,7 +2,7 @@ import { Component, Input } from "@angular/core";
 import { NbDialogRef } from "@nebular/theme";
 
 @Component({
-    selector: "mcma-delete-project-dialog",
+    selector: "mcma-delete-deployment-config-dialog",
     templateUrl: "delete-deployment-config-dialog.component.html",
     styleUrls: ["delete-deployment-config-dialog.component.scss"],
 })

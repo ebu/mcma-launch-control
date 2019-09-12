@@ -10,7 +10,7 @@ import { McmaDeploymentConfig } from "commons";
 import { DeleteDeploymentConfigDialogComponent } from "./dialogs/delete-deployment-config-dialog.component";
 
 @Component({
-    selector: "mcma-deploymentConfigs",
+    selector: "mcma-deployment-configs",
     templateUrl: "./deployment-configs.component.html",
     styleUrls: ["deployment-configs.component.scss"],
 })
