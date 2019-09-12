@@ -1,0 +1,13 @@
+<nb-card>
+    <nb-card-header><h5>Are you sure you want to delete Deployment Configuration {{displayName}}?</h5></nb-card-header>
+    <nb-card-body>
+        <div class="form-group">
+            <label for="name" class="label">To confirm this action type '{{code}}'</label>
+            <input #name type="text" nbInput fullWidth id="name" placeholder="Name">
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <button class="cancel" nbButton (click)="cancel()">Cancel</button>
+        <button nbButton status="danger" [disabled]="code !== name.value" (click)="submit(name.value)">Delete</button>
+    </nb-card-footer>
+</nb-card>

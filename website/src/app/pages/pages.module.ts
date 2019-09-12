@@ -7,6 +7,7 @@ import { DashboardModule } from "./dashboard/dashboard.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { PagesRoutingModule } from "./pages-routing.module";
 import { ProjectDetailModule } from "./project-detail/project-detail.module";
+import { DeploymentConfigsModule } from "./deployment-configs/deployment-configs.module";
 
 @NgModule({
     imports: [
@@ -16,6 +17,7 @@ import { ProjectDetailModule } from "./project-detail/project-detail.module";
         DashboardModule,
         ProjectsModule,
         ProjectDetailModule,
+        DeploymentConfigsModule,
     ],
     declarations: [
         PagesComponent,

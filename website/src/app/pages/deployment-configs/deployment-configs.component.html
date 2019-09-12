@@ -1,0 +1,21 @@
+<nb-card>
+    <nb-card-header>
+        <div class="row show-grid">
+            <div class="col-md-11">
+                <h4>Deployment Configurations</h4>
+            </div>
+            <div class="col-md-1">
+                <button nbButton (click)="onCreate()">
+                    Add
+                </button>
+            </div>
+        </div>
+    </nb-card-header>
+
+    <nb-card-body>
+        <ng2-smart-table [settings]="settings"
+                         [source]="source"
+                         (delete)="onDelete($event)">
+        </ng2-smart-table>
+    </nb-card-body>
+</nb-card>
