@@ -32,7 +32,7 @@
         "@angular/platform-browser": "^8.2.5",
         "@angular/platform-browser-dynamic": "^8.2.5",
         "@angular/router": "^8.2.5",
-        "@mcma/core": "^0.5.3",
+        "@mcma/core": "0.6.3",
         "@nebular/auth": "4.1.2",
         "@nebular/eva-icons": "4.1.2",
         "@nebular/security": "4.1.2",

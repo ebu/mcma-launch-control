@@ -114,6 +114,16 @@ subprojects {
         args "update"
     }
 
+    task npmDedup(type: Exec) {
+        dependsOn verifyNodeJS
+        enabled file("package.json").exists()
+        inputs.file("package.json")
+        outputs.file("package-lock.json")
+        outputs.dir("node_modules")
+        commandLine npmExecutable
+        args "dedup"
+    }
+
     task clean(type: Delete) {
         delete "build"
         delete "node_modules"
