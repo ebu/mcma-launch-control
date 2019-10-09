@@ -74,7 +74,7 @@ resource "aws_lambda_function" "service-registry-api-handler" {
 ##############################
 resource "aws_api_gateway_rest_api" "media_repository_api" {
   name        = var.module_prefix
-  description = "Service Registry Rest Api"
+  description = "Media Repository Rest Api"
 }
 
 resource "aws_api_gateway_resource" "media_repository_api_resource" {
@@ -142,7 +142,7 @@ resource "aws_api_gateway_method" "media_repository_api_method" {
   authorization = "AWS_IAM"
 }
 
-resource "aws_api_gateway_integration" "media_repository_api_method-integration" {
+resource "aws_api_gateway_integration" "media_repository_api_method_integration" {
   rest_api_id             = aws_api_gateway_rest_api.media_repository_api.id
   resource_id             = aws_api_gateway_resource.media_repository_api_resource.id
   http_method             = aws_api_gateway_method.media_repository_api_method.http_method
@@ -151,7 +151,7 @@ resource "aws_api_gateway_integration" "media_repository_api_method-integration"
   integration_http_method = "POST"
 }
 
-resource "aws_lambda_permission" "apigw_service-registry-api-handler" {
+resource "aws_lambda_permission" "api_gateway_exec_api_handler" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.service-registry-api-handler.arn
@@ -161,8 +161,8 @@ resource "aws_lambda_permission" "apigw_service-registry-api-handler" {
 
 resource "aws_api_gateway_deployment" "media_repository_deployment" {
   depends_on = [
-    "aws_api_gateway_method.media_repository_api_method",
-    "aws_api_gateway_integration.media_repository_api_method-integration",
+    "aws_api_gateway_integration.media_repository_options_integration",
+    "aws_api_gateway_integration.media_repository_api_method_integration",
   ]
 
   rest_api_id = aws_api_gateway_rest_api.media_repository_api.id
@@ -170,11 +170,11 @@ resource "aws_api_gateway_deployment" "media_repository_deployment" {
 
   variables = {
     "TableName" = aws_dynamodb_table.media_repository_table.name
-    "PublicUrl" = local.media_repository_url
+    "PublicUrl" = local.service_url
   }
 }
 
 locals {
-  media_repository_url       = "https://${aws_api_gateway_rest_api.media_repository_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
-  media_repository_auth_type = "AWS4"
+  service_url       = "https://${aws_api_gateway_rest_api.media_repository_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
+  service_auth_type = "AWS4"
 }

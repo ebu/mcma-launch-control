@@ -142,7 +142,7 @@ resource "aws_api_gateway_method" "service_registry_api_method" {
   authorization = "AWS_IAM"
 }
 
-resource "aws_api_gateway_integration" "service_registry_api_method-integration" {
+resource "aws_api_gateway_integration" "service_registry_api_method_integration" {
   rest_api_id             = aws_api_gateway_rest_api.service_registry_api.id
   resource_id             = aws_api_gateway_resource.service_registry_api_resource.id
   http_method             = aws_api_gateway_method.service_registry_api_method.http_method
@@ -151,7 +151,7 @@ resource "aws_api_gateway_integration" "service_registry_api_method-integration"
   integration_http_method = "POST"
 }
 
-resource "aws_lambda_permission" "apigw_service-registry-api-handler" {
+resource "aws_lambda_permission" "api_gateway_exec_api_handler" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.service-registry-api-handler.arn
@@ -161,8 +161,8 @@ resource "aws_lambda_permission" "apigw_service-registry-api-handler" {
 
 resource "aws_api_gateway_deployment" "service_registry_deployment" {
   depends_on = [
-    "aws_api_gateway_method.service_registry_api_method",
-    "aws_api_gateway_integration.service_registry_api_method-integration",
+    "aws_api_gateway_integration.service_registry_options_integration",
+    "aws_api_gateway_integration.service_registry_api_method_integration",
   ]
 
   rest_api_id = aws_api_gateway_rest_api.service_registry_api.id
@@ -170,12 +170,12 @@ resource "aws_api_gateway_deployment" "service_registry_deployment" {
 
   variables = {
     "TableName" = aws_dynamodb_table.service_registry_table.name
-    "PublicUrl" = local.service_registry_url
+    "PublicUrl" = local.service_url
   }
 }
 
 locals {
-  service_registry_url       = "https://${aws_api_gateway_rest_api.service_registry_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
-  service_registry_auth_type = "AWS4"
-  services_url               = "${local.service_registry_url}/services"
+  service_url       = "https://${aws_api_gateway_rest_api.service_registry_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.stage_name}"
+  service_auth_type = "AWS4"
+  services_url      = "${local.service_url}/services"
 }

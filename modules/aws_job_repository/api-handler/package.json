@@ -1,0 +1,22 @@
+{
+    "name": "job-repository-api-handler",
+    "version": "0.0.0",
+    "description": "API gateway request handler for Job Repository",
+    "private": true,
+    "engines": {
+        "node": "~8.10.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@mcma/api": "0.6.3",
+        "@mcma/aws-api-gateway": "0.6.3",
+        "@mcma/aws-client": "0.6.3",
+        "@mcma/aws-dynamodb": "0.6.3",
+        "@mcma/aws-lambda-worker-invoker": "0.6.3",
+        "@mcma/client": "0.6.3",
+        "@mcma/core": "0.6.3",
+        "@mcma/data": "0.6.3",
+        "aws-sdk": "^2.542.0"
+    }
+}

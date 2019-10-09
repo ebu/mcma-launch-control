@@ -45,3 +45,11 @@ resource "aws_s3_bucket_object" "module_aws_media_repository" {
   content_type = "application/zip"
   etag         = filemd5("../modules/aws_media_repository/build/dist/module.zip")
 }
+
+resource "aws_s3_bucket_object" "module_aws_job_repository" {
+  bucket       = aws_s3_bucket.repository.id
+  key          = "aws_job_repository.zip"
+  source       = "../modules/aws_job_repository/build/dist/module.zip"
+  content_type = "application/zip"
+  etag         = filemd5("../modules/aws_job_repository/build/dist/module.zip")
+}

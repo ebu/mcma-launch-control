@@ -1,0 +1,20 @@
+{
+    "name": "job-repository-worker",
+    "version": "0.0.0",
+    "description": "Lambda function to process requests from the api-handler asynchronously",
+    "private": true,
+    "engines": {
+        "node": "~8.10.0"
+    },
+    "main": "src/index.js",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@mcma/aws-client": "0.6.3",
+        "@mcma/aws-dynamodb": "0.6.3",
+        "@mcma/client": "0.6.3",
+        "@mcma/core": "0.6.3",
+        "@mcma/data": "0.6.3",
+        "@mcma/worker": "0.6.3",
+        "aws-sdk": "^2.542.0"
+    }
+}
