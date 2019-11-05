@@ -21,5 +21,7 @@ subprojects {
         archiveName "lambda.zip"
         destinationDir file("build/dist")
         from "build/staging"
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
     }
 }

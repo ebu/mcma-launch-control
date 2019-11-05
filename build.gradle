@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 
 def McmaVersion = "0.6.3"
 
-def requiredVersionNodeJS = "10.15.3"
+def requiredVersionNodeJS = "10.16.3"
 
 allprojects {
     ext {

@@ -8,4 +8,6 @@ task build(type: Zip) {
     archiveName "module.zip"
     destinationDir file("build/dist")
     from "build/staging"
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
 }
