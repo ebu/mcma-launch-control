@@ -9,13 +9,13 @@
     "main": "src/index.js",
     "license": "Apache-2.0",
     "dependencies": {
-        "@mcma/api": "0.6.3",
-        "@mcma/aws-api-gateway": "0.6.3",
-        "@mcma/aws-client": "0.6.3",
-        "@mcma/aws-dynamodb": "0.6.3",
-        "@mcma/client": "0.6.3",
-        "@mcma/core": "0.6.3",
-        "@mcma/data": "0.6.3",
-        "aws-sdk": "^2.524.0"
+        "@mcma/api": "0.7.6",
+        "@mcma/aws-api-gateway": "0.7.6",
+        "@mcma/aws-client": "0.7.6",
+        "@mcma/aws-dynamodb": "0.7.6",
+        "@mcma/client": "0.7.6",
+        "@mcma/core": "0.7.6",
+        "@mcma/data": "0.7.6",
+        "aws-sdk": "^2.563.0"
     }
 }

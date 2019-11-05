@@ -1,17 +1,15 @@
-const { Logger } = require("@mcma/core");
-
 const { DataController } = require("data");
 
 const { CodeCommit } = require("./tools/codecommit");
 
-const createProject = async (workerRequest) => {
+const createProject = async (providerCollection, workerRequest) => {
     let dc = new DataController(workerRequest.tableName());
 
     let project = await dc.getProject(workerRequest.input.projectId);
 
     let repositoryName = project.name;
 
-    Logger.info(project);
+    console.log(project);
 
     let repository;
     try {
@@ -24,15 +22,15 @@ const createProject = async (workerRequest) => {
         }
     }
 
-    Logger.info(repository);
+    console.log(repository);
 };
 
-const deleteProject = async (workerRequest) => {
+const deleteProject = async (providerCollection, workerRequest) => {
     let repositoryName = workerRequest.input.projectName;
 
     let repositoryId = await CodeCommit.deleteRepository({ repositoryName });
 
-    Logger.info({ repositoryId });
+    console.log({ repositoryId });
 };
 
 module.exports = {

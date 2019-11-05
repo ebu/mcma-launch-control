@@ -1,4 +1,3 @@
-const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
@@ -12,7 +11,7 @@ const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 const worker = new LambdaWorkerInvoker();
 
 const createProject = async (requestContext) => {
-    Logger.info("createProject()", JSON.stringify(requestContext.request, null, 2));
+    console.log("createProject()", JSON.stringify(requestContext.request, null, 2));
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
@@ -39,7 +38,7 @@ const createProject = async (requestContext) => {
     let projectId = requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name;
     project.onCreate(projectId);
 
-    let table = new DynamoDbTable(McmaProject, requestContext.tableName());
+    let table = new DynamoDbTable(requestContext.tableName(), McmaProject);
 
     let existingProject = await table.get(projectId);
     if (existingProject) {
@@ -57,11 +56,11 @@ const createProject = async (requestContext) => {
         requestContext.getAllContextVariables(),
         { projectId });
 
-    Logger.info("createProject()", JSON.stringify(requestContext.response, null, 2));
+    console.log("createProject()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const updateProject = async (requestContext) => {
-    Logger.info("updateProject()", JSON.stringify(requestContext.request, null, 2));
+    console.log("updateProject()", JSON.stringify(requestContext.request, null, 2));
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
@@ -81,22 +80,22 @@ const updateProject = async (requestContext) => {
     project.name = projectName;
     project.onUpsert(projectId);
 
-    let table = new DynamoDbTable(McmaProject, requestContext.tableName());
+    let table = new DynamoDbTable(requestContext.tableName(), McmaProject);
     project = await table.put(projectId, project);
 
     requestContext.setResponseBody(project);
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
-        "createProject",
+        "CreateProject",
         requestContext.getAllContextVariables(),
         { projectId });
 
-    Logger.info("updateProject()", JSON.stringify(requestContext.response, null, 2));
+    console.log("updateProject()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const onBeforeDeleteProject = async (requestContext) => {
-    Logger.info(requestContext);
+    console.log(requestContext);
     // TODO check if project has deployments or components
 };
 
@@ -105,7 +104,7 @@ const onAfterDeleteProject = async (requestContext, resource) => {
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
-        "deleteProject",
+        "DeleteProject",
         requestContext.getAllContextVariables(),
         { projectName });
 };

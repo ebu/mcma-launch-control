@@ -1,5 +1,5 @@
 //"use strict";
-const { Service, JobProfile, Logger } = require("@mcma/core");
+const { Service, JobProfile } = require("@mcma/core");
 const { McmaApiRouteCollection, DefaultRouteCollectionBuilder } = require("@mcma/api");
 const { DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 require("@mcma/aws-api-gateway");
@@ -14,9 +14,9 @@ const controller =
         .toApiGatewayApiController();
 
 exports.handler = async (event, context) => {
-    Logger.debug(JSON.stringify(event, null, 2), JSON.stringify(event, null, 2));
+    console.info(JSON.stringify(event, null, 2), JSON.stringify(event, null, 2));
 
     const resp = await controller.handleRequest(event, context);
-    Logger.debug(resp);
+    console.info(resp);
     return resp;
 };

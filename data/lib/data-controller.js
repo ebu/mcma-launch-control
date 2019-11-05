@@ -4,10 +4,10 @@ const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } = req
 class DataController {
     constructor(tableName) {
         this.tableName = tableName;
-        this.projectTable = new DynamoDbTable(McmaProject, this.tableName);
-        this.deploymentConfigTable = new DynamoDbTable(McmaDeploymentConfig, this.tableName);
-        this.deploymentTable = new DynamoDbTable(McmaDeployment, this.tableName);
-        this.componentTable = new DynamoDbTable(McmaComponent, this.tableName);
+        this.projectTable = new DynamoDbTable(this.tableName, McmaProject);
+        this.deploymentConfigTable = new DynamoDbTable(this.tableName, McmaDeploymentConfig);
+        this.deploymentTable = new DynamoDbTable(this.tableName, McmaDeployment);
+        this.componentTable = new DynamoDbTable(this.tableName, McmaComponent);
     }
 
     async getProject(projectId) {

@@ -1,6 +1,4 @@
 //"use strict";
-const { Logger } = require("@mcma/core");
-
 function deleteJobProcess(resourceManagerProvider) {
     return async function deleteJobProcess(event) {
         let jobProcessId = event.input.jobProcessId;
@@ -9,7 +7,7 @@ function deleteJobProcess(resourceManagerProvider) {
             let resourceManager = resourceManagerProvider.get(event);
             await resourceManager.delete(jobProcessId);
         } catch (error) {
-            Logger.exception(error);
+            console.error(error);
         }
     };
 }

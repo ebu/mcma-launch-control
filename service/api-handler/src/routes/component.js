@@ -1,4 +1,3 @@
-const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
@@ -11,29 +10,29 @@ const URI_TEMPLATE = PROJECTS_PATH + "/{projectId}" + COMPONENTS_PATH;
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
 const queryComponent = async (requestContext) => {
-    Logger.info("queryComponent()", JSON.stringify(requestContext.request, null, 2));
+    console.log("queryComponent()", JSON.stringify(requestContext.request, null, 2));
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
+    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
     let project = await projectTable.get(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
-    let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
+    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
     let resources = await componentTable.query((resource) => resource.id.startsWith(projectId));
 
     requestContext.setResponseBody(resources);
 
-    Logger.info("queryComponent()", JSON.stringify(requestContext.response, null, 2));
+    console.log("queryComponent()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const createComponent = async (requestContext) => {
-    Logger.info("createComponent()", JSON.stringify(requestContext.request, null, 2));
+    console.log("createComponent()", JSON.stringify(requestContext.request, null, 2));
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
+    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
     let project = await projectTable.get(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
@@ -64,7 +63,7 @@ const createComponent = async (requestContext) => {
 
     component.onCreate(projectId + COMPONENTS_PATH + "/" + component.name);
 
-    let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
+    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
 
     let existingComponent = await componentTable.get(component.id);
     if (existingComponent) {
@@ -76,14 +75,14 @@ const createComponent = async (requestContext) => {
 
     requestContext.setResponseResourceCreated(component);
 
-    Logger.info("createComponent()", JSON.stringify(requestContext.response, null, 2));
+    console.log("createComponent()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const updateComponent = async (requestContext) => {
-    Logger.info("updateComponent()", JSON.stringify(requestContext.request, null, 2));
+    console.log("updateComponent()", JSON.stringify(requestContext.request, null, 2));
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(McmaProject, requestContext.tableName());
+    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
     let project = await projectTable.get(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
@@ -107,12 +106,12 @@ const updateComponent = async (requestContext) => {
     component.name = componentName;
     component.onUpsert(requestContext.publicUrl() + requestContext.request.path);
 
-    let componentTable = new DynamoDbTable(McmaComponent, requestContext.tableName());
+    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
     component = await componentTable.put(component.id, component);
 
     requestContext.setResponseBody(component);
 
-    Logger.info("updateComponent()", JSON.stringify(requestContext.response, null, 2));
+    console.log("updateComponent()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaComponent), McmaComponent, URI_TEMPLATE)

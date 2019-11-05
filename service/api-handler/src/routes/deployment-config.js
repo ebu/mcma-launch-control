@@ -1,4 +1,3 @@
-const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
@@ -9,7 +8,7 @@ const URI_TEMPLATE = "/deployment-configs";
 const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
 const createDeploymentConfig = async (requestContext) => {
-    Logger.info("createDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
+    console.log("createDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
@@ -35,7 +34,7 @@ const createDeploymentConfig = async (requestContext) => {
 
     deploymentConfig.onCreate(requestContext.publicUrl() + URI_TEMPLATE + "/" + deploymentConfig.name);
 
-    let table = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
+    let table = new DynamoDbTable(requestContext.tableName(), McmaDeploymentConfig);
 
     let existingDeploymentConfig = await table.get(deploymentConfig.id);
     if (existingDeploymentConfig) {
@@ -47,11 +46,11 @@ const createDeploymentConfig = async (requestContext) => {
 
     requestContext.setResponseResourceCreated(deploymentConfig);
 
-    Logger.info("createDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
+    console.log("createDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const updateDeploymentConfig = async (requestContext) => {
-    Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
+    console.log("updateDeploymentConfig()", JSON.stringify(requestContext.request, null, 2));
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
@@ -70,12 +69,12 @@ const updateDeploymentConfig = async (requestContext) => {
     deploymentConfig.name = deploymentConfigName;
     deploymentConfig.onUpsert(requestContext.publicUrl() + requestContext.request.path);
 
-    let table = new DynamoDbTable(McmaDeploymentConfig, requestContext.tableName());
+    let table = new DynamoDbTable(requestContext.tableName(), McmaDeploymentConfig);
     deploymentConfig = await table.put(deploymentConfig.id, deploymentConfig);
 
     requestContext.setResponseBody(deploymentConfig);
 
-    Logger.info("updateDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
+    console.log("updateDeploymentConfig()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeploymentConfig), McmaDeploymentConfig, URI_TEMPLATE)

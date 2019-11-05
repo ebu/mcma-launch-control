@@ -1,6 +1,6 @@
 //"use strict";
 
-const { Logger, JobProcess, NotificationEndpoint, JobStatus } = require("@mcma/core");
+const { JobProcess, NotificationEndpoint, JobStatus } = require("@mcma/core");
 
 function createJobProcess(resourceManagerProvider, dbTableProvider) {
     return async function createJobProcess(workerRequest) {
@@ -23,7 +23,7 @@ function createJobProcess(resourceManagerProvider, dbTableProvider) {
             job.status = JobStatus.QUEUED;
             job.jobProcess = jobProcess.id;
         } catch (error) {
-            Logger.error("Failed to create JobProcess", error);
+            console.error("Failed to create JobProcess", error);
             job.status = JobStatus.FAILED;
             job.statusMessage = "Failed to create JobProcess due to error '" + error.message + "'";
         }

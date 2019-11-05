@@ -1,4 +1,3 @@
-const { Logger } = require("@mcma/core");
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
@@ -15,7 +14,7 @@ const URI_TEMPLATE_2 = URI_TEMPLATE + "/{deploymentId}";
 const worker = new LambdaWorkerInvoker();
 
 const queryDeployment = async (requestContext) => {
-    Logger.info("queryDeployment()", JSON.stringify(requestContext.request, null, 2));
+    console.log("queryDeployment()", JSON.stringify(requestContext.request, null, 2));
     let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
@@ -25,16 +24,16 @@ const queryDeployment = async (requestContext) => {
         return;
     }
 
-    let deploymentTable = new DynamoDbTable(McmaDeployment, requestContext.tableName());
+    let deploymentTable = new DynamoDbTable(requestContext.tableName(), McmaDeployment);
     let resources = await deploymentTable.query((resource) => resource.id.startsWith(projectId));
 
     requestContext.setResponseBody(resources);
 
-    Logger.info("queryDeployment()", JSON.stringify(requestContext.response, null, 2));
+    console.log("queryDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const updateDeployment = async (requestContext) => {
-    Logger.info("updateDeployment()", JSON.stringify(requestContext.request, null, 2));
+    console.log("updateDeployment()", JSON.stringify(requestContext.request, null, 2));
     let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
@@ -75,15 +74,15 @@ const updateDeployment = async (requestContext) => {
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
-        "updateDeployment",
+        "UpdateDeployment",
         requestContext.getAllContextVariables(),
         { projectId, deploymentConfigId, deploymentId });
 
-    Logger.info("updateDeployment()", JSON.stringify(requestContext.response, null, 2));
+    console.log("updateDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const deleteDeployment = async (requestContext) => {
-    Logger.info("deleteDeployment()", JSON.stringify(requestContext.request, null, 2));
+    console.log("deleteDeployment()", JSON.stringify(requestContext.request, null, 2));
     let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
@@ -123,11 +122,11 @@ const deleteDeployment = async (requestContext) => {
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
-        "deleteDeployment",
+        "DeleteDeployment",
         requestContext.getAllContextVariables(),
         { projectId, deploymentConfigId, deploymentId });
 
-    Logger.info("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
+    console.log("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
 
 const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeployment), McmaDeployment, URI_TEMPLATE)

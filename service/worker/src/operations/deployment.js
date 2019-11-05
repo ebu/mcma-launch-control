@@ -1,7 +1,5 @@
 const { URL } = require("url");
 
-const { Logger } = require("@mcma/core");
-
 const { McmaDeploymentStatus } = require("commons");
 const { DataController } = require("data");
 
@@ -105,7 +103,7 @@ const getRepositoryUrl = async (project) => {
     let repositoryName = project.name;
     let repoData = await CodeCommit.getRepository({ repositoryName });
 
-    Logger.info(JSON.stringify(repoData, null, 2));
+    console.log(JSON.stringify(repoData, null, 2));
 
     let repoUrl = new URL(repoData.repositoryMetadata.cloneUrlHttp);
     repoUrl.username = GIT_USERNAME;
@@ -113,9 +111,9 @@ const getRepositoryUrl = async (project) => {
     return repoUrl.toString();
 };
 
-const updateDeployment = async (workerRequest) => {
+const updateDeployment = async (providerCollection, workerRequest) => {
     try {
-        Logger.info("updateDeployment", JSON.stringify(workerRequest, null, 2));
+        console.log("updateDeployment", JSON.stringify(workerRequest, null, 2));
         let dc = new DataController(workerRequest.tableName());
 
         let project = await dc.getProject(workerRequest.input.projectId);
@@ -123,12 +121,12 @@ const updateDeployment = async (workerRequest) => {
         let deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
         let components = await dc.getComponents(workerRequest.input.projectId);
 
-        Logger.info(JSON.stringify(project, null, 2));
-        Logger.info(JSON.stringify(deployment, null, 2));
-        Logger.info(JSON.stringify(deploymentConfig, null, 2));
+        console.log(JSON.stringify(project, null, 2));
+        console.log(JSON.stringify(deployment, null, 2));
+        console.log(JSON.stringify(deploymentConfig, null, 2));
 
         if (!project || !deploymentConfig || !deployment) {
-            Logger.warn("Project, DeploymentConfig and/or Deployment missing from DynamoDB Table");
+            console.warn("Project, DeploymentConfig and/or Deployment missing from DynamoDB Table");
             return;
         }
 
@@ -176,32 +174,32 @@ const updateDeployment = async (workerRequest) => {
             deployment.status = errorMessage ? McmaDeploymentStatus.ERROR : McmaDeploymentStatus.OK;
             deployment.statusMessage = errorMessage;
         } catch (error) {
-            Logger.error(error);
+            console.error(error);
             deployment.status = McmaDeploymentStatus.ERROR;
             deployment.statusMessage = error.message;
         }
 
         await dc.setDeployment(deployment);
     } catch (error) {
-        Logger.error(error);
+        console.error(error);
     }
 };
 
-const deleteDeployment = async (workerRequest) => {
+const deleteDeployment = async (providerCollection, workerRequest) => {
     try {
-        Logger.info("deleteDeployment", JSON.stringify(workerRequest, null, 2));
+        console.log("deleteDeployment", JSON.stringify(workerRequest, null, 2));
         let dc = new DataController(workerRequest.tableName());
 
         let project = await dc.getProject(workerRequest.input.projectId);
         let deployment = await dc.getDeployment(workerRequest.input.deploymentId);
         let deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
 
-        Logger.info(JSON.stringify(project, null, 2));
-        Logger.info(JSON.stringify(deployment, null, 2));
-        Logger.info(JSON.stringify(deploymentConfig, null, 2));
+        console.log(JSON.stringify(project, null, 2));
+        console.log(JSON.stringify(deployment, null, 2));
+        console.log(JSON.stringify(deploymentConfig, null, 2));
 
         if (!project || !deploymentConfig || !deployment) {
-            Logger.warn("Project, DeploymentConfig and/or Deployment missing from DynamoDB Table");
+            console.warn("Project, DeploymentConfig and/or Deployment missing from DynamoDB Table");
             return;
         }
 
@@ -228,13 +226,13 @@ const deleteDeployment = async (workerRequest) => {
 
             await dc.deleteDeployment(deployment.id);
         } catch (error) {
-            Logger.warn(error);
+            console.warn(error);
             deployment.status = McmaDeploymentStatus.ERROR;
             deployment.statusMessage = error.message;
             await dc.setDeployment(deployment);
         }
     } catch (error) {
-        Logger.error(error);
+        console.error(error);
     }
 };
 
