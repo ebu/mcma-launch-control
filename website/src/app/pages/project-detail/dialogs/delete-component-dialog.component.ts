@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { NbDialogRef } from "@nebular/theme";
-import { McmaComponent } from "commons";
+import { McmaComponent } from "@local/commons";
 
 @Component({
     selector: "mcma-delete-component-dialog",

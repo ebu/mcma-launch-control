@@ -16,3 +16,5 @@ terraform.tfvars.json
 /deployment/terraform.output.json
 
 /website/src/config.json
+/libraries/commons/package-lock.json
+/libraries/data/package-lock.json

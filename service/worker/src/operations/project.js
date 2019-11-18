@@ -1,4 +1,4 @@
-const { DataController } = require("data");
+const { DataController } = require("@local/data");
 
 const { CodeCommit } = require("./tools/codecommit");
 

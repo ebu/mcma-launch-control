@@ -6,7 +6,7 @@ import { LocalDataSource } from "ng2-smart-table";
 import { NbDialogService } from "@nebular/theme";
 import { AddDeploymentConfigDialogComponent } from "./dialogs/add-deployment-config-dialog.component";
 
-import { McmaDeploymentConfig } from "commons";
+import { McmaDeploymentConfig } from "@local/commons";
 import { DeleteDeploymentConfigDialogComponent } from "./dialogs/delete-deployment-config-dialog.component";
 
 @Component({

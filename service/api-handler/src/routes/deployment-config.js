@@ -1,7 +1,7 @@
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
-const { McmaDeploymentConfig } = require("commons");
+const { McmaDeploymentConfig } = require("@local/commons");
 
 const URI_TEMPLATE = "/deployment-configs";
 

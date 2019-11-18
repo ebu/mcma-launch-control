@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } from "commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } from "@local/commons";
 import { iif, of } from "rxjs";
 import { switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";

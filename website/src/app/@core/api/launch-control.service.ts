@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaProject } from "commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaProject } from "@local/commons";
 
 import { LaunchControlData } from "../data/launch-control";
 import { map, switchMap } from "rxjs/operators";

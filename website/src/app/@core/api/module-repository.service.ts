@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { ModuleRepositoryData } from "../data/module-repository";
-import { McmaModule, McmaModuleParameter } from "commons";
+import { McmaModule, McmaModuleParameter } from "@local/commons";
 import { ConfigService } from "../utils";
 
 @Injectable()

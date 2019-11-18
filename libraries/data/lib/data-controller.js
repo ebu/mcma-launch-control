@@ -1,5 +1,5 @@
 const { DynamoDbTable } = require("@mcma/aws-dynamodb");
-const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } = require("commons");
+const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } = require("@local/commons");
 
 class DataController {
     constructor(tableName) {

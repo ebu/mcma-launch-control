@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { NbDialogRef } from "@nebular/theme";
-import { McmaComponent, McmaModule } from "commons";
+import { McmaComponent, McmaModule } from "@local/commons";
 import { ModuleRepositoryData } from "../../../@core/data/module-repository";
 
 interface Variable {

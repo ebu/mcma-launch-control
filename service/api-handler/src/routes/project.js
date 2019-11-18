@@ -2,7 +2,7 @@ const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
 
-const { McmaProject } = require("commons");
+const { McmaProject } = require("@local/commons");
 
 const URI_TEMPLATE = "/projects";
 

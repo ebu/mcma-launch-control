@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 
-import { McmaModule } from "commons";
+import { McmaModule } from "@local/commons";
 
 export abstract class ModuleRepositoryData {
     abstract getModules(): Observable<McmaModule[]>;

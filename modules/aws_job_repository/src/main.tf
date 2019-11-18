@@ -64,7 +64,7 @@ resource "aws_lambda_function" "api_handler" {
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("${path.module}/lambdas/api-handler.zip")
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs10.x"
   timeout          = "900"
   memory_size      = "3008"
 }
@@ -79,7 +79,7 @@ resource "aws_lambda_function" "worker" {
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("${path.module}/lambdas/worker.zip")
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs10.x"
   timeout          = "900"
   memory_size      = "3008"
 }

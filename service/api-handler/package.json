@@ -4,11 +4,13 @@
     "description": "API gateway request handler for Launch Control Service",
     "private": true,
     "engines": {
-        "node": "~8.10.0"
+        "node": "^10.16.3"
     },
     "main": "src/index.js",
     "license": "Apache-2.0",
     "dependencies": {
+        "@local/commons": "file:../../libraries/commons",
+        "@local/data": "file:../../libraries/data",
         "@mcma/api": "0.7.6",
         "@mcma/aws-api-gateway": "0.7.6",
         "@mcma/aws-dynamodb": "0.7.6",
@@ -16,8 +18,6 @@
         "@mcma/client": "0.7.6",
         "@mcma/core": "0.7.6",
         "@mcma/data": "0.7.6",
-        "aws-sdk": "^2.563.0",
-        "commons": "file:../../commons",
-        "data": "file:../../data"
+        "aws-sdk": "^2.563.0"
     }
 }

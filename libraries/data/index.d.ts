@@ -1,4 +1,4 @@
-import { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } from "commons";
+import { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } from "@local/commons";
 
 export class DataController {
     constructor(tableName: string);

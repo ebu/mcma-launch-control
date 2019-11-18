@@ -1,12 +1,12 @@
 {
-    "name": "data",
+    "name": "@local/data",
     "version": "0.0.0",
     "description": "Library with DataController for doing DynamoDB operations",
     "private": true,
     "engines": {
-        "node": "~8.10.0"
+        "node": "^10.16.3"
     },
-    "main": "src/index.js",
+    "main": "index.js",
     "license": "Apache-2.0",
     "dependencies": {
         "commons": "file:../commons"

@@ -6,7 +6,7 @@ import { LocalDataSource } from "ng2-smart-table";
 import { NbDialogService } from "@nebular/theme";
 import { AddProjectDialogComponent } from "./dialogs/add-project-dialog.component";
 
-import { McmaProject } from "commons";
+import { McmaProject } from "@local/commons";
 import { DeleteProjectDialogComponent } from "./dialogs/delete-project-dialog.component";
 import { Router } from "@angular/router";
 

@@ -33,7 +33,7 @@ resource "aws_lambda_function" "service_api_handler" {
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("../service/api-handler/build/dist/lambda.zip")
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs10.x"
   timeout          = "30"
   memory_size      = "256"
 
@@ -54,9 +54,11 @@ resource "aws_lambda_function" "service_worker" {
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("../service/worker/build/dist/lambda.zip")
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs10.x"
   timeout          = "900"
   memory_size      = "3008"
+
+  layers = [ "arn:aws:lambda:${var.aws_region}:553035198032:layer:git-lambda2:2" ]
 
   environment {
     variables = {

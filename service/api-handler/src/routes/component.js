@@ -1,7 +1,7 @@
 const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
 const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
 
-const { McmaComponent, McmaProject } = require("commons");
+const { McmaComponent, McmaProject } = require("@local/commons");
 
 const PROJECTS_PATH = "/projects";
 const COMPONENTS_PATH = "/components";

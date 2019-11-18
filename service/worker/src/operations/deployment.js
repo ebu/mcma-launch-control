@@ -1,7 +1,7 @@
 const { URL } = require("url");
 
-const { McmaDeploymentStatus } = require("commons");
-const { DataController } = require("data");
+const { McmaDeploymentStatus } = require("@local/commons");
+const { DataController } = require("@local/data");
 
 const { CodeCommit } = require("./tools/codecommit");
 const { Terraform } = require("./tools/terraform");
