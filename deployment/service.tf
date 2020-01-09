@@ -58,7 +58,7 @@ resource "aws_lambda_function" "service_worker" {
   timeout          = "900"
   memory_size      = "3008"
 
-  layers = [ "arn:aws:lambda:${var.aws_region}:553035198032:layer:git-lambda2:2" ]
+  layers = ["arn:aws:lambda:${var.aws_region}:553035198032:layer:git-lambda2:2"]
 
   environment {
     variables = {
@@ -168,10 +168,8 @@ resource "aws_lambda_permission" "apigw_service_api_handler" {
 
 resource "aws_api_gateway_deployment" "service_deployment" {
   depends_on = [
-    "aws_api_gateway_method.service_options_method",
-    "aws_api_gateway_integration.service_options_integration",
-    "aws_api_gateway_method.service_api_method",
-    "aws_api_gateway_integration.service_api_method_integration",
+    aws_api_gateway_integration.service_options_integration,
+    aws_api_gateway_integration.service_api_method_integration,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.service_api.id

@@ -9,6 +9,8 @@
     "main": "src/index.js",
     "license": "Apache-2.0",
     "dependencies": {
-        "aws-sdk": "^2.563.0"
+        "amazon-cognito-identity-js": "^3.2.0",
+        "aws-sdk": "^2.563.0",
+        "node-fetch": "^2.6.0"
     }
 }

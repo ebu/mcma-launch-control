@@ -15,23 +15,13 @@ provider "template" {
 }
 
 ##################################
-# aws_iam_role : iam_for_exec_lambda
+# AWs Policies
 ##################################
-
-resource "aws_iam_role" "iam_for_exec_lambda" {
-  name               = format("%.64s", "${var.project_prefix}.lambda-exec-role")
-  assume_role_policy = file("policies/lambda-allow-assume-role.json")
-}
 
 resource "aws_iam_policy" "log_policy" {
   name        = "${var.project_prefix}.policy-log"
   description = "Policy to write to log"
   policy      = file("policies/allow-full-logs.json")
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_role_policy_log" {
-  role       = aws_iam_role.iam_for_exec_lambda.name
-  policy_arn = aws_iam_policy.log_policy.arn
 }
 
 resource "aws_iam_policy" "dynamodb_policy" {
@@ -40,26 +30,52 @@ resource "aws_iam_policy" "dynamodb_policy" {
   policy      = file("policies/allow-full-dynamodb.json")
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_role_policy_dynamodb" {
-  role       = aws_iam_role.iam_for_exec_lambda.name
-  policy_arn = aws_iam_policy.dynamodb_policy.arn
-}
-
 resource "aws_iam_policy" "lambda_policy" {
   name        = "${var.project_prefix}.policy-lambda"
   description = "Policy to allow invoking lambda functions"
   policy      = file("policies/allow-invoke-lambda.json")
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_role_policy_lambda" {
-  role       = aws_iam_role.iam_for_exec_lambda.name
-  policy_arn = aws_iam_policy.lambda_policy.arn
-}
-
 resource "aws_iam_policy" "codecommit_policy" {
   name        = "${var.project_prefix}.policy-codecommit"
   description = "Policy to allow using codecommit"
   policy      = file("policies/allow-full-codecommit.json")
+}
+
+resource "aws_iam_policy" "api_gateway_policy" {
+  name        = "${var.project_prefix}.policy-api-gateway"
+  description = "Policy to allow invoking api gateway endpoints"
+  policy      = file("policies/allow-invoke-api-gateway.json")
+}
+
+resource "aws_iam_policy" "cognito_policy" {
+  name        = "${var.project_prefix}.policy-cognito"
+  description = "Policy to allow accessing cognito API"
+  policy      = file("policies/allow-full-cognito.json")
+}
+
+##################################
+# aws_iam_role : iam_for_exec_lambda
+##################################
+
+resource "aws_iam_role" "iam_for_exec_lambda" {
+  name               = format("%.64s", "${var.project_prefix}.lambda-exec-role")
+  assume_role_policy = file("policies/lambda-allow-assume-role.json")
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role_policy_log" {
+  role       = aws_iam_role.iam_for_exec_lambda.name
+  policy_arn = aws_iam_policy.log_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role_policy_dynamodb" {
+  role       = aws_iam_role.iam_for_exec_lambda.name
+  policy_arn = aws_iam_policy.dynamodb_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_role_policy_lambda" {
+  role       = aws_iam_role.iam_for_exec_lambda.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_role_policy_codecommit" {
