@@ -9,9 +9,9 @@
     "main": "index.js",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@mcma/core": "0.7.6"
+        "@mcma/core": "0.8.5"
     },
     "peerDependencies": {
-        "@mcma/core": "0.7.6"
+        "@mcma/core": "0.8.5"
     }
 }

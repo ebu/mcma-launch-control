@@ -11,11 +11,11 @@
     "dependencies": {
         "@local/commons": "file:../../libraries/commons",
         "@local/data": "file:../../libraries/data",
-        "@mcma/aws-dynamodb": "0.7.6",
-        "@mcma/client": "0.7.6",
-        "@mcma/core": "0.7.6",
-        "@mcma/data": "0.7.6",
-        "@mcma/worker": "0.7.6",
+        "@mcma/aws-dynamodb": "0.8.5",
+        "@mcma/client": "0.8.5",
+        "@mcma/core": "0.8.5",
+        "@mcma/data": "0.8.5",
+        "@mcma/worker": "0.8.5",
         "aws-sdk": "^2.563.0"
     }
 }

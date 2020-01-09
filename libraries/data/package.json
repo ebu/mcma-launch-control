@@ -12,15 +12,15 @@
         "commons": "file:../commons"
     },
     "devDependencies": {
-        "@mcma/aws-dynamodb": "0.7.6",
-        "@mcma/core": "0.7.6",
-        "@mcma/data": "0.7.6",
+        "@mcma/aws-dynamodb": "0.8.5",
+        "@mcma/core": "0.8.5",
+        "@mcma/data": "0.8.5",
         "aws-sdk": "^2.521.0"
     },
     "peerDependencies": {
-        "@mcma/aws-dynamodb": "0.7.6",
-        "@mcma/core": "0.7.6",
-        "@mcma/data": "0.7.6",
+        "@mcma/aws-dynamodb": "0.8.5",
+        "@mcma/core": "0.8.5",
+        "@mcma/data": "0.8.5",
         "aws-sdk": "^2.519.0"
     }
 }

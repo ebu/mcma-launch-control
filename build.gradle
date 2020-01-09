@@ -1,7 +1,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-def McmaVersion = "0.7.6"
+def McmaVersion = "0.8.5"
 
 def requiredVersionNodeJS = "10.16.3"
 

@@ -35,7 +35,7 @@
         "@angular/platform-browser-dynamic": "^8.2.13",
         "@angular/router": "^8.2.13",
         "@local/commons": "file:../libraries/commons",
-        "@mcma/core": "0.7.6",
+        "@mcma/core": "0.8.5",
         "@nebular/auth": "4.1.2",
         "@nebular/eva-icons": "4.1.2",
         "@nebular/security": "4.1.2",
