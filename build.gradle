@@ -19,7 +19,7 @@ allprojects {
             terraformExecutable = Arrays.asList("terraform")
         }
 
-        awsAvailableLibraries = [".bin", "aws-sdk", "base64-js", "buffer", "dynamodb-doc", "events", "ieee754", "isarray", "jmespath", "punycode", "querystring", "sax", "url", "xml2js", "xmlbuilder"]
+        awsAvailableLibraries = Arrays.asList(".bin", "aws-sdk", "buffer", "dynamodb-doc", "events", "ieee754", "jmespath", "lodash", "punycode", "querystring", "url")
     }
 }
 
@@ -51,7 +51,7 @@ task verifyNodeJS {
 }
 
 task build {
-    dependsOn "modules:build"
+    dependsOn "repository:build"
     dependsOn "service:build"
     dependsOn "website:build"
 }

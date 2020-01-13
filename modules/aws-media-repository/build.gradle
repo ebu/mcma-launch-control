@@ -1,3 +1,8 @@
+task copyModuleJSON(type: Copy) {
+    from "module.json"
+    into "build/staging"
+}
+
 task copyTerraform(type: Copy) {
     from "src"
     into "build/staging"
@@ -11,6 +16,7 @@ task copyApiHandler(type: Copy) {
 }
 
 task build(type: Zip) {
+    dependsOn copyModuleJSON
     dependsOn copyApiHandler
     dependsOn copyTerraform
     archiveName "module.zip"

@@ -1,0 +1,103 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+task copyModules(type: Copy) {
+    dependsOn ":modules:build"
+    from "../modules"
+    into "build/modules"
+    include "**/module.zip"
+    includeEmptyDirs = false
+    eachFile {
+        path = path.replace("build/dist", "")
+    }
+}
+
+task unzipModuleJson {
+    dependsOn copyModules
+    inputs.files fileTree("build/modules").include("**/module.zip")
+    outputs.files fileTree("build/modules").include("**/module.json")
+    doLast {
+        fileTree("build/modules").include("**/module.zip").each { File module ->
+            copy {
+                from zipTree(module).matching { include "module.json" }.singleFile
+                into module.parentFile.path
+            }
+        }
+    }
+}
+
+task parseModuleJson {
+    dependsOn unzipModuleJson
+    inputs.dir "build/modules"
+    outputs.dir "build/staging"
+    doLast {
+        def jsonSlurper = new JsonSlurper()
+
+        fileTree("build/modules").include("**/module.json").each { File moduleJson ->
+            def object = jsonSlurper.parse(moduleJson)
+
+            def json = JsonOutput.toJson(object)
+            def jsonPretty = JsonOutput.prettyPrint(json) + "\n"
+
+
+            def targetModuleJson = file("build/staging/" + object.provider + "/" + object.name + "/" + object.version + "/module.json")
+            targetModuleJson.parentFile.mkdirs()
+            targetModuleJson.createNewFile()
+            targetModuleJson.write(jsonPretty)
+            copy {
+                from moduleJson.parent + "/module.zip"
+                into targetModuleJson.parentFile
+            }
+        }
+    }
+}
+
+def indexFolder(File folder, File rootFolder) {
+    def indexJson = [
+        path: rootFolder.relativePath(folder) + "/",
+        contents: [],
+        lastModified: new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+    ]
+
+    folder.eachFile { File file ->
+        if (file.isDirectory()) {
+            indexFolder(file, rootFolder)
+
+            indexJson.contents.add([
+                name: file.getName(),
+                link: file.getName() + "/index.json"
+            ])
+        } else {
+            indexJson.contents.add([
+                name: file.getName(),
+                link: file.getName(),
+            ])
+        }
+    }
+
+    def indexJsonFile = file(folder.path + "/index.json")
+    indexJsonFile.createNewFile()
+
+    def json = JsonOutput.toJson(indexJson)
+    def jsonPretty = JsonOutput.prettyPrint(json) + "\n"
+    indexJsonFile.write(jsonPretty)
+}
+
+task createIndexFiles {
+    dependsOn parseModuleJson
+    inputs.dir "build/staging"
+    outputs.dir "build/dist"
+
+    doLast {
+        delete "build/dist"
+        copy {
+            from "build/staging"
+            into "build/dist"
+        }
+        indexFolder(file("build/dist"), file("build/dist"))
+    }
+}
+
+task build {
+    dependsOn createIndexFiles
+}

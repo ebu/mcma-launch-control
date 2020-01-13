@@ -18,3 +18,4 @@ terraform.tfvars.json
 /website/src/config.json
 /libraries/commons/package-lock.json
 /libraries/data/package-lock.json
+/deployment/repository_files.tf.json

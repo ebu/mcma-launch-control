@@ -10,40 +10,4 @@ resource "aws_s3_bucket" "repository" {
     bucket_name = local.repository_bucket_name
   })
   force_destroy = true
-
-  website {
-    index_document = "index.html"
-  }
-}
-
-resource "aws_s3_bucket_object" "module_aws_s3_bucket" {
-  bucket       = aws_s3_bucket.repository.id
-  key          = "aws_s3_bucket.zip"
-  source       = "../modules/aws_s3_bucket/build/dist/module.zip"
-  content_type = "application/zip"
-  etag         = filemd5("../modules/aws_s3_bucket/build/dist/module.zip")
-}
-
-resource "aws_s3_bucket_object" "module_aws_service_registry" {
-  bucket       = aws_s3_bucket.repository.id
-  key          = "aws_service_registry.zip"
-  source       = "../modules/aws_service_registry/build/dist/module.zip"
-  content_type = "application/zip"
-  etag         = filemd5("../modules/aws_service_registry/build/dist/module.zip")
-}
-
-resource "aws_s3_bucket_object" "module_aws_media_repository" {
-  bucket       = aws_s3_bucket.repository.id
-  key          = "aws_media_repository.zip"
-  source       = "../modules/aws_media_repository/build/dist/module.zip"
-  content_type = "application/zip"
-  etag         = filemd5("../modules/aws_media_repository/build/dist/module.zip")
-}
-
-resource "aws_s3_bucket_object" "module_aws_job_repository" {
-  bucket       = aws_s3_bucket.repository.id
-  key          = "aws_job_repository.zip"
-  source       = "../modules/aws_job_repository/build/dist/module.zip"
-  content_type = "application/zip"
-  etag         = filemd5("../modules/aws_job_repository/build/dist/module.zip")
 }

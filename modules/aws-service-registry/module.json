@@ -1,0 +1,25 @@
+{
+    "provider": "ebu",
+    "name": "aws-service-registry",
+    "version": "0.0.1",
+    "displayName": "AWS MCMA Service Registry",
+    "description": "The MCMA Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
+    "inputParameters": [
+        {
+            "name": "module_prefix",
+            "type": "string"
+        },
+        {
+            "name": "stage_name",
+            "type": "string"
+        },
+        {
+            "name": "aws_account_id",
+            "type": "string"
+        },
+        {
+            "name": "aws_region",
+            "type": "string"
+        }
+    ]
+}

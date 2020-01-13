@@ -1,6 +1,6 @@
 task build {
-    dependsOn "aws_job_repository:build"
-    dependsOn "aws_media_repository:build"
-    dependsOn "aws_s3_bucket:build"
-    dependsOn "aws_service_registry:build"
+    dependsOn "aws-job-repository:build"
+    dependsOn "aws-media-repository:build"
+    dependsOn "aws-s3-bucket:build"
+    dependsOn "aws-service-registry:build"
 }
