@@ -1,43 +1,81 @@
 <nb-card>
     <nb-card-header>
-        <h5 style="width:25em">{{action}} Component</h5>
+        <h5 style="width:50em">{{action}} Component</h5>
     </nb-card-header>
     <nb-card-body>
-        <div class="form-group">
-            <label for="componentCode" class="label">Code</label>
-            <input id="componentCode"
-                   type="text" nbInput fullWidth
-                   placeholder="Code"
-                   [(ngModel)]="componentCode">
+        <h6>Module</h6>
+        <div class="form-group row">
+            <label for="componentProvider" class="label col-sm-2 col-form-label">Provider</label>
+            <div class="col-sm-10">
+                <nb-select id="componentProvider"
+                           fullWidth
+                           placeholder="Select Provider"
+                           (selectedChange)="onProviderChange($event)"
+                           [(selected)]="selectedProvider">
+                    <nb-option *ngFor="let provider of providers" [value]="provider">{{provider}}</nb-option>
+                </nb-select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="componentDisplayName" class="label">Display Name</label>
-            <input id="componentDisplayName"
-                   type="text" nbInput fullWidth
-                   placeholder="Display Name"
-                   [(ngModel)]="componentDisplayName">
+        <div class="form-group row">
+            <label for="componentModule" class="label col-sm-2 col-form-label">Module</label>
+            <div class="col-sm-10">
+                <nb-select id="componentModule"
+                           fullWidth
+                           placeholder="Select Module"
+                           (selectedChange)="onModuleChange($event)"
+                           [(selected)]="selectedModule">
+                    <nb-option *ngFor="let module of modules" [value]="module">{{module}}</nb-option>
+                </nb-select>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="componentModule" class="label">Module</label>
-            <nb-select id="componentModule"
+        <div class="form-group row">
+            <label for="componentVersion" class="label col-sm-2 col-form-label">Version</label>
+            <div class="col-sm-10">
+                <nb-select id="componentVersion"
+                           fullWidth
+                           placeholder="Select Version"
+                           (selectedChange)="onVersionChange($event)"
+                           [(selected)]="selectedVersion">
+                    <nb-option *ngFor="let version of versions" [value]="version">{{version}}</nb-option>
+                </nb-select>
+            </div>
+        </div>
+
+        <h6>General</h6>
+        <div class="form-group row">
+            <label for="componentCode" class="label col-sm-2 col-form-label">Code</label>
+            <div class="col-sm-10">
+                <input id="componentCode"
+                       type="text"
+                       nbInput
                        fullWidth
-                       placeholder="Module"
-                       (selectedChange)="onModuleChange($event)"
-                       [(selected)]="componentModule">
-                <nb-option *ngFor="let module of modules" [value]="module.id">{{module.displayName}}</nb-option>
-            </nb-select>
+                       placeholder="Code"
+                       [(ngModel)]="componentCode">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="componentDisplayName" class="label col-sm-2 col-form-label">Display Name</label>
+            <div class="col-sm-10">
+                <input id="componentDisplayName"
+                       type="text"
+                       nbInput
+                       fullWidth
+                       placeholder="Display Name"
+                       [(ngModel)]="componentDisplayName">
+            </div>
         </div>
 
         <h6>Variables</h6>
         <div class="form-group row" *ngFor="let variable of componentVariables">
-            <label for="varInput" class="label col-sm-3 col-form-label">{{variable.name}}:</label>
-            <div class="col-sm-9">
-                <input #variableValue
-                       id="varInput"
+            <label for="var_{{variable.name}}" class="label col-sm-2 col-form-label">{{variable.name}}:</label>
+            <div class="col-sm-10">
+                <input #variableField
+                       id="var_{{variable.name}}"
                        type="text"
-                       nbInput fullWidth
+                       nbInput
+                       fullWidth
                        [value]="variable.value"
-                       (change)="onVariableChange(variable.name, variableValue.value)">
+                       (change)="onVariableChange(variable.name, variableField.value)">
             </div>
         </div>
     </nb-card-body>

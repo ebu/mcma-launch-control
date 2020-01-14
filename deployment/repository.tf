@@ -10,4 +10,11 @@ resource "aws_s3_bucket" "repository" {
     bucket_name = local.repository_bucket_name
   })
   force_destroy = true
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST", "DELETE"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
 }

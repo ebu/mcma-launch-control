@@ -1,87 +1,50 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, switchMap } from "rxjs/operators";
 import { ModuleRepositoryData } from "../data/module-repository";
-import { McmaModule, McmaModuleParameter } from "@local/commons";
+import { McmaModule } from "@local/commons";
 import { ConfigService } from "../utils";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable()
 export class ModuleRepositoryService extends ModuleRepositoryData {
-    constructor(private config: ConfigService) {
+    constructor(private http: HttpClient, private config: ConfigService) {
         super();
     }
 
-    getModules(): Observable<McmaModule[]> {
+    getProviders(): Observable<string[]> {
         return this.config.get<string>("repository_url").pipe(
-            map(repositoryUrl => {
-                return [
-                    new McmaModule({
-                        id: repositoryUrl + "/aws_s3_bucket.zip",
-                        provider: "ebu",
-                        name: "aws_s3_bucket",
-                        version: "0.0.1",
-                        displayName: "AWS S3 Bucket",
-                        description: "A managed AWS S3 bucket",
-                        inputParameters: [
-                            new McmaModuleParameter({
-                                name: "bucket_name",
-                                type: "string",
-                            }),
-                        ],
-                    }),
-                    new McmaModule({
-                        id: repositoryUrl + "/aws_service_registry.zip",
-                        provider: "ebu",
-                        name: "aws_service_registry",
-                        version: "0.0.1",
-                        displayName: "AWS MCMA Service Registry",
-                        description: "The MCMA Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
-                        inputParameters: [
-                            new McmaModuleParameter({
-                                name: "module_prefix",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "stage_name",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "aws_account_id",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "aws_region",
-                                type: "string",
-                            }),
-                        ],
-                    }),
-                    new McmaModule({
-                        id: repositoryUrl + "/aws_media_repository.zip",
-                        provider: "ebu",
-                        name: "aws_media_repository",
-                        version: "0.0.1",
-                        displayName: "AWS MCMA Media Repository",
-                        description: "The MCMA Service Registry is used for tracking assets and their corresponding data files.",
-                        inputParameters: [
-                            new McmaModuleParameter({
-                                name: "module_prefix",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "stage_name",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "aws_account_id",
-                                type: "string",
-                            }),
-                            new McmaModuleParameter({
-                                name: "aws_region",
-                                type: "string",
-                            }),
-                        ],
-                    }),
-                ];
+            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/index.json")),
+            map(index => index["contents"].map(item => item.name)),
+        );
+    }
+
+    getModules(provider: string): Observable<string[]> {
+        return this.config.get<string>("repository_url").pipe(
+            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + provider + "/index.json")),
+            map(index => index["contents"].map(item => item.name)),
+        );
+    }
+
+    getVersions(provider: string, module: string): Observable<string[]> {
+        return this.config.get<string>("repository_url").pipe(
+            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + provider + "/" + module + "/index.json")),
+            map(index => index["contents"].map(item => item.name)),
+        );
+    }
+
+    getModule(provider: string, module: string, version: string): Observable<McmaModule> {
+        let baseUrl;
+
+        return this.config.get<string>("repository_url").pipe(
+            switchMap(repositoryUrl => {
+                baseUrl = repositoryUrl + "/" + provider + "/" + module + "/" + version;
+                return this.http.get(baseUrl + "/module.json");
+            }),
+            map(json => {
+                const mcmaModule = new McmaModule(json);
+                mcmaModule.id = baseUrl + "/module.zip";
+                return mcmaModule;
             }),
         );
     }
