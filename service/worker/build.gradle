@@ -7,3 +7,8 @@ build {
     dependsOn copyTerraformBin
     fileMode 0755
 }
+
+tsc {
+    dependsOn ":libraries:commons:npmInstall"
+    dependsOn ":libraries:data:npmInstall"
+}

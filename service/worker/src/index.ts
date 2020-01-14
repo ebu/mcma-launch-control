@@ -1,8 +1,9 @@
-const { ConsoleLoggerProvider } = require("@mcma/core");
-const { ProviderCollection, Worker, WorkerRequest } = require("@mcma/worker");
+import { ConsoleLoggerProvider } from "@mcma/core";
 
-const { createProject, deleteProject } = require("./operations/project");
-const { updateDeployment, deleteDeployment } = require("./operations/deployment");
+import { ProviderCollection, Worker, WorkerRequest } from "@mcma/worker";
+
+import { deleteDeployment, updateDeployment } from "./operations/deployment";
+import { createProject, deleteProject } from "./operations/project";
 
 const loggerProvider = new ConsoleLoggerProvider("launch-control-worker");
 
@@ -17,7 +18,7 @@ const worker =
         .addOperation("UpdateDeployment", updateDeployment)
         .addOperation("DeleteDeployment", deleteDeployment);
 
-exports.handler = async (event, context) => {
+export async function handler(event, context) {
     try {
         console.info(JSON.stringify(event, null, 2), JSON.stringify(context, null, 2));
 
@@ -26,4 +27,4 @@ exports.handler = async (event, context) => {
         console.error("Error occurred when handling action '" + event.operationName + "'");
         console.error(error.toString());
     }
-};
+}

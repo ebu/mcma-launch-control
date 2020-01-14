@@ -1,11 +1,13 @@
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+import { promisify } from "util";
+import { exec } from "child_process";
+
+const execAsync = promisify(exec);
 
 const TERRAFORM = process.env.LAMBDA_TASK_ROOT + "/bin/terraform";
 
 let cwd;
 
-class Terraform {
+export class Terraform {
     static setWorkingDir(workingDir) {
         cwd = workingDir;
     }
@@ -13,7 +15,7 @@ class Terraform {
     static async version() {
         let cmd = TERRAFORM + " --version";
         console.log(cmd);
-        const { stdout, stderr } = await exec(cmd);
+        const { stdout, stderr } = await execAsync(cmd);
         console.log("stdout:", stdout);
         console.log("stderr:", stderr);
         return stdout;
@@ -22,7 +24,7 @@ class Terraform {
     static async init(deploymentName) {
         let cmd = TERRAFORM + " init -backend-config=path=\"deployments/" + deploymentName + "/terraform.tfstate\" -input=false -no-color";
         console.log(cmd);
-        const { stdout, stderr } = await exec(cmd, { cwd });
+        const { stdout, stderr } = await execAsync(cmd, { cwd });
         console.log("stdout:", stdout);
         console.log("stderr:", stderr);
     }
@@ -30,7 +32,7 @@ class Terraform {
     static async apply() {
         let cmd = TERRAFORM + " apply -auto-approve -input=false -no-color";
         console.log(cmd);
-        const { stdout, stderr } = await exec(cmd, { cwd });
+        const { stdout, stderr } = await execAsync(cmd, { cwd });
         console.log("stdout:", stdout);
         console.log("stderr:", stderr);
     }
@@ -38,12 +40,8 @@ class Terraform {
     static async destroy() {
         let cmd = TERRAFORM + " destroy -force -input=false -no-color";
         console.log(cmd);
-        const { stdout, stderr } = await exec(cmd, { cwd });
+        const { stdout, stderr } = await execAsync(cmd, { cwd });
         console.log("stdout:", stdout);
         console.log("stderr:", stderr);
     }
 }
-
-module.exports = {
-    Terraform
-};

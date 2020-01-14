@@ -8,16 +8,15 @@
     },
     "main": "index.js",
     "license": "Apache-2.0",
-    "dependencies": {
-        "commons": "file:../commons"
-    },
     "devDependencies": {
+        "@local/commons": "file:../commons",
         "@mcma/aws-dynamodb": "0.8.5",
         "@mcma/core": "0.8.5",
         "@mcma/data": "0.8.5",
         "aws-sdk": "^2.521.0"
     },
     "peerDependencies": {
+        "@local/commons": "file:../commons",
         "@mcma/aws-dynamodb": "0.8.5",
         "@mcma/core": "0.8.5",
         "@mcma/data": "0.8.5",

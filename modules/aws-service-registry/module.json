@@ -4,22 +4,68 @@
     "version": "0.0.1",
     "displayName": "AWS MCMA Service Registry",
     "description": "The MCMA Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
+    "link": "",
     "inputParameters": [
         {
             "name": "module_prefix",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${project_prefix}-service-registry"
+        },
+        {
+            "name": "module_name",
+            "type": "string",
+            "defaultValue": "${project_prefix}-service-registry"
         },
         {
             "name": "stage_name",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${stage_name}"
         },
         {
             "name": "aws_account_id",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${aws_account_id}"
         },
         {
             "name": "aws_region",
+            "type": "string",
+            "defaultValue": "${aws_region}"
+        }
+    ],
+    "outputParameters": [
+        {
+            "name": "auth_type",
             "type": "string"
+        },
+        {
+            "name": "services_url",
+            "type": "string"
+        },
+        {
+            "name": "job_profiles_url",
+            "type": "string"
+        }
+    ],
+    "postDeploymentActions": [
+        {
+            "type": "CreateResource",
+            "data": {
+                "resource": {
+                    "@type": "Service",
+                    "name": "Service Registry",
+                    "resources": [
+                        {
+                            "resourceType": "Service",
+                            "httpEndpoint": "${services_url}"
+                        },
+                        {
+                            "resourceType": "JobProfile",
+                            "httpEndpoint": "${job_profiles_url}"
+                        }
+                    ],
+                    "authType": "${authType}"
+                }
+            }
         }
     ]
 }

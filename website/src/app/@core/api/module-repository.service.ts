@@ -43,7 +43,8 @@ export class ModuleRepositoryService extends ModuleRepositoryData {
             }),
             map(json => {
                 const mcmaModule = new McmaModule(json);
-                mcmaModule.id = baseUrl + "/module.zip";
+                mcmaModule.id = baseUrl + "/module.json";
+                mcmaModule.link = baseUrl + "/module.zip";
                 return mcmaModule;
             }),
         );

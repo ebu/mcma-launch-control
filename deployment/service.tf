@@ -3,11 +3,10 @@
 ##################################
 
 resource "aws_dynamodb_table" "service_table" {
-  name           = "${var.project_prefix}-service"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "resource_type"
-  range_key      = "resource_id"
+  name         = "${var.project_prefix}-service"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "resource_type"
+  range_key    = "resource_id"
 
   attribute {
     name = "resource_type"
@@ -146,7 +145,8 @@ resource "aws_api_gateway_method" "service_api_method" {
   rest_api_id   = aws_api_gateway_rest_api.service_api.id
   resource_id   = aws_api_gateway_resource.service_api_resource.id
   http_method   = "ANY"
-  authorization = "NONE" //"AWS_IAM"
+  authorization = "NONE"
+  //"AWS_IAM"
 }
 
 resource "aws_api_gateway_integration" "service_api_method_integration" {

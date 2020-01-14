@@ -12,12 +12,21 @@ subprojects {
     }
 
     task copySource(type: Copy) {
+        enabled file("package.json").exists() && !file("tsconfig.json").exists()
         from "src"
         into "build/staging/"
     }
 
+    task tsc(type: Exec) {
+        dependsOn npmInstall
+        enabled file("tsconfig.json").exists()
+        inputs.files fileTree(dir: "src", include: "**/*.ts").getFiles()
+        outputs.files fileTree(dir: "build/staging", include: "**/*.js", exclude: "node_modules").getFiles()
+        commandLine tscExecutable
+    }
+
     task build(type: Zip) {
-        dependsOn copySource, copyNodeModules
+        dependsOn copySource, copyNodeModules, tsc
         archiveName "lambda.zip"
         destinationDir file("build/dist")
         from "build/staging"

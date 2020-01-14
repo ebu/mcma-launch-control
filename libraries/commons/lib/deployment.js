@@ -1,5 +1,12 @@
 const { Resource } = require("@mcma/core");
 
+const McmaDeploymentStatus = {
+    OK: "OK",
+    ERROR: "ERROR",
+    DEPLOYING: "DEPLOYING",
+    DESTROYING: "DESTROYING"
+};
+
 class McmaDeployment extends Resource {
     constructor(properties) {
         super("McmaDeployment", properties);
@@ -18,4 +25,5 @@ class McmaDeployment extends Resource {
 
 module.exports = {
     McmaDeployment,
+    McmaDeploymentStatus,
 };

@@ -1,8 +1,9 @@
-const { DataController } = require("@local/data");
+import { DataController } from "@local/data";
 
-const { CodeCommit } = require("./tools/codecommit");
+import * as AWS from "aws-sdk"
+const CodeCommit = new AWS.CodeCommit();
 
-const createProject = async (providerCollection, workerRequest) => {
+export async function createProject(providerCollection, workerRequest) {
     let dc = new DataController(workerRequest.tableName());
 
     let project = await dc.getProject(workerRequest.input.projectId);
@@ -13,7 +14,7 @@ const createProject = async (providerCollection, workerRequest) => {
 
     let repository;
     try {
-        repository = await CodeCommit.getRepository({ repositoryName });
+        repository = await CodeCommit.getRepository({ repositoryName }).promise();
     } catch (error) {
         if (error.code === "RepositoryDoesNotExistException") {
             repository = await CodeCommit.createRepository({ repositoryName });
@@ -23,17 +24,12 @@ const createProject = async (providerCollection, workerRequest) => {
     }
 
     console.log(repository);
-};
+}
 
-const deleteProject = async (providerCollection, workerRequest) => {
+export async function deleteProject(providerCollection, workerRequest) {
     let repositoryName = workerRequest.input.projectName;
 
-    let repositoryId = await CodeCommit.deleteRepository({ repositoryName });
+    let repositoryId = await CodeCommit.deleteRepository({ repositoryName }).promise();
 
     console.log({ repositoryId });
-};
-
-module.exports = {
-    createProject,
-    deleteProject
-};
+}

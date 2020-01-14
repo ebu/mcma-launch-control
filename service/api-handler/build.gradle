@@ -1,0 +1,4 @@
+tsc {
+    dependsOn ":libraries:commons:npmInstall"
+    dependsOn ":libraries:data:npmInstall"
+}

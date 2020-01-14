@@ -1,8 +1,8 @@
-const { DefaultRouteCollectionBuilder, HttpStatusCode } = require("@mcma/api");
-const { DynamoDbTable, DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
-const { LambdaWorkerInvoker } = require("@mcma/aws-lambda-worker-invoker");
+import { DefaultRouteCollectionBuilder, HttpStatusCode } from "@mcma/api";
+import { DynamoDbTable, DynamoDbTableProvider } from "@mcma/aws-dynamodb";
+import { LambdaWorkerInvoker } from "@mcma/aws-lambda-worker-invoker";
+import { McmaDeployment, McmaDeploymentStatus } from "@local/commons";
 
-const { McmaDeployment, McmaDeploymentStatus } = require("@local/commons");
 const { DataController } = require("@local/data");
 
 const PROJECTS_PATH = "/projects";
@@ -20,7 +20,7 @@ const queryDeployment = async (requestContext) => {
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
     let project = await dc.getProject(projectId);
     if (!project) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
@@ -39,7 +39,7 @@ const updateDeployment = async (requestContext) => {
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
     let project = await dc.getProject(projectId);
     if (!project) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
@@ -47,7 +47,7 @@ const updateDeployment = async (requestContext) => {
     let deploymentConfigId = requestContext.publicUrl() + DEPLOYMENTS_CONFIG_PATH + "/" + deploymentName;
     let deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
     if (!deploymentConfig) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
         return;
     }
 
@@ -55,7 +55,7 @@ const updateDeployment = async (requestContext) => {
     let deployment = await dc.getDeployment(deploymentId);
     if (deployment) {
         if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
-            requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
+            requestContext.setResponseStatusCode(HttpStatusCode.Conflict, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
             return;
         }
     } else {
@@ -88,7 +88,7 @@ const deleteDeployment = async (requestContext) => {
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
     let project = await dc.getProject(projectId);
     if (!project) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaProject '" + projectId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
@@ -96,19 +96,19 @@ const deleteDeployment = async (requestContext) => {
     let deploymentConfigId = requestContext.publicUrl() + DEPLOYMENTS_CONFIG_PATH + "/" + deploymentName;
     let deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
     if (!deploymentConfig) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaDeploymentConfig '" + deploymentConfigId + "' does not exist.");
         return;
     }
 
     let deploymentId = requestContext.publicUrl() + requestContext.request.path;
     let deployment = await dc.getDeployment(deploymentId);
     if (!deployment) {
-        requestContext.setResponseStatusCode(HttpStatusCode.NOT_FOUND, "McmaDeployment '" + deploymentId + "' does not exist.");
+        requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaDeployment '" + deploymentId + "' does not exist.");
         return;
     }
 
     if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
-        requestContext.setResponseStatusCode(HttpStatusCode.CONFLICT, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
+        requestContext.setResponseStatusCode(HttpStatusCode.Conflict, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
         return;
     }
 
@@ -118,7 +118,7 @@ const deleteDeployment = async (requestContext) => {
 
     await dc.setDeployment(deployment);
 
-    requestContext.setResponseStatusCode(HttpStatusCode.ACCEPTED);
+    requestContext.setResponseStatusCode(HttpStatusCode.Accepted);
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
@@ -129,11 +129,9 @@ const deleteDeployment = async (requestContext) => {
     console.log("deleteDeployment()", JSON.stringify(requestContext.response, null, 2));
 };
 
-const routeCollection = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeployment), McmaDeployment, URI_TEMPLATE)
+export const deploymentRoutes = new DefaultRouteCollectionBuilder(new DynamoDbTableProvider(McmaDeployment), McmaDeployment, URI_TEMPLATE)
     .route(r => r.get).add()
     .build()
     .addRoute("GET", URI_TEMPLATE, queryDeployment)
     .addRoute("POST", URI_TEMPLATE_2, updateDeployment)
     .addRoute("DELETE", URI_TEMPLATE_2, deleteDeployment);
-
-module.exports = routeCollection;

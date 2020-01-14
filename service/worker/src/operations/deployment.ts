@@ -1,11 +1,14 @@
-const { URL } = require("url");
+import { URL } from "url";
 
-const { McmaDeploymentStatus } = require("@local/commons");
-const { DataController } = require("@local/data");
+import { McmaDeploymentStatus, McmaComponent } from "@local/commons";
+import { DataController } from "@local/data";
 
-const { CodeCommit } = require("./tools/codecommit");
-const { Terraform } = require("./tools/terraform");
-const { Git } = require("./tools/git");
+import { Terraform } from "../tools/terraform";
+import { Git } from "../tools/git";
+
+import * as AWS from "aws-sdk";
+
+const CodeCommit = new AWS.CodeCommit();
 
 const REPOSITORY_DIR = "/tmp/repo";
 
@@ -19,13 +22,15 @@ const AWS_REGION = process.env.AwsRegion;
 const GIT_USERNAME = process.env.AwsCodeCommitUsername;
 const GIT_PASSWORD = process.env.AwsCodeCommitPassword;
 
-const generateGitIgnore = () => ".terraform\n" +
-    ".terraform.tfstate.lock.info\n" +
-    "terraform.tfstate.backup\n" +
-    "terraform.tfvars.json\n";
+function generateGitIgnore() {
+    return ".terraform\n" +
+        ".terraform.tfstate.lock.info\n" +
+        "terraform.tfstate.backup\n" +
+        "terraform.tfvars.json\n";
+}
 
-const generateMainTfJson = (components) => {
-    let providers = [];
+function generateMainTfJson(components) {
+    const providers = [];
 
     providers.push({
         aws: {
@@ -36,10 +41,10 @@ const generateMainTfJson = (components) => {
         }
     });
 
-    let modules = [];
+    const modules = [];
 
     for (const component of components) {
-        let variables = {};
+        const variables: any = {};
 
         for (const variable in component.variables) {
             if (component.variables.hasOwnProperty(variable)) {
@@ -47,16 +52,16 @@ const generateMainTfJson = (components) => {
             }
         }
 
-        variables.source = component.module;
+        variables.source = component.module.substring(0, component.module.length - 4) + "zip";
 
-        let module = {};
+        const module = {};
         module[component.name] = variables;
         component.variables;
 
-        modules.push(module)
+        modules.push(module);
     }
 
-    let mainTfJson = {
+    const mainTfJson = {
         terraform: {
             required_version: ">= 0.12.0",
             backend: {
@@ -68,10 +73,10 @@ const generateMainTfJson = (components) => {
     };
 
     return JSON.stringify(mainTfJson, null, 2);
-};
+}
 
-generateVariablesTfJson = () => {
-    let variablesTfJson = {
+function generateVariablesTfJson() {
+    const variablesTfJson = {
         variable: [
             {
                 project_prefix: {},
@@ -85,10 +90,10 @@ generateVariablesTfJson = () => {
     };
 
     return JSON.stringify(variablesTfJson, null, 2);
-};
+}
 
-generateTerraformTfVarsJson = (project, deploymentConfig) => {
-    let terraformTfVarsJson = {
+function generateTerraformTfVarsJson(project, deploymentConfig) {
+    const terraformTfVarsJson = {
         project_prefix: GLOBAL_PREFIX + "." + project.name + "." + deploymentConfig.name,
         stage_name: deploymentConfig.name,
         aws_account_id: AWS_ACCOUNT_ID,
@@ -97,29 +102,35 @@ generateTerraformTfVarsJson = (project, deploymentConfig) => {
         aws_region: AWS_REGION
     };
     return JSON.stringify(terraformTfVarsJson, null, 2);
-};
+}
 
-const getRepositoryUrl = async (project) => {
-    let repositoryName = project.name;
-    let repoData = await CodeCommit.getRepository({ repositoryName });
+async function getRepositoryUrl(project) {
+    const repositoryName = project.name;
+    const repoData = await CodeCommit.getRepository({ repositoryName }).promise();
 
     console.log(JSON.stringify(repoData, null, 2));
 
-    let repoUrl = new URL(repoData.repositoryMetadata.cloneUrlHttp);
+    const repoUrl = new URL(repoData.repositoryMetadata.cloneUrlHttp);
     repoUrl.username = GIT_USERNAME;
     repoUrl.password = GIT_PASSWORD;
     return repoUrl.toString();
-};
+}
 
-const updateDeployment = async (providerCollection, workerRequest) => {
+async function getModules(components: McmaComponent[]) {
+    return [];
+}
+
+export async function updateDeployment(providerCollection, workerRequest) {
     try {
         console.log("updateDeployment", JSON.stringify(workerRequest, null, 2));
-        let dc = new DataController(workerRequest.tableName());
+        const dc = new DataController(workerRequest.tableName());
 
-        let project = await dc.getProject(workerRequest.input.projectId);
-        let deployment = await dc.getDeployment(workerRequest.input.deploymentId);
-        let deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
-        let components = await dc.getComponents(workerRequest.input.projectId);
+        const project = await dc.getProject(workerRequest.input.projectId);
+        const deployment = await dc.getDeployment(workerRequest.input.deploymentId);
+        const deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
+        const components = await dc.getComponents(workerRequest.input.projectId);
+
+        const modulesMap = await getModules(components);
 
         console.log(JSON.stringify(project, null, 2));
         console.log(JSON.stringify(deployment, null, 2));
@@ -136,12 +147,12 @@ const updateDeployment = async (providerCollection, workerRequest) => {
             Git.setWorkingDir(REPOSITORY_DIR);
             Terraform.setWorkingDir(REPOSITORY_DIR);
 
-            let repoUrl = await getRepositoryUrl(project);
+            const repoUrl = await getRepositoryUrl(project);
 
             await Git.clone(repoUrl);
             await Git.config("Launch Control", "launch-control@mcma.ebu.ch");
 
-            let isNewRepository = await Git.isNew();
+            const isNewRepository = await Git.isNew();
 
             await Git.writeFile(".gitignore", generateGitIgnore());
             await Git.writeFile("main.tf.json", generateMainTfJson(components));
@@ -183,16 +194,16 @@ const updateDeployment = async (providerCollection, workerRequest) => {
     } catch (error) {
         console.error(error);
     }
-};
+}
 
-const deleteDeployment = async (providerCollection, workerRequest) => {
+export async function deleteDeployment(providerCollection, workerRequest) {
     try {
         console.log("deleteDeployment", JSON.stringify(workerRequest, null, 2));
-        let dc = new DataController(workerRequest.tableName());
+        const dc = new DataController(workerRequest.tableName());
 
-        let project = await dc.getProject(workerRequest.input.projectId);
-        let deployment = await dc.getDeployment(workerRequest.input.deploymentId);
-        let deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
+        const project = await dc.getProject(workerRequest.input.projectId);
+        const deployment = await dc.getDeployment(workerRequest.input.deploymentId);
+        const deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
 
         console.log(JSON.stringify(project, null, 2));
         console.log(JSON.stringify(deployment, null, 2));
@@ -207,7 +218,7 @@ const deleteDeployment = async (providerCollection, workerRequest) => {
             Git.setWorkingDir(REPOSITORY_DIR);
             Terraform.setWorkingDir(REPOSITORY_DIR);
 
-            let repoUrl = await getRepositoryUrl(project);
+            const repoUrl = await getRepositoryUrl(project);
 
             await Git.clone(repoUrl);
             await Git.config("Launch Control", "launch-control@mcma.ebu.ch");
@@ -234,9 +245,4 @@ const deleteDeployment = async (providerCollection, workerRequest) => {
     } catch (error) {
         console.error(error);
     }
-};
-
-module.exports = {
-    updateDeployment,
-    deleteDeployment
-};
+}
