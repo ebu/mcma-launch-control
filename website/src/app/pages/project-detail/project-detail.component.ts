@@ -2,12 +2,14 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } from "@local/commons";
 import { iif, of } from "rxjs";
-import { switchMap, takeWhile } from "rxjs/operators";
+import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { LocalDataSource } from "ng2-smart-table";
 import { NbDialogService } from "@nebular/theme";
 import { EditComponentDialogComponent } from "./dialogs/edit-component-dialog.component";
 import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialog.component";
+import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.component";
+import { EditVariableDialogComponent } from "./dialogs/edit-variable-dialog.component";
 
 const equal = require("fast-deep-equal");
 
@@ -26,6 +28,46 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     deploymentConfigs: McmaDeploymentConfig[];
 
     projectDeployments: McmaDeployment[];
+
+    variableSettings = {
+        add: {
+            addButtonContent: "<i class=\"nb-plus\"></i>",
+            createButtonContent: "<i class=\"nb-checkmark\"></i>",
+            cancelButtonContent: "<i class=\"nb-close\"></i>",
+        },
+        edit: {
+            editButtonContent: "<i class=\"nb-edit\" title=\"Edit\"></i>",
+            saveButtonContent: "<i class=\"nb-checkmark\"></i>",
+            cancelButtonContent: "<i class=\"nb-close\"></i>",
+        },
+        delete: {
+            deleteButtonContent: "<i class=\"nb-trash\" title=\"Delete\"></i>",
+        },
+
+        mode: "external",
+        hideSubHeader: true,
+
+        actions: {
+            position: "right",
+        },
+
+        filter: false,
+
+        columns: {
+            name: {
+                title: "Name",
+                type: "string",
+                width: "20%",
+            },
+            value: {
+                title: "Value",
+                type: "string",
+                width: "70%",
+            },
+        },
+    };
+
+    variableSource: LocalDataSource = new LocalDataSource();
 
     componentSettings = {
         add: {
@@ -55,12 +97,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             name: {
                 title: "Code",
                 type: "string",
-                width: "15%",
+                width: "20%",
             },
             displayName: {
                 title: "Display Name",
                 type: "string",
-                width: "75%",
+                width: "70%",
             },
         },
     };
@@ -95,12 +137,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             name: {
                 title: "Code",
                 type: "string",
-                width: "15%",
+                width: "20%",
             },
             displayName: {
                 title: "Display Name",
                 type: "string",
-                width: "30%",
+                width: "25%",
             },
             status: {
                 title: "Status",
@@ -153,8 +195,21 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     private loadProject(project: McmaProject) {
         this.project = project;
 
+        this.loadVariables();
         this.loadComponents();
         this.loadDeployments();
+    }
+
+    private loadVariables() {
+        const variables = [];
+        for (const name of Object.keys(this.project.variables)) {
+            variables.push({
+                name,
+                value: this.project.variables[name],
+            });
+        }
+        variables.sort((a, b) => a.name.localeCompare(b.name));
+        this.variableSource.load(variables);
     }
 
     private loadComponents() {
@@ -214,6 +269,54 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 this.deploymentReloadScheduled = false;
             }, 2000);
         }
+    }
+
+    onAddVariable() {
+        this.dialogService.open(EditVariableDialogComponent, {
+            context: {
+                variable: { name: "", value: "" },
+            },
+        }).onClose.pipe(
+            takeWhile(variable => !!variable),
+            map(variable => {
+                this.project.variables[variable.name] = variable.value;
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadVariables());
+    }
+
+    onEditVariable(event) {
+        this.dialogService.open(EditVariableDialogComponent, {
+            context: {
+                variable: event.data,
+            },
+        }).onClose.pipe(
+            takeWhile(variable => !!variable),
+            map(variable => {
+                if (variable.name !== event.data.name) {
+                    delete this.project.variables[event.data.name];
+                }
+                this.project.variables[variable.name] = variable.value;
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadVariables());
+    }
+
+    onDeleteVariable(event) {
+        this.dialogService.open(DeleteVariableDialogComponent, {
+            context: {
+                variable: event.data,
+            },
+        }).onClose.pipe(
+            takeWhile(doDelete => doDelete),
+            map(ignored => {
+                delete this.project.variables[event.data.name];
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadVariables());
     }
 
     onAddComponent() {

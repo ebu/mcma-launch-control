@@ -9,7 +9,24 @@
 
     <nb-card-body>
 
-        <div class="row show-grid marginBottom">
+        <div class="row show-grid">
+            <div class="col-md-11">
+                <h6>Variables</h6>
+            </div>
+            <div class="col-md-1">
+                <button nbButton (click)="onAddVariable()">
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="variableSettings"
+                         [source]="variableSource"
+                         (edit)="onEditVariable($event)"
+                         (delete)="onDeleteVariable($event)">
+        </ng2-smart-table>
+
+        <div class="row show-grid marginTop">
             <div class="col-md-11">
                 <h6>Components</h6>
             </div>
