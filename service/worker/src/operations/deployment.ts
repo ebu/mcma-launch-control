@@ -1,12 +1,18 @@
 import { URL } from "url";
 
-import { McmaDeploymentStatus, McmaComponent } from "@local/commons";
+import * as AWS from "aws-sdk";
+import axios, { AxiosError } from "axios";
+
+import { Exception, Resource } from "@mcma/core";
+import { AuthProvider, ResourceManager } from "@mcma/client";
+import "@mcma/aws-client";
+
+import { McmaComponent, McmaDeployedComponent, McmaDeploymentStatus, McmaModule, McmaModuleDeploymentActionType } from "@local/commons";
 import { DataController } from "@local/data";
 
 import { Terraform } from "../tools/terraform";
 import { Git } from "../tools/git";
-
-import * as AWS from "aws-sdk";
+import { VariableResolver } from "../tools/variable-resolver";
 
 const CodeCommit = new AWS.CodeCommit();
 
@@ -21,6 +27,26 @@ const AWS_REGION = process.env.AwsRegion;
 
 const GIT_USERNAME = process.env.AwsCodeCommitUsername;
 const GIT_PASSWORD = process.env.AwsCodeCommitPassword;
+
+async function getModules(components: McmaComponent[] | McmaDeployedComponent[]): Promise<Map<string, McmaModule>> {
+    let map = new Map<string, McmaModule>();
+
+    for (const component of components) {
+        try {
+            const response = await axios.get<McmaModule>(component.module);
+            map.set(component.name, response.data);
+        } catch (err) {
+            if (err && err.response) {
+                const axiosError = err as AxiosError<any>;
+                return axiosError.response.data;
+            }
+
+            throw err;
+        }
+    }
+
+    return map;
+}
 
 function generateGitIgnore() {
     return ".terraform\n" +
@@ -77,16 +103,14 @@ function generateMainTfJson(components) {
 
 function generateVariablesTfJson() {
     const variablesTfJson = {
-        variable: [
-            {
-                project_prefix: {},
-                stage_name: {},
-                aws_account_id: {},
-                aws_access_key: {},
-                aws_secret_key: {},
-                aws_region: {}
-            }
-        ]
+        variable: {
+            project_prefix: {},
+            stage_name: {},
+            aws_account_id: {},
+            aws_access_key: {},
+            aws_secret_key: {},
+            aws_region: {}
+        }
     };
 
     return JSON.stringify(variablesTfJson, null, 2);
@@ -104,6 +128,21 @@ function generateTerraformTfVarsJson(project, deploymentConfig) {
     return JSON.stringify(terraformTfVarsJson, null, 2);
 }
 
+function generateOutputsTfJson(components: McmaComponent[]) {
+
+    const outputTfJson = {
+        output: {}
+    };
+
+    for (const component of components) {
+        outputTfJson.output[component.name] = {
+            value: "${module." + component.name + "}"
+        };
+    }
+
+    return JSON.stringify(outputTfJson, null, 2);
+}
+
 async function getRepositoryUrl(project) {
     const repositoryName = project.name;
     const repoData = await CodeCommit.getRepository({ repositoryName }).promise();
@@ -116,8 +155,168 @@ async function getRepositoryUrl(project) {
     return repoUrl.toString();
 }
 
-async function getModules(components: McmaComponent[]) {
-    return [];
+function getResourceManagerConfig(deployedComponents: McmaDeployedComponent[]) {
+    // finding a service registry by searching for the 'services_url' output property
+
+    for (const deployedComponent of deployedComponents) {
+        if (deployedComponent.outputVariables["services_url"]) {
+            return {
+                servicesUrl: deployedComponent.outputVariables["services_url"],
+                servicesAuthType: deployedComponent.outputVariables["auth_type"],
+                servicesAuthContext: deployedComponent.outputVariables["auth_context"],
+            };
+        }
+    }
+}
+
+function replaceVariables(value: any, vr: VariableResolver): any {
+    if (typeof value === "string") {
+        return vr.resolve(<string>value);
+    } else if (value instanceof Array) {
+        return (<any[]>value).map(item => replaceVariables(item, vr));
+    } else if (value instanceof Object) {
+        const obj = {};
+        for (const key of Object.keys(value)) {
+            obj[key] = replaceVariables(value[key], vr);
+        }
+        return obj;
+    } else {
+        return value;
+    }
+}
+
+async function processPreDestroyActions(components: McmaComponent[], oldDeployedComponents: McmaDeployedComponent[], oldModulesMap: Map<string, McmaModule>) {
+    const resourceManagerConfig = getResourceManagerConfig(oldDeployedComponents);
+
+    const componentsMap = new Map<string, McmaComponent>();
+    for (const component of components) {
+        componentsMap.set(component.name, component);
+    }
+
+    for (const deployedComponent of oldDeployedComponents) {
+        const module = oldModulesMap.get(deployedComponent.name);
+
+        if (module.deploymentActions) {
+            for (const action of module.deploymentActions) {
+                console.log("Processing pre destroy action:", JSON.stringify(action, null, 2));
+
+                switch (action.type) {
+                    case McmaModuleDeploymentActionType.ManagedResource:
+                        if (!resourceManagerConfig) {
+                            throw new Exception("Failed to execute post deployment action. Unable to find a deployed Service Registry");
+                        }
+                        const resourceManager = new ResourceManager(resourceManagerConfig, new AuthProvider().addAwsV4Auth({
+                            accessKey: AWS_ACCESS_KEY,
+                            secretKey: AWS_SECRET_KEY,
+                            region: AWS_REGION
+                        }));
+
+                        const resourceName = action.data.resourceName;
+                        if (!resourceName) {
+                            throw new Exception("Property 'resourceName' missing in deployment action 'ManagedResource'");
+                        }
+
+                        const resourceId = deployedComponent.resources[resourceName];
+                        if (resourceId) {
+                            try {
+                                console.log("Deleting managed resource '" + resourceName + "' with id: " + resourceId );
+                                // TODO: pass resourceId when upgrading to MCMA libraries 0.8.6
+                                await resourceManager.delete(<Resource>{ id: resourceId });
+                            } catch (error) {
+                                console.warn("Failed to delete resource '" + resourceId + "'");
+                                console.warn(error.toString());
+                            }
+                        }
+
+                        break;
+                    case McmaModuleDeploymentActionType.RunScript:
+                        throw new Exception("Deployment action '" + action.type + "' not implemented");
+                    default:
+                        throw new Exception("Unrecognized deployment action '" + action.type + "'");
+                }
+            }
+        }
+    }
+}
+
+function generateDeployedComponents(deploymentId: string, components: McmaComponent[], terraformOutput: any): McmaDeployedComponent[] {
+    const result: McmaDeployedComponent[] = [];
+
+    for (const component of components) {
+        const deployedComponent = new McmaDeployedComponent(component);
+        deployedComponent.id = deploymentId + "/" + component.name;
+
+        //TODO replace inputVariables with resolved variables while variables keeps the original configuration copied from the component.
+        deployedComponent.inputVariables = deployedComponent.variables;
+        deployedComponent.outputVariables = terraformOutput[component.name].value;
+
+        result.push(deployedComponent);
+    }
+
+    return result;
+}
+
+async function processDeploymentActions(oldDeployedComponents: McmaDeployedComponent[], newDeployedComponents: McmaDeployedComponent[], modulesMap: Map<string, McmaModule>) {
+    const resourceManagerConfig = getResourceManagerConfig(newDeployedComponents);
+
+    const oldDeployedComponentsMap = new Map<string, McmaDeployedComponent>();
+    for (const deployedComponent of oldDeployedComponents) {
+        oldDeployedComponentsMap.set(deployedComponent.name, deployedComponent);
+    }
+
+    for (const deployedComponent of newDeployedComponents) {
+        const module = modulesMap.get(deployedComponent.name);
+
+        if (module.deploymentActions) {
+            for (const action of module.deploymentActions) {
+                console.log("Processing post deploy action:", JSON.stringify(action, null, 2));
+
+                switch (action.type) {
+                    case McmaModuleDeploymentActionType.ManagedResource:
+                        if (!resourceManagerConfig) {
+                            throw new Exception("Failed to execute post deployment action. Unable to find a deployed Service Registry");
+                        }
+                        const resourceManager = new ResourceManager(resourceManagerConfig, new AuthProvider().addAwsV4Auth({
+                            accessKey: AWS_ACCESS_KEY,
+                            secretKey: AWS_SECRET_KEY,
+                            region: AWS_REGION
+                        }));
+
+                        const vr = new VariableResolver();
+                        for (const key of Object.keys(deployedComponent.outputVariables)) {
+                            vr.put(key, deployedComponent.outputVariables[key]);
+                        }
+
+                        const resourceName = action.data.resourceName;
+                        if (!resourceName) {
+                            throw new Exception("Property 'resourceName' missing in deployment action 'ManagedResource'");
+                        }
+
+                        let resource = action.data.resource;
+                        if (!resource) {
+                            throw new Exception("Property 'resource' missing in deployment action 'ManagedResource'");
+                        }
+                        resource = replaceVariables(resource, vr);
+
+                        const oldDeployedComponent = oldDeployedComponentsMap.get(deployedComponent.name);
+                        if (oldDeployedComponent && oldDeployedComponent.resources && oldDeployedComponent.resources[resourceName]) {
+                            resource.id = oldDeployedComponent.resources[resourceName];
+                            resource = await resourceManager.update(resource);
+                        } else {
+                            resource = await resourceManager.create(resource);
+                        }
+
+                        console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id );
+                        deployedComponent.resources[resourceName] = resource.id;
+                        break;
+                    case McmaModuleDeploymentActionType.RunScript:
+                        throw new Exception("Deployment action '" + action.type + "' not implemented");
+                    default:
+                        throw new Exception("Unrecognized deployment action '" + action.type + "'");
+                }
+            }
+        }
+    }
 }
 
 export async function updateDeployment(providerCollection, workerRequest) {
@@ -125,12 +324,15 @@ export async function updateDeployment(providerCollection, workerRequest) {
         console.log("updateDeployment", JSON.stringify(workerRequest, null, 2));
         const dc = new DataController(workerRequest.tableName());
 
-        const project = await dc.getProject(workerRequest.input.projectId);
-        const deployment = await dc.getDeployment(workerRequest.input.deploymentId);
-        const deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
-        const components = await dc.getComponents(workerRequest.input.projectId);
+        const { projectId, deploymentConfigId, deploymentId } = workerRequest.input;
 
+        const project = await dc.getProject(projectId);
+        const components = await dc.getComponents(projectId);
         const modulesMap = await getModules(components);
+        const deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
+        const deployment = await dc.getDeployment(deploymentId);
+        const oldDeployedComponents = await dc.getDeployedComponents(deploymentId);
+        const oldModulesMap = await getModules(oldDeployedComponents);
 
         console.log(JSON.stringify(project, null, 2));
         console.log(JSON.stringify(deployment, null, 2));
@@ -144,6 +346,13 @@ export async function updateDeployment(providerCollection, workerRequest) {
         let errorMessage = null;
 
         try {
+            try {
+                console.log("Running pre destroy actions");
+                await processPreDestroyActions(components, oldDeployedComponents, oldModulesMap);
+            } catch (error) {
+                console.error(error.toString());
+            }
+
             Git.setWorkingDir(REPOSITORY_DIR);
             Terraform.setWorkingDir(REPOSITORY_DIR);
 
@@ -158,6 +367,7 @@ export async function updateDeployment(providerCollection, workerRequest) {
             await Git.writeFile("main.tf.json", generateMainTfJson(components));
             await Git.writeFile("variables.tf.json", generateVariablesTfJson());
             await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+            await Git.writeFile("outputs.tf.json", generateOutputsTfJson(components));
 
             await Git.addFiles();
             if (isNewRepository || await Git.hasChanges()) {
@@ -168,9 +378,12 @@ export async function updateDeployment(providerCollection, workerRequest) {
                 await Git.push();
             }
 
+            let terraformOutput;
+
             try {
                 await Terraform.init(deploymentConfig.name);
                 await Terraform.apply();
+                terraformOutput = await Terraform.output();
             } catch (error) {
                 errorMessage = error.message;
             }
@@ -180,6 +393,27 @@ export async function updateDeployment(providerCollection, workerRequest) {
                 await Git.pull();
                 await Git.commit("Deployment '" + deploymentConfig.name + "' is updated " + (errorMessage ? "with errors during deployment" : "successfully"));
                 await Git.push();
+            }
+
+            if (!errorMessage) {
+                const newDeployedComponents: McmaDeployedComponent[] = generateDeployedComponents(deploymentId, components, terraformOutput);
+
+                console.log("Running post deployment actions");
+                try {
+                    await processDeploymentActions(oldDeployedComponents, newDeployedComponents, modulesMap);
+                } catch (error) {
+                    console.error(error.toString());
+                    errorMessage = error.message;
+                }
+
+                console.log("Updating deployed components for deploymentConfig");
+                for (const deployedComponent of oldDeployedComponents) {
+                    await dc.deleteDeployedComponent(deployedComponent.id);
+                }
+
+                for (const deployedComponent of newDeployedComponents) {
+                    await dc.setDeployedComponent(deployedComponent);
+                }
             }
 
             deployment.status = errorMessage ? McmaDeploymentStatus.ERROR : McmaDeploymentStatus.OK;
@@ -201,9 +435,13 @@ export async function deleteDeployment(providerCollection, workerRequest) {
         console.log("deleteDeployment", JSON.stringify(workerRequest, null, 2));
         const dc = new DataController(workerRequest.tableName());
 
-        const project = await dc.getProject(workerRequest.input.projectId);
-        const deployment = await dc.getDeployment(workerRequest.input.deploymentId);
-        const deploymentConfig = await dc.getDeploymentConfig(workerRequest.input.deploymentConfigId);
+        const { projectId, deploymentConfigId, deploymentId } = workerRequest.input;
+
+        const project = await dc.getProject(projectId);
+        const deployment = await dc.getDeployment(deploymentId);
+        const deploymentConfig = await dc.getDeploymentConfig(deploymentConfigId);
+        const oldDeployedComponents = await dc.getDeployedComponents(deploymentId);
+        const oldModulesMap = await getModules(oldDeployedComponents);
 
         console.log(JSON.stringify(project, null, 2));
         console.log(JSON.stringify(deployment, null, 2));
@@ -215,6 +453,13 @@ export async function deleteDeployment(providerCollection, workerRequest) {
         }
 
         try {
+            try {
+                console.log("Running pre destroy actions");
+                await processPreDestroyActions([], oldDeployedComponents, oldModulesMap);
+            } catch (error) {
+                console.error(error.toString());
+            }
+
             Git.setWorkingDir(REPOSITORY_DIR);
             Terraform.setWorkingDir(REPOSITORY_DIR);
 
@@ -233,6 +478,11 @@ export async function deleteDeployment(providerCollection, workerRequest) {
                 await Git.pull();
                 await Git.commit("Deployment '" + deploymentConfig.name + "' is destroyed");
                 await Git.push();
+            }
+
+            console.log("Deleting deployed components for deploymentConfig");
+            for (const deployedComponent of oldDeployedComponents) {
+                await dc.deleteDeployedComponent(deployedComponent.id);
             }
 
             await dc.deleteDeployment(deployment.id);

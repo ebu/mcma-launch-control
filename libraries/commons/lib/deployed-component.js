@@ -11,8 +11,10 @@ class McmaDeployedComponent extends Resource {
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
         this.module = (properties && properties.module) || null;
+        this.variables = (properties && properties.variables) || null;
         this.inputVariables = (properties && properties.inputVariables) || {};
         this.outputVariables = (properties && properties.outputVariables) || {};
+        this.resources = (properties && properties.resources) || {};
     }
 }
 

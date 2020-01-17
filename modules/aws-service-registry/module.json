@@ -14,7 +14,7 @@
         {
             "name": "module_name",
             "type": "string",
-            "defaultValue": "${project_prefix}-service-registry"
+            "defaultValue": "AWS MCMA Service Registry"
         },
         {
             "name": "stage_name",
@@ -46,10 +46,11 @@
             "type": "string"
         }
     ],
-    "postDeploymentActions": [
+    "deploymentActions": [
         {
-            "type": "CreateResource",
+            "type": "ManagedResource",
             "data": {
+                "resourceName": "service",
                 "resource": {
                     "@type": "Service",
                     "name": "Service Registry",
@@ -63,7 +64,7 @@
                             "httpEndpoint": "${job_profiles_url}"
                         }
                     ],
-                    "authType": "${authType}"
+                    "authType": "${auth_type}"
                 }
             }
         }

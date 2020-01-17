@@ -16,11 +16,11 @@ class McmaModule extends Resource {
         this.link = (properties && properties.link) || null;
         this.inputParameters = (properties && properties.inputParameters) || [];
         this.outputParameters = (properties && properties.outputParameters) || [];
-        this.postDeploymentActions = (properties && properties.postDeploymentActions) || [];
+        this.deploymentActions = (properties && properties.deploymentActions) || [];
 
         this.inputParameters = this.inputParameters.map(param => new McmaModuleParameter(param));
         this.outputParameters = this.outputParameters.map(param => new McmaModuleParameter(param));
-        this.postDeploymentActions = this.postDeploymentActions.map(param => new McmaModuleAction(param));
+        this.deploymentActions = this.deploymentActions.map(param => new McmaModuleDeploymentAction(param));
     }
 }
 
@@ -32,11 +32,12 @@ class McmaModuleParameter {
     }
 }
 
-const McmaModuleActionType = Object.freeze({
-    CreateResource: "CreateResource",
+const McmaModuleDeploymentActionType = Object.freeze({
+    ManagedResource: "ManagedResource",
+    RunScript: "RunScript",
 });
 
-class McmaModuleAction {
+class McmaModuleDeploymentAction {
     constructor(properties) {
         this.type = (properties && properties.type) || null;
         this.data = (properties && properties.data) || null;
@@ -46,6 +47,6 @@ class McmaModuleAction {
 module.exports = {
     McmaModule,
     McmaModuleParameter,
-    McmaModuleActionType,
-    McmaModuleAction,
+    McmaModuleDeploymentActionType,
+    McmaModuleDeploymentAction,
 };

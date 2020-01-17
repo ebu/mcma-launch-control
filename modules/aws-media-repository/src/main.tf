@@ -54,7 +54,7 @@ resource "aws_dynamodb_table" "service_table" {
   }
 
   stream_enabled   = true
-  stream_view_type = "NEW_IMAGE"
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 }
 
 #################################
@@ -77,7 +77,7 @@ resource "aws_lambda_function" "api_handler" {
 ##############################
 resource "aws_api_gateway_rest_api" "service_api" {
   name        = var.module_prefix
-  description = "Media Repository Rest Api"
+  description = "${var.module_name} Rest Api"
 }
 
 resource "aws_api_gateway_resource" "service_api" {

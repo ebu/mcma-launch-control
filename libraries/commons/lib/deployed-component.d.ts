@@ -6,6 +6,8 @@ export class McmaDeployedComponent extends Resource {
     name: string;
     displayName: string;
     module: string;
+    variables: object;
     inputVariables: object;
     outputVariables: object;
+    resources: object;
 }

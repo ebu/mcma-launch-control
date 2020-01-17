@@ -44,4 +44,13 @@ export class Terraform {
         console.log("stdout:", stdout);
         console.log("stderr:", stderr);
     }
+
+    static async output() {
+        let cmd = TERRAFORM + " output -json -no-color";
+        console.log(cmd);
+        const { stdout, stderr } = await execAsync(cmd, { cwd });
+        console.log("stdout:", stdout);
+        console.log("stderr:", stderr);
+        return JSON.parse(stdout);
+    }
 }

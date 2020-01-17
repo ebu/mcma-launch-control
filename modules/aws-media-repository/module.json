@@ -3,23 +3,69 @@
     "name": "aws-media-repository",
     "version": "0.0.1",
     "displayName": "AWS MCMA Media Repository",
-    "description": "The MCMA Media Repository is used for tracking assets and their corresponding data files.",
+    "description": "The MCMA Media Repository is used for tracking assets and their corresponding essence files.",
     "inputParameters": [
         {
             "name": "module_prefix",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${project_prefix}-media-repository"
+        },
+        {
+            "name": "module_name",
+            "type": "string",
+            "defaultValue": "AWS MCMA Media Repository"
         },
         {
             "name": "stage_name",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${stage_name}"
         },
         {
             "name": "aws_account_id",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "${aws_account_id}"
         },
         {
             "name": "aws_region",
+            "type": "string",
+            "defaultValue": "${aws_region}"
+        }
+    ],
+    "outputParameters": [
+        {
+            "name": "auth_type",
             "type": "string"
+        },
+        {
+            "name": "bm_contents_url",
+            "type": "string"
+        },
+        {
+            "name": "bm_essences_url",
+            "type": "string"
+        }
+    ],
+    "deploymentActions": [
+        {
+            "type": "ManagedResource",
+            "data": {
+                "resourceName": "service",
+                "resource": {
+                    "@type": "Service",
+                    "name": "Media Repository",
+                    "resources": [
+                        {
+                            "resourceType": "BMContent",
+                            "httpEndpoint": "${bm_contents_url}"
+                        },
+                        {
+                            "resourceType": "BMEssence",
+                            "httpEndpoint": "${bm_essences_url}"
+                        }
+                    ],
+                    "authType": "${auth_type}"
+                }
+            }
         }
     ]
 }

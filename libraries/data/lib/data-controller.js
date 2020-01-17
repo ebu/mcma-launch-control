@@ -1,5 +1,5 @@
 const { DynamoDbTable } = require("@mcma/aws-dynamodb");
-const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent } = require("@local/commons");
+const { McmaProject, McmaDeploymentConfig, McmaDeployment, McmaComponent, McmaDeployedComponent } = require("@local/commons");
 
 class DataController {
     constructor(tableName) {
@@ -8,6 +8,7 @@ class DataController {
         this.deploymentConfigTable = new DynamoDbTable(this.tableName, McmaDeploymentConfig);
         this.deploymentTable = new DynamoDbTable(this.tableName, McmaDeployment);
         this.componentTable = new DynamoDbTable(this.tableName, McmaComponent);
+        this.deployedComponentTable = new DynamoDbTable(this.tableName, McmaDeployedComponent)
     }
 
     async getProject(projectId) {
@@ -105,8 +106,7 @@ class DataController {
 
     async getComponents(projectId) {
         let resources = await this.componentTable.query((resource) => resource.id.startsWith(projectId));
-        resources.map(value => new McmaComponent(value));
-        return resources;
+        return resources.map(value => new McmaComponent(value));
     }
 
     async getComponent(componentId) {
@@ -137,6 +137,42 @@ class DataController {
             return false;
         }
         await this.componentTable.delete(componentId);
+        return true;
+    }
+
+    async getDeployedComponents(deploymentId) {
+        let resources = await this.deployedComponentTable.query((resource) => resource.id.startsWith(deploymentId));
+        return resources.map(value => new McmaDeployedComponent(value));
+    }
+
+    async getDeployedComponent(deployedComponentId) {
+        let deployedComponent;
+        try {
+            deployedComponent = await this.deployedComponentTable.get(deployedComponentId);
+        } catch (ignored) {
+        }
+
+        if (!deployedComponent) {
+            return null;
+        }
+        return new McmaDeployedComponent(deployedComponent);
+    }
+
+    async setDeployedComponent(deployedComponent) {
+        if (typeof deployedComponent.id !== "string") {
+            throw new Error("McmaDeployedComponent missing id");
+        }
+
+        deployedComponent = await this.deployedComponentTable.put(deployedComponent.id, deployedComponent);
+        return new McmaDeployedComponent(deployedComponent);
+    }
+
+    async deleteDeployedComponent(deployedComponentId) {
+        let deployedComponent = await this.getDeployedComponent(deployedComponentId);
+        if (!deployedComponent) {
+            return false;
+        }
+        await this.deployedComponentTable.delete(deployedComponentId);
         return true;
     }
 }

@@ -11,7 +11,7 @@ export class McmaModule extends Resource {
     link: string;
     inputParameters: McmaModuleParameter[];
     outputParameters: McmaModuleParameter[];
-    postDeploymentActions: McmaModuleAction[];
+    deploymentActions: McmaModuleDeploymentAction[];
 }
 
 export class McmaModuleParameter {
@@ -21,13 +21,14 @@ export class McmaModuleParameter {
     type: string;
 }
 
-export enum McmaModuleActionType {
-    CreateResource = "CreateResource"
+export enum McmaModuleDeploymentActionType {
+    ManagedResource = "ManagedResource",
+    RunScript = "RunScript",
 }
 
-export class McmaModuleAction {
+export class McmaModuleDeploymentAction {
     constructor(properties?: object);
 
-    type: McmaModuleAction;
+    type: McmaModuleDeploymentActionType;
     data: any;
 }

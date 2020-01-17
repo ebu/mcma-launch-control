@@ -52,7 +52,7 @@ async function createProject(requestContext) {
 
     await worker.invoke(
         process.env.ServiceWorkerLambdaFunctionName,
-        "createProject",
+        "CreateProject",
         requestContext.getAllContextVariables(),
         { projectId });
 
