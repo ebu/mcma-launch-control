@@ -1,0 +1,7 @@
+<nb-card>
+    <nb-card-header><h5>Are you sure you want to delete Provider '{{provider.name}}'?</h5></nb-card-header>
+    <nb-card-footer>
+        <button class="cancel" nbButton (click)="cancel()">Cancel</button>
+        <button nbButton status="danger" (click)="submit()">OK</button>
+    </nb-card-footer>
+</nb-card>

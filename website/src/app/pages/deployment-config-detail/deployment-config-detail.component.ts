@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaDeploymentConfig, McmaProject } from "@local/commons";
+import { McmaDeploymentConfig } from "@local/commons";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { LocalDataSource } from "ng2-smart-table";
@@ -9,7 +9,7 @@ import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.
 import { EditVariableDialogComponent } from "./dialogs/edit-variable-dialog.component";
 
 @Component({
-    selector: "deployment-config-project-detail",
+    selector: "mcma-deployment-config-detail",
     templateUrl: "./deployment-config-detail.component.html",
     styleUrls: ["deployment-config-detail.component.scss"],
 })
@@ -64,15 +64,15 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.launchControlService.getDeploymentConfig(this.route.snapshot.params["deploymentConfigName"])
             .pipe(takeWhile(() => this.alive))
-            .subscribe(project => this.loadDeploymentConfig(project));
+            .subscribe(deploymentConfig => this.loadDeploymentConfig(deploymentConfig));
     }
 
     ngOnDestroy() {
         this.alive = false;
     }
 
-    private loadDeploymentConfig(project: McmaProject) {
-        this.deploymentConfig = project;
+    private loadDeploymentConfig(deploymentConfig: McmaDeploymentConfig) {
+        this.deploymentConfig = deploymentConfig;
 
         this.loadVariables();
     }
@@ -100,7 +100,7 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
                 this.deploymentConfig.variables[variable.name] = variable.value;
                 return this.deploymentConfig;
             }),
-            switchMap(project => this.launchControlService.setProject(project)),
+            switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),
         ).subscribe(() => this.loadVariables());
     }
 
@@ -118,7 +118,7 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
                 this.deploymentConfig.variables[variable.name] = variable.value;
                 return this.deploymentConfig;
             }),
-            switchMap(project => this.launchControlService.setProject(project)),
+            switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),
         ).subscribe(() => this.loadVariables());
     }
 
@@ -133,7 +133,7 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
                 delete this.deploymentConfig.variables[event.data.name];
                 return this.deploymentConfig;
             }),
-            switchMap(project => this.launchControlService.setProject(project)),
+            switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),
         ).subscribe(() => this.loadVariables());
     }
 }

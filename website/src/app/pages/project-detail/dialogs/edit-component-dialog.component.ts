@@ -45,10 +45,8 @@ export class EditComponentDialogComponent implements OnInit {
         this.componentDisplayName = this.component.displayName;
         this.componentModule = this.component.module;
 
-        for (const varName in this.component.variables) {
-            if (this.component.variables.hasOwnProperty(varName)) {
-                this.componentVariableMap.set(varName, this.component.variables[varName]);
-            }
+        for (const varName of Object.keys(this.component.variables)) {
+            this.componentVariableMap.set(varName, this.component.variables[varName]);
         }
 
         if (this.component.module) {

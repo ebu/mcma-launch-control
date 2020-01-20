@@ -14,6 +14,8 @@ class McmaModule extends Resource {
         this.displayName = (properties && properties.displayName) || null;
         this.description = (properties && properties.description) || null;
         this.link = (properties && properties.link) || null;
+        this.provider = (properties && properties.provider) || null;
+        this.providers = (properties && properties.providers) || [];
         this.inputParameters = (properties && properties.inputParameters) || [];
         this.outputParameters = (properties && properties.outputParameters) || [];
         this.deploymentActions = (properties && properties.deploymentActions) || [];
@@ -27,8 +29,8 @@ class McmaModule extends Resource {
 class McmaModuleParameter {
     constructor(properties) {
         this.name = (properties && properties.name) || null;
+        this.description = (properties && properties.description) || null;
         this.type = (properties && properties.type) || null;
-        this.defaultValue = (properties && properties.defaultValue) || null;
     }
 }
 

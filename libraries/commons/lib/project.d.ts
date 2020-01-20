@@ -1,4 +1,5 @@
 import { Resource } from "@mcma/core";
+import { McmaProvider } from "./provider";
 
 export class McmaProject extends Resource {
     constructor(properties?: object);
@@ -6,4 +7,5 @@ export class McmaProject extends Resource {
     name: string;
     displayName: string;
     variables: object;
+    providers: McmaProvider[];
 }

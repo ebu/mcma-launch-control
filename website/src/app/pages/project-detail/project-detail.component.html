@@ -28,6 +28,23 @@
 
         <div class="row show-grid marginTop">
             <div class="col-md-11">
+                <h6>Providers</h6>
+            </div>
+            <div class="col-md-1">
+                <button nbButton (click)="onAddProvider()">
+                    Add
+                </button>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="providerSettings"
+                         [source]="providerSource"
+                         (edit)="onEditProvider($event)"
+                         (delete)="onDeleteProvider($event)">
+        </ng2-smart-table>
+
+        <div class="row show-grid marginTop">
+            <div class="col-md-11">
                 <h6>Components</h6>
             </div>
             <div class="col-md-1">

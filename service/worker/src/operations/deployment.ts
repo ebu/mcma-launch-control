@@ -72,10 +72,8 @@ function generateMainTfJson(components) {
     for (const component of components) {
         const variables: any = {};
 
-        for (const variable in component.variables) {
-            if (component.variables.hasOwnProperty(variable)) {
-                variables[variable] = component.variables[variable];
-            }
+        for (const variable of Object.keys(component.variables)) {
+            variables[variable] = component.variables[variable];
         }
 
         variables.source = component.module.substring(0, component.module.length - 4) + "zip";
@@ -219,7 +217,7 @@ async function processPreDestroyActions(components: McmaComponent[], oldDeployed
                         const resourceId = deployedComponent.resources[resourceName];
                         if (resourceId) {
                             try {
-                                console.log("Deleting managed resource '" + resourceName + "' with id: " + resourceId );
+                                console.log("Deleting managed resource '" + resourceName + "' with id: " + resourceId);
                                 // TODO: pass resourceId when upgrading to MCMA libraries 0.8.6
                                 await resourceManager.delete(<Resource>{ id: resourceId });
                             } catch (error) {
@@ -306,7 +304,7 @@ async function processDeploymentActions(oldDeployedComponents: McmaDeployedCompo
                             resource = await resourceManager.create(resource);
                         }
 
-                        console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id );
+                        console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id);
                         deployedComponent.resources[resourceName] = resource.id;
                         break;
                     case McmaModuleDeploymentActionType.RunScript:
@@ -416,11 +414,11 @@ export async function updateDeployment(providerCollection, workerRequest) {
                 }
             }
 
-            deployment.status = errorMessage ? McmaDeploymentStatus.ERROR : McmaDeploymentStatus.OK;
+            deployment.status = errorMessage ? McmaDeploymentStatus.Error : McmaDeploymentStatus.OK;
             deployment.statusMessage = errorMessage;
         } catch (error) {
             console.error(error);
-            deployment.status = McmaDeploymentStatus.ERROR;
+            deployment.status = McmaDeploymentStatus.Error;
             deployment.statusMessage = error.message;
         }
 
@@ -488,7 +486,7 @@ export async function deleteDeployment(providerCollection, workerRequest) {
             await dc.deleteDeployment(deployment.id);
         } catch (error) {
             console.warn(error);
-            deployment.status = McmaDeploymentStatus.ERROR;
+            deployment.status = McmaDeploymentStatus.Error;
             deployment.statusMessage = error.message;
             await dc.setDeployment(deployment);
         }

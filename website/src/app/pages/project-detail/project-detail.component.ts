@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject } from "@local/commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject, McmaProvider } from "@local/commons";
 import { iif, of } from "rxjs";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
@@ -10,6 +10,8 @@ import { EditComponentDialogComponent } from "./dialogs/edit-component-dialog.co
 import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialog.component";
 import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.component";
 import { EditVariableDialogComponent } from "./dialogs/edit-variable-dialog.component";
+import { DeleteProviderDialogComponent } from "./dialogs/delete-provider-dialog.component";
+import { EditProviderDialogComponent } from "./dialogs/edit-provider-dialog.component";
 
 const equal = require("fast-deep-equal");
 
@@ -68,6 +70,46 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     };
 
     variableSource: LocalDataSource = new LocalDataSource();
+
+    providerSettings = {
+        add: {
+            addButtonContent: "<i class=\"nb-plus\"></i>",
+            createButtonContent: "<i class=\"nb-checkmark\"></i>",
+            cancelButtonContent: "<i class=\"nb-close\"></i>",
+        },
+        edit: {
+            editButtonContent: "<i class=\"nb-edit\" title=\"Edit\"></i>",
+            saveButtonContent: "<i class=\"nb-checkmark\"></i>",
+            cancelButtonContent: "<i class=\"nb-close\"></i>",
+        },
+        delete: {
+            deleteButtonContent: "<i class=\"nb-trash\" title=\"Delete\"></i>",
+        },
+
+        mode: "external",
+        hideSubHeader: true,
+
+        actions: {
+            position: "right",
+        },
+
+        filter: false,
+
+        columns: {
+            name: {
+                title: "Code",
+                type: "string",
+                width: "20%",
+            },
+            displayName: {
+                title: "Display Name",
+                type: "string",
+                width: "70%",
+            },
+        },
+    };
+
+    providerSource: LocalDataSource = new LocalDataSource();
 
     componentSettings = {
         add: {
@@ -196,6 +238,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.project = project;
 
         this.loadVariables();
+        this.loadProviders();
         this.loadComponents();
         this.loadDeployments();
     }
@@ -210,6 +253,10 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         }
         variables.sort((a, b) => a.name.localeCompare(b.name));
         this.variableSource.load(variables);
+    }
+
+    private loadProviders() {
+        this.providerSource.load(this.project.providers);
     }
 
     private loadComponents() {
@@ -317,6 +364,64 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             }),
             switchMap(project => this.launchControlService.setProject(project)),
         ).subscribe(() => this.loadVariables());
+    }
+
+    onAddProvider() {
+        this.dialogService.open(EditProviderDialogComponent, {
+            context: {
+                provider: new McmaProvider(),
+            },
+        }).onClose.pipe(
+            takeWhile(provider => !!provider),
+            map(provider => {
+                const idx = this.project.providers.findIndex(p => provider.name === p.name);
+                if (idx >= 0) {
+                    this.project.providers.splice(idx, 1);
+                }
+                this.project.providers.push(provider);
+                this.project.providers.sort((a, b) => a.name.localeCompare(b.name));
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadProviders());
+    }
+
+    onEditProvider(event) {
+        this.dialogService.open(EditProviderDialogComponent, {
+            context: {
+                provider: new McmaProvider(event.data),
+            },
+        }).onClose.pipe(
+            takeWhile(provider => !!provider),
+            map(provider => {
+                const idx = this.project.providers.findIndex(p => provider.name === p.name);
+                if (idx >= 0) {
+                    this.project.providers.splice(idx, 1);
+                }
+                this.project.providers.push(provider);
+                this.project.providers.sort((a, b) => a.name.localeCompare(b.name));
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadProviders());
+    }
+
+    onDeleteProvider(event) {
+        this.dialogService.open(DeleteProviderDialogComponent, {
+            context: {
+                provider: new McmaProvider(event.data),
+            },
+        }).onClose.pipe(
+            takeWhile(doDelete => doDelete),
+            map(ignored => {
+                const idx = this.project.providers.findIndex(p => event.data.name === p.name);
+                if (idx >= 0) {
+                    this.project.providers.splice(idx, 1);
+                }
+                return this.project;
+            }),
+            switchMap(project => this.launchControlService.setProject(project)),
+        ).subscribe(() => this.loadProviders());
     }
 
     onAddComponent() {

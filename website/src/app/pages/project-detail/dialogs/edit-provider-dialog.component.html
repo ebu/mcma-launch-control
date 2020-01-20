@@ -1,0 +1,61 @@
+<nb-card>
+    <nb-card-header>
+        <h5 style="width:50em">{{action}} Provider</h5>
+    </nb-card-header>
+    <nb-card-body>
+        <h6>General</h6>
+        <div class="form-group row">
+            <label for="providerType" class="label col-sm-2 col-form-label">Type</label>
+            <div class="col-sm-10">
+                <nb-select id="providerType"
+                           fullWidth
+                           placeholder="Select Provider Type"
+                           (selectedChange)="onProviderTypeChange($event)"
+                           [(selected)]="providerType">
+                    <nb-option *ngFor="let providerType of providerTypes" [value]="providerType">{{providerType.displayName}}</nb-option>
+                </nb-select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="providerCode" class="label col-sm-2 col-form-label">Code</label>
+            <div class="col-sm-10">
+                <input #providerCodeField
+                       id="providerCode"
+                       type="text"
+                       nbInput
+                       fullWidth
+                       placeholder="Code"
+                       [(ngModel)]="providerCode">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="providerDisplayName" class="label col-sm-2 col-form-label">Display Name</label>
+            <div class="col-sm-10">
+                <input id="providerDisplayName"
+                       type="text"
+                       nbInput
+                       fullWidth
+                       placeholder="Display Name"
+                       [(ngModel)]="providerDisplayName">
+            </div>
+        </div>
+
+        <h6>Variables</h6>
+        <div class="form-group row" *ngFor="let variable of providerVariables">
+            <label for="var_{{variable.name}}" class="label col-sm-2 col-form-label">{{variable.name}}:</label>
+            <div class="col-sm-10">
+                <input #variableField
+                       id="var_{{variable.name}}"
+                       type="text"
+                       nbInput
+                       fullWidth
+                       [value]="variable.value"
+                       (change)="onVariableChange(variable.name, variableField.value)">
+            </div>
+        </div>
+    </nb-card-body>
+    <nb-card-footer>
+        <button class="cancel" nbButton (click)="cancel()">Cancel</button>
+        <button nbButton status="danger" [disabled]="providerCodeField.value === ''" (click)="submit()">OK</button>
+    </nb-card-footer>
+</nb-card>

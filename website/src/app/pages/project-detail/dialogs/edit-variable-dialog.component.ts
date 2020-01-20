@@ -27,6 +27,7 @@ export class EditVariableDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.action = this.variable.name ? "Edit" : "Add";
         this.name = this.variable.name;
         this.value = this.variable.value;
     }

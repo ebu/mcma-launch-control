@@ -1,9 +1,15 @@
-const { McmaProvider } = require("./provider");
 const { Resource } = require("@mcma/core");
 
-class McmaProject extends Resource {
+const McmaProviderType = Object.freeze({
+    AWS: "aws",
+    AzureRM: "azurerm",
+    AzureAD: "azuread",
+    Google: "google",
+});
+
+class McmaProvider extends Resource {
     constructor(properties) {
-        super("McmaProject", properties);
+        super("McmaProvider", properties);
 
         this.dateCreated = (properties && properties.dateCreated) || null;
         this.dateModified = (properties && properties.dateModified) || null;
@@ -11,13 +17,12 @@ class McmaProject extends Resource {
         this.id = (properties && properties.id) || null;
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
+        this.providerType = (properties && properties.providerType) || null;
         this.variables = (properties && properties.variables) || {};
-        this.providers = (properties && properties.providers) || [];
-
-        this.providers = this.providers.map(p => new McmaProvider(p));
     }
 }
 
 module.exports = {
-    McmaProject,
+    McmaProviderType,
+    McmaProvider,
 };
