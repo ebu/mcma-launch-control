@@ -20,11 +20,11 @@ export class EditComponentDialogComponent implements OnInit {
 
     action: string = "Add";
 
-    providers: string[] = [];
+    namespaces: string[] = [];
     modules: string[] = [];
     versions: string[] = [];
 
-    selectedProvider: string;
+    selectedNamespace: string;
     selectedModule: string;
     selectedVersion: string;
 
@@ -55,13 +55,13 @@ export class EditComponentDialogComponent implements OnInit {
             const moduleComponents = this.component.module.split("/");
             this.selectedVersion = moduleComponents[moduleComponents.length - 2];
             this.selectedModule = moduleComponents[moduleComponents.length - 3];
-            this.selectedProvider = moduleComponents[moduleComponents.length - 4];
+            this.selectedNamespace = moduleComponents[moduleComponents.length - 4];
         }
 
-        this.moduleRepository.getProviders().subscribe(providers => {
-            this.providers.length = 0;
-            this.providers.push(...providers);
-            this.onProviderChange(this.selectedProvider);
+        this.moduleRepository.getNamespaces().subscribe(namespaces => {
+            this.namespaces.length = 0;
+            this.namespaces.push(...namespaces);
+            this.onNamespaceChange(this.selectedNamespace);
         });
     }
 
@@ -78,15 +78,15 @@ export class EditComponentDialogComponent implements OnInit {
         }));
     }
 
-    onProviderChange(event) {
-        let provider = event;
-        if (!provider) {
-            provider = this.providers.length > 0 ? this.providers[0] : "";
+    onNamespaceChange(event) {
+        let namespace = event;
+        if (!namespace) {
+            namespace = this.namespaces.length > 0 ? this.namespaces[0] : "";
         }
 
-        this.selectedProvider = provider;
+        this.selectedNamespace = namespace;
 
-        this.moduleRepository.getModules(this.selectedProvider).subscribe(modules => {
+        this.moduleRepository.getModules(this.selectedNamespace).subscribe(modules => {
             this.modules = modules;
             this.onModuleChange(this.selectedModule);
         });
@@ -100,7 +100,7 @@ export class EditComponentDialogComponent implements OnInit {
 
         this.selectedModule = module;
 
-        this.moduleRepository.getVersions(this.selectedProvider, this.selectedModule).subscribe(versions => {
+        this.moduleRepository.getVersions(this.selectedNamespace, this.selectedModule).subscribe(versions => {
             this.versions = versions;
             this.onVersionChange(this.selectedVersion);
         });
@@ -114,7 +114,7 @@ export class EditComponentDialogComponent implements OnInit {
 
         this.selectedVersion = version;
 
-        this.moduleRepository.getModule(this.selectedProvider, this.selectedModule, this.selectedVersion).subscribe(module => {
+        this.moduleRepository.getModule(this.selectedNamespace, this.selectedModule, this.selectedVersion).subscribe(module => {
             const updateCode = !this.componentCode || (this.module && this.module.name === this.componentCode);
             const updateDisplayName = !this.componentDisplayName || (this.module && this.module.displayName === this.componentDisplayName);
 

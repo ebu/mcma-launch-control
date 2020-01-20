@@ -1,9 +1,11 @@
 {
-    "provider": "ebu",
+    "namespace": "ebu",
     "name": "aws-s3-bucket",
     "version": "0.0.1",
     "displayName": "AWS S3 Bucket",
     "description": "A managed AWS S3 bucket",
+    "provider": "aws",
+    "link": "",
     "inputParameters": [
         {
             "name": "bucket_name",

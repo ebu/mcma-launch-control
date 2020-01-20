@@ -5,14 +5,14 @@
     <nb-card-body>
         <h6>Module</h6>
         <div class="form-group row">
-            <label for="componentProvider" class="label col-sm-2 col-form-label">Provider</label>
+            <label for="componentNamespace" class="label col-sm-2 col-form-label">Namespace</label>
             <div class="col-sm-10">
-                <nb-select id="componentProvider"
+                <nb-select id="componentNamespace"
                            fullWidth
-                           placeholder="Select Provider"
-                           (selectedChange)="onProviderChange($event)"
-                           [(selected)]="selectedProvider">
-                    <nb-option *ngFor="let provider of providers" [value]="provider">{{provider}}</nb-option>
+                           placeholder="Select Namespace"
+                           (selectedChange)="onNamespaceChange($event)"
+                           [(selected)]="selectedNamespace">
+                    <nb-option *ngFor="let namespace of namespaces" [value]="namespace">{{namespace}}</nb-option>
                 </nb-select>
             </div>
         </div>

@@ -12,33 +12,33 @@ export class ModuleRepositoryService extends ModuleRepositoryData {
         super();
     }
 
-    getProviders(): Observable<string[]> {
+    getNamespaces(): Observable<string[]> {
         return this.config.get<string>("repository_url").pipe(
             switchMap(repositoryUrl => this.http.get(repositoryUrl + "/index.json")),
             map(index => index["contents"].map(item => item.name)),
         );
     }
 
-    getModules(provider: string): Observable<string[]> {
+    getModules(namespace: string): Observable<string[]> {
         return this.config.get<string>("repository_url").pipe(
-            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + provider + "/index.json")),
+            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + namespace + "/index.json")),
             map(index => index["contents"].map(item => item.name)),
         );
     }
 
-    getVersions(provider: string, module: string): Observable<string[]> {
+    getVersions(namespace: string, module: string): Observable<string[]> {
         return this.config.get<string>("repository_url").pipe(
-            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + provider + "/" + module + "/index.json")),
+            switchMap(repositoryUrl => this.http.get(repositoryUrl + "/" + namespace + "/" + module + "/index.json")),
             map(index => index["contents"].map(item => item.name)),
         );
     }
 
-    getModule(provider: string, module: string, version: string): Observable<McmaModule> {
+    getModule(namespace: string, module: string, version: string): Observable<McmaModule> {
         let baseUrl;
 
         return this.config.get<string>("repository_url").pipe(
             switchMap(repositoryUrl => {
-                baseUrl = repositoryUrl + "/" + provider + "/" + module + "/" + version;
+                baseUrl = repositoryUrl + "/" + namespace + "/" + module + "/" + version;
                 return this.http.get(baseUrl + "/module.json");
             }),
             map(json => {

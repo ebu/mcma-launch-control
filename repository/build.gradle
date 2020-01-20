@@ -40,7 +40,7 @@ task parseModuleJson {
             def jsonPretty = JsonOutput.prettyPrint(json) + "\n"
 
 
-            def targetModuleJson = file("build/staging/" + object.provider + "/" + object.name + "/" + object.version + "/module.json")
+            def targetModuleJson = file("build/staging/" + object.namespace + "/" + object.name + "/" + object.version + "/module.json")
             targetModuleJson.parentFile.mkdirs()
             targetModuleJson.createNewFile()
             targetModuleJson.write(jsonPretty)
