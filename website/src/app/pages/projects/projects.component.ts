@@ -61,17 +61,17 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService, private router: Router) {
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.launchControlService.getProjects()
             .pipe(takeWhile(() => this.alive))
             .subscribe(projects => this.source.load(projects));
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy() {
         this.alive = false;
     }
 
-    onCreate(): void {
+    onCreate() {
         this.dialogService.open(AddProjectDialogComponent).onClose.pipe(
             takeWhile(projectDetails => !!projectDetails),
             map(projectDetails => new McmaProject(projectDetails)),
@@ -81,11 +81,11 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         ).subscribe(projects => this.source.load(projects));
     }
 
-    onEdit(event): void {
+    onEdit(event) {
         this.router.navigate(["pages/projects", event.data.name]);
     }
 
-    onDelete(event): void {
+    onDelete(event) {
         this.dialogService.open(DeleteProjectDialogComponent, {
             context: {
                 projectCode: event.data.name,

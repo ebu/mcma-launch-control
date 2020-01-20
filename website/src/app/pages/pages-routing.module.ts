@@ -6,6 +6,7 @@ import { PagesComponent } from "./pages.component";
 import { ProjectDetailComponent } from "./project-detail/project-detail.component";
 import { ProjectsComponent } from "./projects/projects.component";
 import { DeploymentConfigsComponent } from "./deployment-configs/deployment-configs.component";
+import { DeploymentConfigDetailComponent } from "./deployment-config-detail/deployment-config-detail.component";
 
 const routes: Routes = [{
     path: "",
@@ -26,6 +27,10 @@ const routes: Routes = [{
         {
             path: "deployment-configs",
             component: DeploymentConfigsComponent,
+        },
+        {
+            path: "deployment-configs/:deploymentConfigName",
+            component: DeploymentConfigDetailComponent,
         },
         {
             path: "",

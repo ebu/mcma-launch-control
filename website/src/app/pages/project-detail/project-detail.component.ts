@@ -178,7 +178,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute, private dialogService: NbDialogService) {
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.launchControlService.getProject(this.route.snapshot.params["projectName"])
             .pipe(takeWhile(() => this.alive))
             .subscribe(project => this.loadProject(project));
@@ -188,7 +188,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             .subscribe(deploymentConfigs => this.innerLoadDeployments(deploymentConfigs, this.projectDeployments));
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy() {
         this.alive = false;
     }
 

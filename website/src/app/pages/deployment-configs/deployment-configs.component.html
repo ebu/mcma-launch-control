@@ -15,6 +15,7 @@
     <nb-card-body>
         <ng2-smart-table [settings]="settings"
                          [source]="source"
+                         (edit)="onEdit($event)"
                          (delete)="onDelete($event)">
         </ng2-smart-table>
     </nb-card-body>

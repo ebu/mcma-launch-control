@@ -8,6 +8,7 @@ import { AddDeploymentConfigDialogComponent } from "./dialogs/add-deployment-con
 
 import { McmaDeploymentConfig } from "@local/commons";
 import { DeleteDeploymentConfigDialogComponent } from "./dialogs/delete-deployment-config-dialog.component";
+import { Router } from "@angular/router";
 
 @Component({
     selector: "mcma-deployment-configs",
@@ -36,7 +37,6 @@ export class DeploymentConfigsComponent implements OnInit, OnDestroy {
         hideSubHeader: true,
 
         actions: {
-            edit: false,
             position: "right",
         },
 
@@ -58,20 +58,20 @@ export class DeploymentConfigsComponent implements OnInit, OnDestroy {
 
     source: LocalDataSource = new LocalDataSource();
 
-    constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService) {
+    constructor(private launchControlService: LaunchControlData, private dialogService: NbDialogService, private router: Router) {
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.launchControlService.getDeploymentConfigs()
             .pipe(takeWhile(() => this.alive))
             .subscribe(deploymentConfigs => this.source.load(deploymentConfigs));
     }
 
-    ngOnDestroy(): void {
+    ngOnDestroy() {
         this.alive = false;
     }
 
-    onCreate(): void {
+    onCreate() {
         this.dialogService.open(AddDeploymentConfigDialogComponent).onClose.pipe(
             takeWhile(deploymentConfigDetails => !!deploymentConfigDetails),
             map(deploymentConfigDetails => new McmaDeploymentConfig(deploymentConfigDetails)),
@@ -81,7 +81,11 @@ export class DeploymentConfigsComponent implements OnInit, OnDestroy {
         ).subscribe(deploymentConfigs => this.source.load(deploymentConfigs));
     }
 
-    onDelete(event): void {
+    onEdit(event) {
+        this.router.navigate(["pages/deployment-configs", event.data.name]);
+    }
+
+    onDelete(event) {
         this.dialogService.open(DeleteDeploymentConfigDialogComponent, {
             context: {
                 code: event.data.name,

@@ -39,7 +39,7 @@ export class EditComponentDialogComponent implements OnInit {
     constructor(protected ref: NbDialogRef<EditComponentDialogComponent>, private moduleRepository: ModuleRepositoryData) {
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.action = !this.component.id ? "Add" : "Edit";
         this.componentCode = this.component.name;
         this.componentDisplayName = this.component.displayName;

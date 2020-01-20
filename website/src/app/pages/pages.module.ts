@@ -8,6 +8,7 @@ import { ProjectsModule } from "./projects/projects.module";
 import { PagesRoutingModule } from "./pages-routing.module";
 import { ProjectDetailModule } from "./project-detail/project-detail.module";
 import { DeploymentConfigsModule } from "./deployment-configs/deployment-configs.module";
+import { DeploymentConfigDetailModule } from "./deployment-config-detail/deployment-config-detail.module";
 
 @NgModule({
     imports: [
@@ -18,6 +19,7 @@ import { DeploymentConfigsModule } from "./deployment-configs/deployment-configs
         ProjectsModule,
         ProjectDetailModule,
         DeploymentConfigsModule,
+        DeploymentConfigDetailModule,
     ],
     declarations: [
         PagesComponent,
