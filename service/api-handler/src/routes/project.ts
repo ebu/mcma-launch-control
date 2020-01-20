@@ -1,8 +1,8 @@
 import { DefaultRouteCollectionBuilder, HttpStatusCode } from "@mcma/api";
-import { DynamoDbTable, DynamoDbTableProvider } from "@mcma/aws-dynamodb";
+import { DynamoDbTableProvider } from "@mcma/aws-dynamodb";
 import { LambdaWorkerInvoker } from "@mcma/aws-lambda-worker-invoker";
-
 import { McmaProject } from "@local/commons";
+import { DataController } from "@local/data";
 
 const URI_TEMPLATE = "/projects";
 
@@ -12,6 +12,7 @@ const worker = new LambdaWorkerInvoker();
 
 async function createProject(requestContext) {
     console.log("createProject()", JSON.stringify(requestContext.request, null, 2));
+    const dc = new DataController(requestContext.tableName());
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
@@ -35,19 +36,16 @@ async function createProject(requestContext) {
         return;
     }
 
-    let projectId = requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name;
+    const projectId = requestContext.publicUrl() + URI_TEMPLATE + "/" + project.name;
     project.onCreate(projectId);
 
-    let table = new DynamoDbTable(requestContext.tableName(), McmaProject);
-
-    let existingProject = await table.get(projectId);
+    let existingProject = await dc.getProject(projectId);
     if (existingProject) {
         requestContext.setResponseStatusCode(HttpStatusCode.UnprocessableEntity, "McmaProject with name '" + project.name + "' already exists.");
         return;
     }
 
-    project = await table.put(projectId, project);
-
+    project = await dc.setProject(project);
     requestContext.setResponseResourceCreated(project);
 
     await worker.invoke(
@@ -61,28 +59,27 @@ async function createProject(requestContext) {
 
 async function updateProject(requestContext) {
     console.log("updateProject()", JSON.stringify(requestContext.request, null, 2));
+    const dc = new DataController(requestContext.tableName());
 
     if (!requestContext.hasRequestBody()) {
         requestContext.setResponseBadRequestDueToMissingBody();
         return;
     }
 
-    let projectName = requestContext.request.pathVariables.id;
+    const projectName = requestContext.request.pathVariables.id;
 
     if (!nameRegExp.test(projectName)) {
         requestContext.setResponseStatusCode(HttpStatusCode.BadRequest, "McmaProject has illegal characters in name.");
         return;
     }
 
-    let projectId = requestContext.publicUrl() + requestContext.request.path;
+    const projectId = requestContext.publicUrl() + requestContext.request.path;
 
     let project = new McmaProject(requestContext.getRequestBody());
     project.name = projectName;
     project.onUpsert(projectId);
 
-    let table = new DynamoDbTable(requestContext.tableName(), McmaProject);
-    project = await table.put(projectId, project);
-
+    project = await dc.setProject(project);
     requestContext.setResponseBody(project);
 
     await worker.invoke(
@@ -96,7 +93,20 @@ async function updateProject(requestContext) {
 
 async function onBeforeDeleteProject(requestContext) {
     console.log(requestContext);
-    // TODO check if project has deployments or components
+    let dc = new DataController(requestContext.tableName());
+
+    let projectId = requestContext.publicUrl() + requestContext.request.path;
+
+    const deployments = await dc.getDeployments(projectId);
+    if (deployments.length > 0) {
+        requestContext.setResponseStatusCode(HttpStatusCode.Conflict, "Unable to delete project if there are still active deployments");
+        return false;
+    }
+
+    const components = await dc.getComponents(projectId);
+    for (const component of components) {
+        await dc.deleteComponent(component.id);
+    }
 
     return true;
 }

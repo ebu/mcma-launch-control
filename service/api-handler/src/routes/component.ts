@@ -1,8 +1,7 @@
 import { DefaultRouteCollectionBuilder, HttpStatusCode } from "@mcma/api";
-
-
-import { DynamoDbTable, DynamoDbTableProvider } from "@mcma/aws-dynamodb";
-import { McmaComponent, McmaProject } from "@local/commons";
+import { DynamoDbTableProvider } from "@mcma/aws-dynamodb";
+import { McmaComponent } from "@local/commons";
+import { DataController } from "@local/data";
 
 const PROJECTS_PATH = "/projects";
 const COMPONENTS_PATH = "/components";
@@ -12,18 +11,16 @@ const nameRegExp = /^[0-9a-zA-Z\-]+$/;
 
 async function queryComponent(requestContext) {
     console.log("queryComponent()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
-    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
-    let resources = await componentTable.query((resource) => resource.id.startsWith(projectId));
-
+    let resources = await dc.getComponents(projectId);
     requestContext.setResponseBody(resources);
 
     console.log("queryComponent()", JSON.stringify(requestContext.response, null, 2));
@@ -31,10 +28,10 @@ async function queryComponent(requestContext) {
 
 async function createComponent(requestContext) {
     console.log("createComponent()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
@@ -64,16 +61,13 @@ async function createComponent(requestContext) {
 
     component.onCreate(projectId + COMPONENTS_PATH + "/" + component.name);
 
-    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
-
-    let existingComponent = await componentTable.get(component.id);
+    let existingComponent = await dc.getComponent(component.id);
     if (existingComponent) {
         requestContext.setResponseStatusCode(HttpStatusCode.UnprocessableEntity, "McmaComponent with name '" + component.name + "' already exists.");
         return;
     }
 
-    component = await componentTable.put(component.id, component);
-
+    component = await dc.setComponent(component);
     requestContext.setResponseResourceCreated(component);
 
     console.log("createComponent()", JSON.stringify(requestContext.response, null, 2));
@@ -81,10 +75,10 @@ async function createComponent(requestContext) {
 
 async function updateComponent(requestContext) {
     console.log("updateComponent()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
@@ -107,9 +101,7 @@ async function updateComponent(requestContext) {
     component.name = componentName;
     component.onUpsert(requestContext.publicUrl() + requestContext.request.path);
 
-    let componentTable = new DynamoDbTable(requestContext.tableName(), McmaComponent);
-    component = await componentTable.put(component.id, component);
-
+    component = await dc.setComponent(component);
     requestContext.setResponseBody(component);
 
     console.log("updateComponent()", JSON.stringify(requestContext.response, null, 2));

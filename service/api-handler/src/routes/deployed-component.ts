@@ -1,6 +1,7 @@
 import { DefaultRouteCollectionBuilder, HttpStatusCode } from "@mcma/api";
-import { DynamoDbTable, DynamoDbTableProvider } from "@mcma/aws-dynamodb";
-import { McmaDeployedComponent, McmaDeployment, McmaProject } from "@local/commons";
+import { DynamoDbTableProvider } from "@mcma/aws-dynamodb";
+import { McmaDeployedComponent } from "@local/commons";
+import { DataController } from "@local/data";
 
 const PROJECTS_PATH = "/projects";
 const DEPLOYMENTS_PATH = "/deployments";
@@ -9,26 +10,23 @@ const URI_TEMPLATE = PROJECTS_PATH + "/{projectId}" + DEPLOYMENTS_PATH + "/{depl
 
 async function queryDeployedComponent(requestContext) {
     console.log("queryDeployedComponent()", JSON.stringify(requestContext.request, null, 2));
+    let dc = new DataController(requestContext.tableName());
 
     let projectId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId;
-    let projectTable = new DynamoDbTable(requestContext.tableName(), McmaProject);
-    let project = await projectTable.get(projectId);
+    let project = await dc.getProject(projectId);
     if (!project) {
         requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaProject '" + projectId + "' does not exist.");
         return;
     }
 
     let deploymentId = requestContext.publicUrl() + PROJECTS_PATH + "/" + requestContext.request.pathVariables.projectId + DEPLOYMENTS_PATH + "/" + requestContext.request.pathVariables.deploymentId;
-    let deploymentTable = new DynamoDbTable(requestContext.tableName(), McmaDeployment);
-    let deployment = await deploymentTable.get(deploymentId);
+    let deployment = await dc.getDeployment(deploymentId);
     if (!deployment) {
         requestContext.setResponseStatusCode(HttpStatusCode.NotFound, "McmaDeployment '" + deploymentId + "' does not exist.");
         return;
     }
 
-    let deployedComponentTable = new DynamoDbTable(requestContext.tableName(), McmaDeployedComponent);
-    let resources = await deployedComponentTable.query((resource) => resource.id.startsWith(deploymentId));
-
+    let resources = await dc.getDeployedComponents(deploymentId);
     requestContext.setResponseBody(resources);
 
     console.log("queryDeployedComponent()", JSON.stringify(requestContext.response, null, 2));

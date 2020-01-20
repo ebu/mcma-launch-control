@@ -11,6 +11,11 @@ class DataController {
         this.deployedComponentTable = new DynamoDbTable(this.tableName, McmaDeployedComponent)
     }
 
+    async getProjects() {
+        let resources = await this.projectTable.query();
+        return resources.map(value => new McmaComponent(value));
+    }
+
     async getProject(projectId) {
         let project;
         try {
@@ -42,6 +47,11 @@ class DataController {
         return true;
     }
 
+    async getDeploymentConfigs() {
+        let resources = await this.deploymentConfigTable.query();
+        return resources.map(value => new McmaComponent(value));
+    }
+
     async getDeploymentConfig(deploymentConfigId) {
         let deploymentConfig;
         try {
@@ -71,6 +81,11 @@ class DataController {
         }
         await this.deploymentConfigTable.delete(deploymentConfigId);
         return true;
+    }
+
+    async getDeployments(projectId) {
+        let resources = await this.deploymentTable.query((resource) => resource.id.startsWith(projectId + "/"));
+        return resources.map(value => new McmaComponent(value));
     }
 
     async getDeployment(deploymentId) {
@@ -105,7 +120,7 @@ class DataController {
     }
 
     async getComponents(projectId) {
-        let resources = await this.componentTable.query((resource) => resource.id.startsWith(projectId));
+        let resources = await this.componentTable.query((resource) => resource.id.startsWith(projectId + "/"));
         return resources.map(value => new McmaComponent(value));
     }
 
@@ -141,7 +156,7 @@ class DataController {
     }
 
     async getDeployedComponents(deploymentId) {
-        let resources = await this.deployedComponentTable.query((resource) => resource.id.startsWith(deploymentId));
+        let resources = await this.deployedComponentTable.query((resource) => resource.id.startsWith(deploymentId + "/"));
         return resources.map(value => new McmaDeployedComponent(value));
     }
 

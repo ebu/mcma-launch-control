@@ -1,9 +1,8 @@
 import { DefaultRouteCollectionBuilder, HttpStatusCode } from "@mcma/api";
-import { DynamoDbTable, DynamoDbTableProvider } from "@mcma/aws-dynamodb";
+import { DynamoDbTableProvider } from "@mcma/aws-dynamodb";
 import { LambdaWorkerInvoker } from "@mcma/aws-lambda-worker-invoker";
 import { McmaDeployment, McmaDeploymentStatus } from "@local/commons";
-
-const { DataController } = require("@local/data");
+import { DataController } from "@local/data";
 
 const PROJECTS_PATH = "/projects";
 const DEPLOYMENTS_PATH = "/deployments";
@@ -24,9 +23,7 @@ const queryDeployment = async (requestContext) => {
         return;
     }
 
-    let deploymentTable = new DynamoDbTable(requestContext.tableName(), McmaDeployment);
-    let resources = await deploymentTable.query((resource) => resource.id.startsWith(projectId));
-
+    let resources = await dc.getDeployments(projectId);
     requestContext.setResponseBody(resources);
 
     console.log("queryDeployment()", JSON.stringify(requestContext.response, null, 2));
