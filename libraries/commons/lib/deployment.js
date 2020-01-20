@@ -2,9 +2,9 @@ const { Resource } = require("@mcma/core");
 
 const McmaDeploymentStatus = {
     OK: "OK",
-    ERROR: "ERROR",
-    DEPLOYING: "DEPLOYING",
-    DESTROYING: "DESTROYING"
+    Error: "Error",
+    Deploying: "Deploying",
+    Destroying: "Destroying"
 };
 
 class McmaDeployment extends Resource {

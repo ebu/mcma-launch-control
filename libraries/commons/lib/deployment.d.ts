@@ -2,9 +2,9 @@ import { Resource } from "@mcma/core";
 
 export enum McmaDeploymentStatus {
     OK = "OK",
-    ERROR = "ERROR",
-    DEPLOYING = "DEPLOYING",
-    DESTROYING = "DESTROYING"
+    Error = "Error",
+    Deploying = "Deploying",
+    Destroying = "Destroying"
 }
 
 export class McmaDeployment extends Resource {

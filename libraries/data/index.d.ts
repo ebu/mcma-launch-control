@@ -13,15 +13,15 @@ export class DataController {
     setDeploymentConfig(deploymentConfig: McmaDeploymentConfig): Promise<McmaDeploymentConfig>;
     deleteDeploymentConfig(deploymentConfigId: string): Promise<boolean>;
 
-    getDeployments(projectId: string): Promise<McmaDeployment[]>;
-    getDeployment(deploymentId: string): Promise<McmaDeployment>;
-    setDeployment(deployment: McmaDeployment): Promise<McmaDeployment>;
-    deleteDeployment(deploymentId: string): Promise<boolean>;
-
     getComponents(projectId: string): Promise<McmaComponent[]>
     getComponent(componentId: string): Promise<McmaComponent>;
     setComponent(component: McmaComponent): Promise<McmaComponent>;
     deleteComponent(componentId: string): Promise<boolean>;
+
+    getDeployments(projectId: string): Promise<McmaDeployment[]>;
+    getDeployment(deploymentId: string): Promise<McmaDeployment>;
+    setDeployment(deployment: McmaDeployment): Promise<McmaDeployment>;
+    deleteDeployment(deploymentId: string): Promise<boolean>;
 
     getDeployedComponents(deploymentId: string): Promise<McmaDeployedComponent[]>;
     getDeployedComponent(deployedComponentId: string): Promise<McmaDeployedComponent>;

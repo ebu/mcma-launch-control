@@ -158,12 +158,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
         rowClassFunction: (row) => {
             switch (row.data.status) {
-                case McmaDeploymentStatus.DEPLOYING:
+                case McmaDeploymentStatus.Deploying:
                     return "rotating-loop disabled-trash";
-                case McmaDeploymentStatus.DESTROYING:
+                case McmaDeploymentStatus.Destroying:
                     return "rotating-trash disabled-loop";
                 case McmaDeploymentStatus.OK:
-                case McmaDeploymentStatus.ERROR:
+                case McmaDeploymentStatus.Error:
                     return "";
                 default:
                     return "disabled-trash";
@@ -252,7 +252,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 statusMessage: deployment ? deployment.statusMessage : "",
             });
 
-            if (deployment && deployment.status !== McmaDeploymentStatus.OK && deployment.status !== McmaDeploymentStatus.ERROR) {
+            if (deployment && deployment.status !== McmaDeploymentStatus.OK && deployment.status !== McmaDeploymentStatus.Error) {
                 transient = true;
             }
         }

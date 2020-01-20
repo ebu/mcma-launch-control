@@ -51,7 +51,7 @@ const updateDeployment = async (requestContext) => {
     let deploymentId = requestContext.publicUrl() + requestContext.request.path;
     let deployment = await dc.getDeployment(deploymentId);
     if (deployment) {
-        if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
+        if (deployment.status === McmaDeploymentStatus.Deploying || deployment.status === McmaDeploymentStatus.Destroying) {
             requestContext.setResponseStatusCode(HttpStatusCode.Conflict, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
             return;
         }
@@ -61,7 +61,7 @@ const updateDeployment = async (requestContext) => {
         deployment.config = deploymentConfigId;
     }
 
-    deployment.status = McmaDeploymentStatus.DEPLOYING;
+    deployment.status = McmaDeploymentStatus.Deploying;
     deployment.statusMessage = null;
     deployment.onUpsert(deploymentId);
 
@@ -104,12 +104,12 @@ const deleteDeployment = async (requestContext) => {
         return;
     }
 
-    if (deployment.status === McmaDeploymentStatus.DEPLOYING || deployment.status === McmaDeploymentStatus.DESTROYING) {
+    if (deployment.status === McmaDeploymentStatus.Deploying || deployment.status === McmaDeploymentStatus.Destroying) {
         requestContext.setResponseStatusCode(HttpStatusCode.Conflict, "McmaDeployment '" + deploymentId + "' is in " + deployment.status + " state. Try again later");
         return;
     }
 
-    deployment.status = McmaDeploymentStatus.DESTROYING;
+    deployment.status = McmaDeploymentStatus.Destroying;
     deployment.statusMessage = null;
     deployment.onUpsert(deploymentId);
 
