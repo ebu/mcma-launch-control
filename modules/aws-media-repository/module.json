@@ -11,11 +11,11 @@
             "type": "string"
         },
         {
-            "name": "module_name",
+            "name": "stage_name",
             "type": "string"
         },
         {
-            "name": "stage_name",
+            "name": "log_group_name",
             "type": "string"
         },
         {

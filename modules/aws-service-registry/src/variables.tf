@@ -7,14 +7,14 @@ variable "module_prefix" {
   description = "Prefix for all managed resources in this module"
 }
 
-variable "module_name" {
-  type        = string
-  description = "User friedly name to be displayed on the API Gateway"
-}
-
 variable "stage_name" {
   type        = string
   description = "Stage name to be used for the API Gateway deployment"
+}
+
+variable "log_group_name" {
+  type = "string"
+  description = "Log group name used by MCMA Event tracking"
 }
 
 #########################

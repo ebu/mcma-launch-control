@@ -1,10 +1,10 @@
 {
-    "name": "service-registry-api-handler",
+    "name": "media-repository-api-handler",
     "version": "0.0.0",
-    "description": "API gateway request handler for Service Registry",
+    "description": "API gateway request handler for Media Repository",
     "private": true,
     "engines": {
-        "node": "^10.16.3"
+        "node": "~10.16.3"
     },
     "main": "src/index.js",
     "license": "Apache-2.0",
@@ -13,9 +13,10 @@
         "@mcma/aws-api-gateway": "0.8.5",
         "@mcma/aws-client": "0.8.5",
         "@mcma/aws-dynamodb": "0.8.5",
+        "@mcma/aws-logger": "0.8.5",
         "@mcma/client": "0.8.5",
         "@mcma/core": "0.8.5",
         "@mcma/data": "0.8.5",
-        "aws-sdk": "^2.563.0"
+        "aws-sdk": "^2.580.0"
     }
 }

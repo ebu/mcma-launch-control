@@ -363,8 +363,8 @@ export async function updateDeployment(providerCollection, workerRequest) {
         }
 
         const vr = new VariableResolver();
-        vr.putAll(deploymentConfig.variables);
         vr.putAll(project.variables);
+        vr.putAll(deploymentConfig.variables);
 
         let errorMessage = null;
 

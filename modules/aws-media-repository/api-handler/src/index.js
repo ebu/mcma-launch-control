@@ -2,21 +2,29 @@
 const { BMContent, BMEssence } = require("@mcma/core");
 const { McmaApiRouteCollection, DefaultRouteCollectionBuilder } = require("@mcma/api");
 const { DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
+const { AwsCloudWatchLoggerProvider } = require("@mcma/aws-logger");
 require("@mcma/aws-api-gateway");
 
-const contentDbTableProvider = new DynamoDbTableProvider(BMContent);
-const essenceDbTableProvider = new DynamoDbTableProvider(BMEssence);
+const loggerProvider = new AwsCloudWatchLoggerProvider("media-repository-api-handler", process.env.LogGroupName);
+const bmContentDbTableProvider = new DynamoDbTableProvider(BMContent);
+const bmEssenceDbTableProvider = new DynamoDbTableProvider(BMEssence);
 
-const controller =
+const restController =
     new McmaApiRouteCollection()
-        .addRoutes(new DefaultRouteCollectionBuilder(contentDbTableProvider, BMContent, "bm-contents").addAll().build())
-        .addRoutes(new DefaultRouteCollectionBuilder(essenceDbTableProvider, BMEssence, "bm-essences").addAll().build())
+        .addRoutes(new DefaultRouteCollectionBuilder(bmContentDbTableProvider, BMContent,"bm-contents").addAll().build())
+        .addRoutes(new DefaultRouteCollectionBuilder(bmEssenceDbTableProvider, BMEssence,"bm-essences").addAll().build())
         .toApiGatewayApiController();
 
 exports.handler = async (event, context) => {
-    console.info(JSON.stringify(event, null, 2), JSON.stringify(event, null, 2));
+    const logger = loggerProvider.get();
+    try {
+        logger.functionStart(context.awsRequestId);
+        logger.debug(event);
+        logger.debug(context);
 
-    const resp = await controller.handleRequest(event, context);
-    console.info(resp);
-    return resp;
+        return await restController.handleRequest(event, context);
+    } finally {
+        logger.functionEnd(context.awsRequestId);
+        await loggerProvider.flush();
+    }
 };

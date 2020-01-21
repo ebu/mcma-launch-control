@@ -70,6 +70,12 @@ resource "aws_lambda_function" "api_handler" {
   runtime          = "nodejs10.x"
   timeout          = "900"
   memory_size      = "3008"
+
+  environment {
+    variables = {
+      LogGroupName = var.log_group_name
+    }
+  }
 }
 
 ##############################
@@ -77,7 +83,11 @@ resource "aws_lambda_function" "api_handler" {
 ##############################
 resource "aws_api_gateway_rest_api" "service_api" {
   name        = var.module_prefix
-  description = "${var.module_name} Rest Api"
+  description = "Service Registry Rest Api"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
 }
 
 resource "aws_api_gateway_resource" "service_api" {
