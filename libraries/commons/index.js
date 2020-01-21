@@ -5,6 +5,7 @@ const { McmaDeployment, McmaDeploymentStatus } = require("./lib/deployment");
 const { McmaProject } = require("./lib/project");
 const { McmaModule, McmaModuleParameter, McmaModuleDeploymentActionType, McmaModuleDeploymentAction } = require("./lib/module");
 const { McmaProviderType, McmaProvider } = require("./lib/provider");
+const { McmaVariable } = require("./lib/variable");
 
 module.exports = {
     McmaComponent,
@@ -19,4 +20,5 @@ module.exports = {
     McmaModuleDeploymentAction,
     McmaProviderType,
     McmaProvider,
+    McmaVariable,
 };

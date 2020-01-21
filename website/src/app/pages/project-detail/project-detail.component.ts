@@ -1,11 +1,13 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject, McmaProvider } from "@local/commons";
+import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject, McmaProvider, McmaVariable } from "@local/commons";
 import { iif, of } from "rxjs";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { LocalDataSource } from "ng2-smart-table";
 import { NbDialogService } from "@nebular/theme";
+
+
 import { EditComponentDialogComponent } from "./dialogs/edit-component-dialog.component";
 import { DeleteComponentDialogComponent } from "./dialogs/delete-component-dialog.component";
 import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.component";
@@ -244,15 +246,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     }
 
     private loadVariables() {
-        const variables = [];
-        for (const name of Object.keys(this.project.variables)) {
-            variables.push({
-                name,
-                value: this.project.variables[name],
-            });
-        }
-        variables.sort((a, b) => a.name.localeCompare(b.name));
-        this.variableSource.load(variables);
+        this.variableSource.load(this.project.variables);
     }
 
     private loadProviders() {
@@ -321,12 +315,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     onAddVariable() {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: { name: "", value: "" },
+                variable: new McmaVariable(),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),
             map(variable => {
-                this.project.variables[variable.name] = variable.value;
+                const idx = this.project.variables.findIndex(p => variable.name === p.name);
+                if (idx >= 0) {
+                    this.project.variables.splice(idx, 1);
+                }
+                this.project.variables.push(variable);
+                this.project.variables.sort((a, b) => a.name.localeCompare(b.name));
                 return this.project;
             }),
             switchMap(project => this.launchControlService.setProject(project)),
@@ -336,15 +335,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     onEditVariable(event) {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: event.data,
+                variable: new McmaVariable(event.data),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),
             map(variable => {
-                if (variable.name !== event.data.name) {
-                    delete this.project.variables[event.data.name];
+                const idx = this.project.variables.findIndex(p => event.data.name === p.name);
+                if (idx >= 0) {
+                    this.project.variables.splice(idx, 1);
                 }
-                this.project.variables[variable.name] = variable.value;
+                this.project.variables.push(variable);
+                this.project.variables.sort((a, b) => a.name.localeCompare(b.name));
                 return this.project;
             }),
             switchMap(project => this.launchControlService.setProject(project)),
@@ -359,7 +360,10 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         }).onClose.pipe(
             takeWhile(doDelete => doDelete),
             map(ignored => {
-                delete this.project.variables[event.data.name];
+                const idx = this.project.variables.findIndex(p => event.data.name === p.name);
+                if (idx >= 0) {
+                    this.project.variables.splice(idx, 1);
+                }
                 return this.project;
             }),
             switchMap(project => this.launchControlService.setProject(project)),

@@ -1,37 +1,30 @@
 {
     "namespace": "ebu",
     "name": "aws-media-repository",
+    "provider": "aws",
     "version": "0.0.1",
     "displayName": "AWS MCMA Media Repository",
     "description": "The MCMA Media Repository is used for tracking assets and their corresponding essence files.",
-    "providers": [
-        "aws"
-    ],
     "inputParameters": [
         {
             "name": "module_prefix",
-            "type": "string",
-            "defaultValue": "${project_prefix}-media-repository"
+            "type": "string"
         },
         {
             "name": "module_name",
-            "type": "string",
-            "defaultValue": "AWS MCMA Media Repository"
+            "type": "string"
         },
         {
             "name": "stage_name",
-            "type": "string",
-            "defaultValue": "${stage_name}"
+            "type": "string"
         },
         {
             "name": "aws_account_id",
-            "type": "string",
-            "defaultValue": "${aws_account_id}"
+            "type": "string"
         },
         {
             "name": "aws_region",
-            "type": "string",
-            "defaultValue": "${aws_region}"
+            "type": "string"
         }
     ],
     "outputParameters": [

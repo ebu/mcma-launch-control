@@ -1,4 +1,5 @@
 import { Resource } from "@mcma/core";
+import { McmaVariable } from "./variable";
 
 export class McmaComponent extends Resource {
     constructor(properties?: object);
@@ -6,5 +7,5 @@ export class McmaComponent extends Resource {
     name: string;
     displayName: string;
     module: string;
-    variables: object;
+    variables: McmaVariable[];
 }

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { McmaDeploymentConfig } from "@local/commons";
+import { McmaDeploymentConfig, McmaVariable } from "@local/commons";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
 import { LocalDataSource } from "ng2-smart-table";
@@ -78,26 +78,23 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
     }
 
     private loadVariables() {
-        const variables = [];
-        for (const name of Object.keys(this.deploymentConfig.variables)) {
-            variables.push({
-                name,
-                value: this.deploymentConfig.variables[name],
-            });
-        }
-        variables.sort((a, b) => a.name.localeCompare(b.name));
-        this.variableSource.load(variables);
+        this.variableSource.load(this.deploymentConfig.variables);
     }
 
     onAddVariable() {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: { name: "", value: "" },
+                variable: new McmaVariable(),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),
             map(variable => {
-                this.deploymentConfig.variables[variable.name] = variable.value;
+                const idx = this.deploymentConfig.variables.findIndex(p => variable.name === p.name);
+                if (idx >= 0) {
+                    this.deploymentConfig.variables.splice(idx, 1);
+                }
+                this.deploymentConfig.variables.push(variable);
+                this.deploymentConfig.variables.sort((a, b) => a.name.localeCompare(b.name));
                 return this.deploymentConfig;
             }),
             switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),
@@ -107,15 +104,17 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
     onEditVariable(event) {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: event.data,
+                variable: new McmaVariable(event.data),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),
             map(variable => {
-                if (variable.name !== event.data.name) {
-                    delete this.deploymentConfig.variables[event.data.name];
+                const idx = this.deploymentConfig.variables.findIndex(p => event.data.name === p.name);
+                if (idx >= 0) {
+                    this.deploymentConfig.variables.splice(idx, 1);
                 }
-                this.deploymentConfig.variables[variable.name] = variable.value;
+                this.deploymentConfig.variables.push(variable);
+                this.deploymentConfig.variables.sort((a, b) => a.name.localeCompare(b.name));
                 return this.deploymentConfig;
             }),
             switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),
@@ -130,7 +129,10 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
         }).onClose.pipe(
             takeWhile(doDelete => doDelete),
             map(ignored => {
-                delete this.deploymentConfig.variables[event.data.name];
+                const idx = this.deploymentConfig.variables.findIndex(p => event.data.name === p.name);
+                if (idx >= 0) {
+                    this.deploymentConfig.variables.splice(idx, 1);
+                }
                 return this.deploymentConfig;
             }),
             switchMap(deploymentConfig => this.launchControlService.setDeploymentConfig(deploymentConfig)),

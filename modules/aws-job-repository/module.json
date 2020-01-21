@@ -1,10 +1,10 @@
 {
     "namespace": "ebu",
     "name": "aws-job-repository",
+    "provider": "aws",
     "version": "0.0.1",
     "displayName": "AWS MCMA Job Repository",
     "description": "The MCMA Job Repository is used for submitting and monitoring jobs",
-    "provider": "aws",
     "inputParameters": [
         {
             "name": "module_prefix",

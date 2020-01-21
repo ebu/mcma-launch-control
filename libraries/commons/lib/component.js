@@ -1,3 +1,4 @@
+const { McmaVariable } = require("./variable");
 const { Resource } = require("@mcma/core");
 
 class McmaComponent extends Resource {
@@ -11,7 +12,13 @@ class McmaComponent extends Resource {
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
         this.module = (properties && properties.module) || null;
-        this.variables = (properties && properties.variables) || {};
+        this.variables = properties && properties.variables;
+
+        if (!Array.isArray(this.variables)) {
+            this.variables = [];
+        }
+
+        this.variables = this.variables.map(v => new McmaVariable(v));
     }
 }
 

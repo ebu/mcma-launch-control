@@ -13,7 +13,8 @@ import {
     McmaDeploymentStatus,
     McmaModule,
     McmaModuleDeploymentActionType,
-    McmaProvider
+    McmaProvider,
+    McmaVariable
 } from "@local/commons";
 import { DataController } from "@local/data";
 
@@ -68,14 +69,14 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
     for (const provider of providers) {
         const variables = {};
 
-        for (const name of Object.keys(provider.variables)) {
-            let value = provider.variables[name];
+        for (const variable of provider.variables) {
+            let value = variable.value;
             if (value) {
-                variables[name] = vr.resolve(value);
+                variables[variable.name] = vr.resolve(value).value;
             }
         }
         const terraformProvider = {};
-        terraformProvider[provider.providerType] = variables;
+        terraformProvider[provider.type] = variables;
 
         terraformProviders.push(terraformProvider);
     }
@@ -85,8 +86,8 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
     for (const component of components) {
         const variables = {};
 
-        for (const name of Object.keys(component.variables)) {
-            variables[name] = vr.resolve(component.variables[name]);
+        for (const variable of component.variables) {
+            variables[variable.name] = vr.resolve(variable.value).value;
         }
 
         variables["source"] = component.module.substring(0, component.module.length - 4) + "zip";
@@ -169,11 +170,13 @@ function getResourceManagerConfig(deployedComponents: McmaDeployedComponent[]) {
     // finding a service registry by searching for the 'services_url' output property
 
     for (const deployedComponent of deployedComponents) {
-        if (deployedComponent.outputVariables["services_url"]) {
+        const vr = new VariableResolver();
+        vr.putAll(deployedComponent.outputVariables);
+        if (vr.has("services_url")) {
             return {
-                servicesUrl: deployedComponent.outputVariables["services_url"],
-                servicesAuthType: deployedComponent.outputVariables["auth_type"],
-                servicesAuthContext: deployedComponent.outputVariables["auth_context"],
+                servicesUrl: vr.get("services_url").value,
+                servicesAuthType: vr.has("auth_type") ? vr.get("auth_type").value : undefined,
+                servicesAuthContext: vr.has("auth_context") ? vr.get("auth_type").value : undefined,
             };
         }
     }
@@ -181,7 +184,7 @@ function getResourceManagerConfig(deployedComponents: McmaDeployedComponent[]) {
 
 function replaceVariables(value: any, vr: VariableResolver): any {
     if (typeof value === "string") {
-        return vr.resolve(<string>value);
+        return vr.resolve(<string>value).value;
     } else if (value instanceof Array) {
         return (<any[]>value).map(item => replaceVariables(item, vr));
     } else if (value instanceof Object) {
@@ -226,15 +229,18 @@ async function processPreDestroyActions(components: McmaComponent[], oldDeployed
                             throw new Exception("Property 'resourceName' missing in deployment action 'ManagedResource'");
                         }
 
-                        const resourceId = deployedComponent.resources[resourceName];
-                        if (resourceId) {
-                            try {
-                                console.log("Deleting managed resource '" + resourceName + "' with id: " + resourceId);
-                                // TODO: pass resourceId when upgrading to MCMA libraries 0.8.6
-                                await resourceManager.delete(<Resource>{ id: resourceId });
-                            } catch (error) {
-                                console.warn("Failed to delete resource '" + resourceId + "'");
-                                console.warn(error.toString());
+                        const resourceVariable = deployedComponent.resources.find(r => r.name === resourceName);
+                        if (resourceVariable) {
+                            const resourceId = resourceVariable.value;
+                            if (resourceId) {
+                                try {
+                                    console.log("Deleting managed resource '" + resourceName + "' with id: " + resourceId);
+                                    // TODO: pass resourceId when upgrading to MCMA libraries 0.8.6
+                                    await resourceManager.delete(<Resource>{ id: resourceId });
+                                } catch (error) {
+                                    console.warn("Failed to delete resource '" + resourceId + "'");
+                                    console.warn(error.toString());
+                                }
                             }
                         }
 
@@ -258,7 +264,12 @@ function generateDeployedComponents(deploymentId: string, components: McmaCompon
 
         //TODO replace inputVariables with resolved variables while variables keeps the original configuration copied from the component.
         deployedComponent.inputVariables = deployedComponent.variables;
-        deployedComponent.outputVariables = terraformOutput[component.name].value;
+        for (const varName of Object.keys(terraformOutput[component.name].value)) {
+            deployedComponent.outputVariables.push(new McmaVariable({
+                name: varName,
+                value: terraformOutput[component.name].value[varName]
+            }));
+        }
 
         result.push(deployedComponent);
     }
@@ -293,9 +304,7 @@ async function processDeploymentActions(oldDeployedComponents: McmaDeployedCompo
                         }));
 
                         const vr = new VariableResolver();
-                        for (const key of Object.keys(deployedComponent.outputVariables)) {
-                            vr.put(key, deployedComponent.outputVariables[key]);
-                        }
+                        vr.putAll(deployedComponent.outputVariables);
 
                         const resourceName = action.data.resourceName;
                         if (!resourceName) {
@@ -309,15 +318,15 @@ async function processDeploymentActions(oldDeployedComponents: McmaDeployedCompo
                         resource = replaceVariables(resource, vr);
 
                         const oldDeployedComponent = oldDeployedComponentsMap.get(deployedComponent.name);
-                        if (oldDeployedComponent && oldDeployedComponent.resources && oldDeployedComponent.resources[resourceName]) {
-                            resource.id = oldDeployedComponent.resources[resourceName];
+                        if (oldDeployedComponent && oldDeployedComponent.resources && oldDeployedComponent.resources.find(r => r.name === resourceName)) {
+                            resource.id = oldDeployedComponent.resources.find(r => r.name === resourceName).value;
                             resource = await resourceManager.update(resource);
                         } else {
                             resource = await resourceManager.create(resource);
                         }
 
                         console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id);
-                        deployedComponent.resources[resourceName] = resource.id;
+                        deployedComponent.resources.push(new McmaVariable({ name: resourceName, value: resource.id }));
                         break;
                     case McmaModuleDeploymentActionType.RunScript:
                         throw new Exception("Deployment action '" + action.type + "' not implemented");
@@ -354,14 +363,8 @@ export async function updateDeployment(providerCollection, workerRequest) {
         }
 
         const vr = new VariableResolver();
-        for (const name of Object.keys(deploymentConfig.variables)) {
-            const value = deploymentConfig.variables[name];
-            vr.put(name, value);
-        }
-        for (const name of Object.keys(project.variables)) {
-            const value = project.variables[name];
-            vr.put(name, value);
-        }
+        vr.putAll(deploymentConfig.variables);
+        vr.putAll(project.variables);
 
         let errorMessage = null;
 

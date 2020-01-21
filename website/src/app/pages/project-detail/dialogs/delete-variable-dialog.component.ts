@@ -1,5 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { NbDialogRef } from "@nebular/theme";
+import { McmaVariable } from "@local/commons";
 
 @Component({
     selector: "mcma-delete-variable-dialog",
@@ -8,7 +9,7 @@ import { NbDialogRef } from "@nebular/theme";
 })
 export class DeleteVariableDialogComponent {
 
-    @Input() variable: { name: string, value: string};
+    @Input() variable: McmaVariable;
 
     constructor(protected ref: NbDialogRef<DeleteVariableDialogComponent>) {
     }

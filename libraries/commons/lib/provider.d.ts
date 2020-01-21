@@ -1,4 +1,5 @@
-import { Resource } from "@mcma/core";
+import { McmaObject } from "@mcma/core";
+import { McmaVariable } from "./variable";
 
 export enum McmaProviderType {
     AWS = "aws",
@@ -7,11 +8,11 @@ export enum McmaProviderType {
     Google = "google",
 }
 
-export class McmaProvider extends Resource {
+export class McmaProvider extends McmaObject {
     constructor(properties?: object);
 
     name: string;
     displayName: string;
-    providerType: McmaProviderType;
-    variables: object;
+    type: McmaProviderType;
+    variables: McmaVariable[];
 }

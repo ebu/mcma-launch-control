@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { NbDialogRef } from "@nebular/theme";
-import { McmaProvider } from "@local/commons";
+import { McmaProvider, McmaVariable } from "@local/commons";
 
 @Component({
     selector: "mcma-edit-provider-dialog",
@@ -124,19 +124,19 @@ export class EditProviderDialogComponent implements OnInit {
         this.ref.close(new McmaProvider({
             name: this.providerCode,
             displayName: this.providerDisplayName,
-            providerType: this.providerType.name,
+            type: this.providerType.name,
             variables: this.getProviderVariables(),
         }));
     }
 
     ngOnInit() {
-        this.action = !this.provider.id ? "Add" : "Edit";
+        this.action = !this.provider.name ? "Add" : "Edit";
         this.providerCode = this.provider.name;
         this.providerDisplayName = this.provider.displayName;
-        this.providerType = this.providerTypes.find(type => type.name === this.provider.providerType);
+        this.providerType = this.providerTypes.find(type => type.name === this.provider.type);
 
-        for (const varName of Object.keys(this.provider.variables)) {
-            this.providerVariableMap.set(varName, this.provider.variables[varName]);
+        for (const variable of this.provider.variables) {
+            this.providerVariableMap.set(variable.name, variable.value);
         }
 
         this.onProviderTypeChange(this.providerType);
@@ -180,15 +180,18 @@ export class EditProviderDialogComponent implements OnInit {
     }
 
     private getProviderVariables() {
-        const map = {};
+        const list = [];
 
         if (this.providerType) {
             for (const param of this.providerType.inputParameters) {
-                map[param.name] = this.providerVariableMap.has(param.name) ? this.providerVariableMap.get(param.name) : null;
+                list.push(new McmaVariable({
+                    name: param.name,
+                    value: this.providerVariableMap.has(param.name) ? this.providerVariableMap.get(param.name) : null,
+                }));
             }
         }
 
-        return map;
+        return list;
     }
 
 }

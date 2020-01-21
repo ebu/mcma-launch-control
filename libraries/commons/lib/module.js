@@ -8,21 +8,34 @@ class McmaModule extends Resource {
         this.dateModified = (properties && properties.dateModified) || null;
 
         this.id = (properties && properties.id) || null;
-        this.provider = (properties && properties.provider) || null;
+        this.namespace = (properties && properties.namespace) || null;
         this.name = (properties && properties.name) || null;
+        this.provider = (properties && properties.provider) || null;
         this.version = (properties && properties.version) || null;
         this.displayName = (properties && properties.displayName) || null;
         this.description = (properties && properties.description) || null;
         this.link = (properties && properties.link) || null;
-        this.provider = (properties && properties.provider) || null;
-        this.providers = (properties && properties.providers) || [];
-        this.inputParameters = (properties && properties.inputParameters) || [];
-        this.outputParameters = (properties && properties.outputParameters) || [];
-        this.deploymentActions = (properties && properties.deploymentActions) || [];
+        this.providers = properties && properties.providers;
+        this.inputParameters = properties && properties.inputParameters;
+        this.outputParameters = properties && properties.outputParameters;
+        this.deploymentActions = properties && properties.deploymentActions;
 
-        this.inputParameters = this.inputParameters.map(param => new McmaModuleParameter(param));
-        this.outputParameters = this.outputParameters.map(param => new McmaModuleParameter(param));
-        this.deploymentActions = this.deploymentActions.map(param => new McmaModuleDeploymentAction(param));
+        if (!Array.isArray(this.providers)) {
+            this.providers = [];
+        }
+        if (!Array.isArray(this.inputParameters)) {
+            this.inputParameters = [];
+        }
+        if (!Array.isArray(this.outputParameters)) {
+            this.outputParameters = [];
+        }
+        if (!Array.isArray(this.deploymentActions)) {
+            this.deploymentActions = [];
+        }
+
+        this.inputParameters = this.inputParameters.map(v => new McmaModuleParameter(v));
+        this.outputParameters = this.outputParameters.map(v => new McmaModuleParameter(v));
+        this.deploymentActions = this.deploymentActions.map(v => new McmaModuleDeploymentAction(v));
     }
 }
 

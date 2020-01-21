@@ -1,4 +1,5 @@
-const { Resource } = require("@mcma/core");
+const { McmaObject } = require("@mcma/core");
+const { McmaVariable } = require("./variable");
 
 const McmaProviderType = Object.freeze({
     AWS: "aws",
@@ -7,18 +8,20 @@ const McmaProviderType = Object.freeze({
     Google: "google",
 });
 
-class McmaProvider extends Resource {
+class McmaProvider extends McmaObject {
     constructor(properties) {
         super("McmaProvider", properties);
 
-        this.dateCreated = (properties && properties.dateCreated) || null;
-        this.dateModified = (properties && properties.dateModified) || null;
-
-        this.id = (properties && properties.id) || null;
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
-        this.providerType = (properties && properties.providerType) || null;
-        this.variables = (properties && properties.variables) || {};
+        this.type = (properties && properties.type) || null;
+        this.variables = properties && properties.variables;
+
+        if (!Array.isArray(this.variables)) {
+            this.variables = [];
+        }
+
+        this.variables = this.variables.map(v => new McmaVariable(v));
     }
 }
 

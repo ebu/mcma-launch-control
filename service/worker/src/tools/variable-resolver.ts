@@ -1,12 +1,12 @@
+import { McmaVariable } from "@local/commons";
+
 class VariableResolveNode {
-    readonly name: string;
-    readonly value: string;
+    readonly variable: McmaVariable;
     readonly dependencies: Set<string>;
 
-    constructor(name: string, value: string) {
-        this.name = name;
-        this.value = value;
-        this.dependencies = VariableResolveNode.computeDependencies(this.value);
+    constructor(variable) {
+        this.variable = variable;
+        this.dependencies = VariableResolveNode.computeDependencies(variable.value);
     }
 
     private static computeDependencies(str: string) {
@@ -56,19 +56,40 @@ export class VariableResolver {
         this.map = new Map<string, VariableResolveNode>();
     }
 
-    put(name: string, value: string) {
-        this.map.set(name, new VariableResolveNode(name, value));
+    has(name: string): boolean {
+        return this.map.has(name);
     }
 
-    resolve(str: string): string {
-        return this.resolveNode(new VariableResolveNode("", str), new Map<string, string>(), new Set<string>());
+    get(name: string): McmaVariable {
+        if (this.map.has(name)) {
+            return this.map.get(name).variable;
+        }
+        return undefined;
     }
 
-    private resolveNode(node: VariableResolveNode, resolved: Map<string, string>, unresolved: Set<string>) {
-        unresolved.add(node.name);
+    put(variable: McmaVariable) {
+        this.map.set(variable.name, new VariableResolveNode(variable));
+    }
+
+    putAll(variables: McmaVariable[]) {
+        for (const variable of variables) {
+            this.map.set(variable.name, new VariableResolveNode(variable));
+        }
+    }
+
+    resolve(variable: string | McmaVariable): McmaVariable {
+        if (typeof variable === "string") {
+            variable = new McmaVariable({ value: variable });
+        }
+
+        return this.resolveNode(new VariableResolveNode(variable), new Map<string, McmaVariable>(), new Set<string>());
+    }
+
+    private resolveNode(node: VariableResolveNode, resolved: Map<string, McmaVariable>, unresolved: Set<string>): McmaVariable {
+        unresolved.add(node.variable.name);
         for (const dependency of node.dependencies) {
             if (unresolved.has(dependency)) {
-                throw new Error("Circular reference detected: " + node.name + " -> " + dependency);
+                throw new Error("Circular reference detected: " + node.variable.name + " -> " + dependency);
             }
             if (!resolved.has(dependency)) {
                 if (this.map.has(dependency)) {
@@ -76,12 +97,13 @@ export class VariableResolver {
                 }
             }
         }
-        unresolved.delete(node.name);
+        unresolved.delete(node.variable.name);
 
-        const str = node.value;
+        const str = node.variable.value;
         let state = 0;
         let start = 0;
-        let result = "";
+        let value = "";
+        let secure = false;
 
         for (let i = 0; i < str.length; i++) {
             const c = str.charAt(i);
@@ -89,7 +111,7 @@ export class VariableResolver {
             switch (state) {
                 case 0:
                     if (c === "$") {
-                        result += str.substring(start, i);
+                        value += str.substring(start, i);
                         state = 1;
                         start = i;
                     }
@@ -100,17 +122,19 @@ export class VariableResolver {
                     } else if (c !== "$") {
                         state = 0;
                     } else {
-                        result += "$";
+                        value += "$";
                         start = i;
                     }
                     break;
                 case 2:
                     if (c === "}") {
-                        const name = str.substring(start + 2, i);
-                        if (resolved.has(name)) {
-                            result += resolved.get(name);
+                        const nodeName = str.substring(start + 2, i);
+                        if (resolved.has(nodeName)) {
+                            const resolvedNode = resolved.get(nodeName);
+                            value += resolvedNode.value;
+                            secure = secure || resolvedNode.secure;
                         } else {
-                            result += str.substring(start, i);
+                            value += str.substring(start, i + 1);
                         }
                         state = 0;
                         start = i + 1;
@@ -119,8 +143,12 @@ export class VariableResolver {
             }
         }
 
-        result += str.substring(start);
+        value += str.substring(start);
 
-        return result;
+        return new McmaVariable({
+            name: node.variable.name,
+            value,
+            secure,
+        });
     }
 }

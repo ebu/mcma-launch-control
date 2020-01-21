@@ -3,12 +3,14 @@ import { Resource } from "@mcma/core";
 export class McmaModule extends Resource {
     constructor(properties?: object);
 
-    provider: string;
+    namespace: string;
     name: string;
+    provider: string;
     version: string;
     displayName: string;
     description: string;
     link: string;
+    providers: any[];
     inputParameters: McmaModuleParameter[];
     outputParameters: McmaModuleParameter[];
     deploymentActions: McmaModuleDeploymentAction[];

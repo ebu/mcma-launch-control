@@ -1,4 +1,5 @@
 const { Resource } = require("@mcma/core");
+const { McmaVariable } = require("./variable");
 
 class McmaDeploymentConfig extends Resource {
     constructor(properties) {
@@ -10,7 +11,13 @@ class McmaDeploymentConfig extends Resource {
         this.id = (properties && properties.id) || null;
         this.name = (properties && properties.name) || null;
         this.displayName = (properties && properties.displayName) || null;
-        this.variables = (properties && properties.variables) || {};
+        this.variables = properties && properties.variables;
+
+        if (!Array.isArray(this.variables)) {
+            this.variables = [];
+        }
+
+        this.variables = this.variables.map(v => new McmaVariable(v));
     }
 }
 

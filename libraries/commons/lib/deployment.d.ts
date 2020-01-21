@@ -1,5 +1,6 @@
 import { Resource } from "@mcma/core";
 import { McmaProvider } from "./provider";
+import { McmaVariable } from "./variable";
 
 export enum McmaDeploymentStatus {
     OK = "OK",
@@ -15,6 +16,6 @@ export class McmaDeployment extends Resource {
     config: string;
     status: McmaDeploymentStatus;
     statusMessage: string;
-    variables: object;
+    variables: McmaVariable[];
     providers: McmaProvider[];
 }

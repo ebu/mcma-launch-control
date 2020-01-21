@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 
-import { McmaComponent, McmaModule } from "@local/commons";
+import { McmaComponent, McmaModule, McmaVariable } from "@local/commons";
 
 import { NbDialogRef } from "@nebular/theme";
 import { ModuleRepositoryData } from "../../../@core/data/module-repository";
@@ -45,8 +45,8 @@ export class EditComponentDialogComponent implements OnInit {
         this.componentDisplayName = this.component.displayName;
         this.componentModule = this.component.module;
 
-        for (const varName of Object.keys(this.component.variables)) {
-            this.componentVariableMap.set(varName, this.component.variables[varName]);
+        for (const variable of this.component.variables) {
+            this.componentVariableMap.set(variable.name, variable.value);
         }
 
         if (this.component.module) {
@@ -147,14 +147,17 @@ export class EditComponentDialogComponent implements OnInit {
     }
 
     private getComponentVariables(): object {
-        const map = {};
+        const list = [];
 
         if (this.module) {
             for (const param of this.module.inputParameters) {
-                map[param.name] = this.componentVariableMap.has(param.name) ? this.componentVariableMap.get(param.name) : null;
+                list.push(new McmaVariable({
+                    name: param.name,
+                    value: this.componentVariableMap.has(param.name) ? this.componentVariableMap.get(param.name) : null,
+                }));
             }
         }
 
-        return map;
+        return list;
     }
 }

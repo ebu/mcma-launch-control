@@ -1,5 +1,6 @@
 const { Resource } = require("@mcma/core");
 const { McmaProvider } = require("./provider");
+const { McmaVariable } = require("./variable");
 
 const McmaDeploymentStatus = {
     OK: "OK",
@@ -20,10 +21,18 @@ class McmaDeployment extends Resource {
         this.config = (properties && properties.config) || null;
         this.status = (properties && properties.status) || null;
         this.statusMessage = (properties && properties.statusMessage) || null;
-        this.variables = (properties && properties.variables) || {};
-        this.providers = (properties && properties.providers) || [];
+        this.variables = properties && properties.variables;
+        this.providers = properties && properties.providers;
 
-        this.providers = this.providers.map(p => new McmaProvider(p));
+        if (!Array.isArray(this.variables)) {
+            this.variables = [];
+        }
+        if (!Array.isArray(this.providers)) {
+            this.providers = [];
+        }
+
+        this.variables = this.variables.map(v => new McmaVariable(v));
+        this.providers = this.providers.map(v => new McmaProvider(v));
     }
 }
 

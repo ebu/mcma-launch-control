@@ -5,8 +5,8 @@ import { ThemeModule } from "../../@theme/theme.module";
 import { DeploymentConfigDetailComponent } from "./deployment-config-detail.component";
 import { Ng2SmartTableModule } from "ng2-smart-table";
 import { FormsModule } from "@angular/forms";
-import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.component";
 import { EditVariableDialogComponent } from "./dialogs/edit-variable-dialog.component";
+import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.component";
 
 @NgModule({
     imports: [
