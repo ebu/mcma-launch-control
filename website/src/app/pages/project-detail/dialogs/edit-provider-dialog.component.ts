@@ -124,7 +124,7 @@ export class EditProviderDialogComponent implements OnInit {
         this.ref.close(new McmaProvider({
             name: this.providerCode,
             displayName: this.providerDisplayName,
-            providerType: this.providerType,
+            providerType: this.providerType.name,
             variables: this.getProviderVariables(),
         }));
     }

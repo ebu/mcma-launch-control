@@ -7,7 +7,14 @@ import { Exception, Resource } from "@mcma/core";
 import { AuthProvider, ResourceManager } from "@mcma/client";
 import "@mcma/aws-client";
 
-import { McmaComponent, McmaDeployedComponent, McmaDeploymentStatus, McmaModule, McmaModuleDeploymentActionType } from "@local/commons";
+import {
+    McmaComponent,
+    McmaDeployedComponent,
+    McmaDeploymentStatus,
+    McmaModule,
+    McmaModuleDeploymentActionType,
+    McmaProvider
+} from "@local/commons";
 import { DataController } from "@local/data";
 
 import { Terraform } from "../tools/terraform";
@@ -55,34 +62,39 @@ function generateGitIgnore() {
         "terraform.tfvars.json\n";
 }
 
-function generateMainTfJson(components) {
-    const providers = [];
+function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], components: McmaComponent[]) {
+    const terraformProviders = [];
 
-    providers.push({
-        aws: {
-            version: "~> 2.25",
-            access_key: "${var.aws_access_key}",
-            secret_key: "${var.aws_secret_key}",
-            region: "${var.aws_region}",
+    for (const provider of providers) {
+        const variables = {};
+
+        for (const name of Object.keys(provider.variables)) {
+            let value = provider.variables[name];
+            if (value) {
+                variables[name] = vr.resolve(value);
+            }
         }
-    });
+        const terraformProvider = {};
+        terraformProvider[provider.providerType] = variables;
 
-    const modules = [];
+        terraformProviders.push(terraformProvider);
+    }
+
+    const terraformModules = [];
 
     for (const component of components) {
-        const variables: any = {};
+        const variables = {};
 
-        for (const variable of Object.keys(component.variables)) {
-            variables[variable] = component.variables[variable];
+        for (const name of Object.keys(component.variables)) {
+            variables[name] = vr.resolve(component.variables[name]);
         }
 
-        variables.source = component.module.substring(0, component.module.length - 4) + "zip";
+        variables["source"] = component.module.substring(0, component.module.length - 4) + "zip";
 
         const module = {};
         module[component.name] = variables;
-        component.variables;
 
-        modules.push(module);
+        terraformModules.push(module);
     }
 
     const mainTfJson = {
@@ -92,8 +104,8 @@ function generateMainTfJson(components) {
                 local: {}
             }
         },
-        provider: providers,
-        module: modules
+        provider: terraformProviders,
+        module: terraformModules
     };
 
     return JSON.stringify(mainTfJson, null, 2);
@@ -341,6 +353,16 @@ export async function updateDeployment(providerCollection, workerRequest) {
             return;
         }
 
+        const vr = new VariableResolver();
+        for (const name of Object.keys(deploymentConfig.variables)) {
+            const value = deploymentConfig.variables[name];
+            vr.put(name, value);
+        }
+        for (const name of Object.keys(project.variables)) {
+            const value = project.variables[name];
+            vr.put(name, value);
+        }
+
         let errorMessage = null;
 
         try {
@@ -362,9 +384,9 @@ export async function updateDeployment(providerCollection, workerRequest) {
             const isNewRepository = await Git.isNew();
 
             await Git.writeFile(".gitignore", generateGitIgnore());
-            await Git.writeFile("main.tf.json", generateMainTfJson(components));
-            await Git.writeFile("variables.tf.json", generateVariablesTfJson());
-            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+            await Git.writeFile("main.tf.json", generateMainTfJson(vr, project.providers, components));
+            // await Git.writeFile("variables.tf.json", generateVariablesTfJson());
+            // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
             await Git.writeFile("outputs.tf.json", generateOutputsTfJson(components));
 
             await Git.addFiles();
@@ -466,7 +488,7 @@ export async function deleteDeployment(providerCollection, workerRequest) {
             await Git.clone(repoUrl);
             await Git.config("Launch Control", "launch-control@mcma.ebu.ch");
 
-            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+            // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
 
             await Terraform.init(deploymentConfig.name);
             await Terraform.destroy();
