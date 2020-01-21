@@ -78,7 +78,16 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
     }
 
     private loadVariables() {
-        this.variableSource.load(this.deploymentConfig.variables);
+        const variables = [];
+        for (const variable of this.deploymentConfig.variables) {
+            const copy = new McmaVariable(variable);
+            if (copy.secure) {
+                copy.value = "••••••••••••••••";
+            }
+            variables.push(copy);
+        }
+
+        this.variableSource.load(variables);
     }
 
     onAddVariable() {
@@ -104,7 +113,7 @@ export class DeploymentConfigDetailComponent implements OnInit, OnDestroy {
     onEditVariable(event) {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: new McmaVariable(event.data),
+                variable: new McmaVariable(this.deploymentConfig.variables.find(v => v.name === event.data.name)),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),

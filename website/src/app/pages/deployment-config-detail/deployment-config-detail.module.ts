@@ -1,5 +1,5 @@
 import { NgModule } from "@angular/core";
-import { NbButtonModule, NbCardModule, NbInputModule, NbSelectModule } from "@nebular/theme";
+import { NbButtonModule, NbCardModule, NbCheckboxModule, NbInputModule, NbSelectModule } from "@nebular/theme";
 
 import { ThemeModule } from "../../@theme/theme.module";
 import { DeploymentConfigDetailComponent } from "./deployment-config-detail.component";
@@ -17,6 +17,7 @@ import { DeleteVariableDialogComponent } from "./dialogs/delete-variable-dialog.
         NbInputModule,
         NbSelectModule,
         FormsModule,
+        NbCheckboxModule,
     ],
     declarations: [
         DeploymentConfigDetailComponent,

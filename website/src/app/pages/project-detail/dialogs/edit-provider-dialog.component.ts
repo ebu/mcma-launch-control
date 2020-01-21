@@ -15,7 +15,7 @@ export class EditProviderDialogComponent implements OnInit {
     providerTypes = [
         {
             name: "aws",
-            displayName: "AWS",
+            displayName: "AWS Provider",
             inputParameters: [
                 {
                     "name": "version",
@@ -37,7 +37,7 @@ export class EditProviderDialogComponent implements OnInit {
         },
         {
             name: "azurerm",
-            displayName: "Azure Resource Manager",
+            displayName: "Azure Provider",
             inputParameters: [
                 {
                     "name": "version",
@@ -63,7 +63,7 @@ export class EditProviderDialogComponent implements OnInit {
         },
         {
             name: "azuread",
-            displayName: "Azure Active Directory",
+            displayName: "Azure Active Directory Provider",
             inputParameters: [
                 {
                     "name": "version",
@@ -89,7 +89,7 @@ export class EditProviderDialogComponent implements OnInit {
         },
         {
             name: "google",
-            displayName: "Google Cloud Platform",
+            displayName: "Google Cloud Platform Provider",
             inputParameters: [
                 {
                     "name": "credentials",

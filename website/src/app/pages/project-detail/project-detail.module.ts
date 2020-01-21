@@ -1,5 +1,5 @@
 import { NgModule } from "@angular/core";
-import { NbButtonModule, NbCardModule, NbInputModule, NbSelectModule } from "@nebular/theme";
+import { NbButtonModule, NbCardModule, NbCheckboxModule, NbInputModule, NbSelectModule } from "@nebular/theme";
 
 import { ThemeModule } from "../../@theme/theme.module";
 import { ProjectDetailComponent } from "./project-detail.component";
@@ -21,6 +21,7 @@ import { DeleteProviderDialogComponent } from "./dialogs/delete-provider-dialog.
         NbInputModule,
         NbSelectModule,
         FormsModule,
+        NbCheckboxModule,
     ],
     declarations: [
         ProjectDetailComponent,

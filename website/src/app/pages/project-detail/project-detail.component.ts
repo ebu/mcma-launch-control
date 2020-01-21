@@ -246,7 +246,16 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     }
 
     private loadVariables() {
-        this.variableSource.load(this.project.variables);
+        const variables = [];
+        for (const variable of this.project.variables) {
+            const copy = new McmaVariable(variable);
+            if (copy.secure) {
+                copy.value = "••••••••••••••••";
+            }
+            variables.push(copy);
+        }
+
+        this.variableSource.load(variables);
     }
 
     private loadProviders() {
@@ -335,7 +344,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     onEditVariable(event) {
         this.dialogService.open(EditVariableDialogComponent, {
             context: {
-                variable: new McmaVariable(event.data),
+                variable: new McmaVariable(this.project.variables.find(v => v.name === event.data.name)),
             },
         }).onClose.pipe(
             takeWhile(variable => !!variable),
