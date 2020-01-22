@@ -1,11 +1,10 @@
 {
     "namespace": "ebu",
-    "name": "aws-service-registry",
+    "name": "job-processor-service",
     "provider": "aws",
     "version": "0.0.1",
-    "displayName": "AWS MCMA Service Registry",
-    "description": "The MCMA Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
-    "link": "",
+    "displayName": "Job Processor Service",
+    "description": "The Job Processor Service is used for managing the execution of jobs",
     "inputParameters": [
         {
             "name": "module_prefix",
@@ -26,6 +25,10 @@
         {
             "name": "aws_region",
             "type": "string"
+        },
+        {
+            "name": "service_registry",
+            "type": "object"
         }
     ],
     "outputParameters": [
@@ -34,11 +37,7 @@
             "type": "string"
         },
         {
-            "name": "services_url",
-            "type": "string"
-        },
-        {
-            "name": "job_profiles_url",
+            "name": "jobs_url",
             "type": "string"
         }
     ],
@@ -49,15 +48,11 @@
                 "resourceName": "service",
                 "resource": {
                     "@type": "Service",
-                    "name": "Service Registry",
+                    "name": "Job Processor Service",
                     "resources": [
                         {
-                            "resourceType": "Service",
-                            "httpEndpoint": "${services_url}"
-                        },
-                        {
-                            "resourceType": "JobProfile",
-                            "httpEndpoint": "${job_profiles_url}"
+                            "resourceType": "JobProcess",
+                            "httpEndpoint": "${job_processes_url}"
                         }
                     ],
                     "authType": "${auth_type}"

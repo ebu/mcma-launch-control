@@ -1,10 +1,11 @@
 {
     "namespace": "ebu",
-    "name": "aws-media-repository",
+    "name": "service-registry",
     "provider": "aws",
     "version": "0.0.1",
-    "displayName": "AWS MCMA Media Repository",
-    "description": "The MCMA Media Repository is used for tracking assets and their corresponding essence files.",
+    "displayName": "Service Registry",
+    "description": "The Service Registry serves as a central 'yellow pages' for services to discover what other services are available.",
+    "link": "",
     "inputParameters": [
         {
             "name": "module_prefix",
@@ -33,11 +34,11 @@
             "type": "string"
         },
         {
-            "name": "bm_contents_url",
+            "name": "services_url",
             "type": "string"
         },
         {
-            "name": "bm_essences_url",
+            "name": "job_profiles_url",
             "type": "string"
         }
     ],
@@ -48,15 +49,15 @@
                 "resourceName": "service",
                 "resource": {
                     "@type": "Service",
-                    "name": "Media Repository",
+                    "name": "Service Registry",
                     "resources": [
                         {
-                            "resourceType": "BMContent",
-                            "httpEndpoint": "${bm_contents_url}"
+                            "resourceType": "Service",
+                            "httpEndpoint": "${services_url}"
                         },
                         {
-                            "resourceType": "BMEssence",
-                            "httpEndpoint": "${bm_essences_url}"
+                            "resourceType": "JobProfile",
+                            "httpEndpoint": "${job_profiles_url}"
                         }
                     ],
                     "authType": "${auth_type}"

@@ -1,10 +1,10 @@
 {
     "namespace": "ebu",
-    "name": "aws-job-processor-service",
+    "name": "media-repository",
     "provider": "aws",
     "version": "0.0.1",
-    "displayName": "AWS MCMA Job Processor Service",
-    "description": "The MCMA Job Processor Service is used for managing the execution of jobs",
+    "displayName": "Media Repository",
+    "description": "The Media Repository is used for tracking assets and their corresponding essence files.",
     "inputParameters": [
         {
             "name": "module_prefix",
@@ -25,10 +25,6 @@
         {
             "name": "aws_region",
             "type": "string"
-        },
-        {
-            "name": "service_registry",
-            "type": "object"
         }
     ],
     "outputParameters": [
@@ -37,7 +33,11 @@
             "type": "string"
         },
         {
-            "name": "jobs_url",
+            "name": "bm_contents_url",
+            "type": "string"
+        },
+        {
+            "name": "bm_essences_url",
             "type": "string"
         }
     ],
@@ -48,11 +48,15 @@
                 "resourceName": "service",
                 "resource": {
                     "@type": "Service",
-                    "name": "Job Processor Service",
+                    "name": "Media Repository",
                     "resources": [
                         {
-                            "resourceType": "JobProcess",
-                            "httpEndpoint": "${job_processes_url}"
+                            "resourceType": "BMContent",
+                            "httpEndpoint": "${bm_contents_url}"
+                        },
+                        {
+                            "resourceType": "BMEssence",
+                            "httpEndpoint": "${bm_essences_url}"
                         }
                     ],
                     "authType": "${auth_type}"
