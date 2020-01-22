@@ -48,7 +48,7 @@
                 "resourceName": "service",
                 "resource": {
                     "@type": "Service",
-                    "name": "Service Registry",
+                    "name": "Job Repository",
                     "resources": [
                         {
                             "resourceType": "AmeJob",

@@ -1,4 +1,5 @@
 task build {
+    dependsOn "aws-job-processor-service:build"
     dependsOn "aws-job-repository:build"
     dependsOn "aws-media-repository:build"
     dependsOn "aws-s3-bucket:build"
