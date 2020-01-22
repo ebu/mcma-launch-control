@@ -15,12 +15,73 @@
             "type": "string"
         },
         {
+            "name": "log_group_name",
+            "type": "string"
+        },
+        {
             "name": "aws_account_id",
             "type": "string"
         },
         {
             "name": "aws_region",
             "type": "string"
+        },
+        {
+            "name": "service_registry",
+            "type": "object"
+        }
+    ],
+    "outputParameters": [
+        {
+            "name": "auth_type",
+            "type": "string"
+        },
+        {
+            "name": "jobs_url",
+            "type": "string"
+        }
+    ],
+    "deploymentActions": [
+        {
+            "type": "ManagedResource",
+            "data": {
+                "resourceName": "service",
+                "resource": {
+                    "@type": "Service",
+                    "name": "Service Registry",
+                    "resources": [
+                        {
+                            "resourceType": "AmeJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "AIJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "CaptureJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "QAJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "TransferJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "TransformJob",
+                            "httpEndpoint": "${jobs_url}"
+                        },
+                        {
+                            "resourceType": "WorkflowJob",
+                            "httpEndpoint": "${jobs_url}"
+                        }
+                    ],
+                    "authType": "${auth_type}"
+                }
+            }
         }
     ]
 }

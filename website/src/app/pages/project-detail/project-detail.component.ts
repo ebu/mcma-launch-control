@@ -31,6 +31,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
     deploymentConfigs: McmaDeploymentConfig[];
 
+    projectComponents: McmaComponent[];
     projectDeployments: McmaDeployment[];
 
     variableSettings = {
@@ -265,7 +266,10 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     private loadComponents() {
         this.launchControlService.getComponents(this.project.name)
             .pipe(takeWhile(() => this.alive))
-            .subscribe(components => this.componentSource.load(components));
+            .subscribe(components => {
+                this.projectComponents = components;
+                this.componentSource.load(components);
+            });
     }
 
     private loadDeployments() {
@@ -441,6 +445,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.dialogService.open(EditComponentDialogComponent, {
             context: {
                 component: new McmaComponent(),
+                projectComponents: this.projectComponents,
             },
         }).onClose.pipe(
             takeWhile(component => !!component),
@@ -452,6 +457,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.dialogService.open(EditComponentDialogComponent, {
             context: {
                 component: new McmaComponent(event.data),
+                projectComponents: this.projectComponents,
             },
         }).onClose.pipe(
             takeWhile(component => !!component),

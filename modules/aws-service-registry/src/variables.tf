@@ -13,7 +13,7 @@ variable "stage_name" {
 }
 
 variable "log_group_name" {
-  type = "string"
+  type        = "string"
   description = "Log group name used by MCMA Event tracking"
 }
 
@@ -25,6 +25,7 @@ variable "aws_account_id" {
   type        = string
   description = "Account ID to which this module is deployed"
 }
+
 variable "aws_region" {
   type        = string
   description = "AWS Region to which this module is deployed"

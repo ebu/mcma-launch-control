@@ -2,38 +2,44 @@
 
 const { JobProcess, NotificationEndpoint, JobStatus } = require("@mcma/core");
 
-function createJobProcess(resourceManagerProvider, dbTableProvider) {
-    return async function createJobProcess(workerRequest) {
-        let jobId = workerRequest.input.jobId;
+async function createJobProcess(providers, workerRequest) {
+    const jobId = workerRequest.input.jobId;
 
-        let table = dbTableProvider.table(workerRequest.tableName());
-        let job = await table.get(jobId);
+    const table = providers.getDbTableProvider().get(workerRequest.tableName());
+    const resourceManager = providers.getResourceManagerProvider().get(workerRequest);
+    const logger = providers.getLoggerProvider().get(workerRequest.tracker);
 
-        let resourceManager = resourceManagerProvider.get(workerRequest);
+    const job = await table.get(jobId);
 
-        try {
-            let jobProcess = new JobProcess({
-                job: jobId,
-                notificationEndpoint: new NotificationEndpoint({
-                    httpEndpoint: jobId + "/notifications"
-                })
-            });
-            jobProcess = await resourceManager.create(jobProcess);
+    try {
+        logger.info("Creating Job Process");
 
-            job.status = JobStatus.QUEUED;
-            job.jobProcess = jobProcess.id;
-        } catch (error) {
-            console.error("Failed to create JobProcess", error);
-            job.status = JobStatus.FAILED;
-            job.statusMessage = "Failed to create JobProcess due to error '" + error.message + "'";
-        }
+        let jobProcess = new JobProcess({
+            job: jobId,
+            notificationEndpoint: new NotificationEndpoint({
+                httpEndpoint: jobId + "/notifications"
+            }),
+            tracker: job.tracker,
+        });
+        jobProcess = await resourceManager.create(jobProcess);
 
-        job.dateModified = new Date().toISOString();
+        job.status = JobStatus.Queued;
+        job.jobProcess = jobProcess.id;
 
-        await table.put(jobId, job);
+        logger.info("Created Job Process: " + jobProcess.id);
+    } catch (error) {
+        logger.error("Failed to create JobProcess", error);
+        job.status = JobStatus.Failed;
+        job.statusMessage = "Failed to create JobProcess due to error '" + error.message + "'";
+    }
 
-        await resourceManager.sendNotification(job);
-    };
+    job.dateModified = new Date().toISOString();
+
+    await table.put(jobId, job);
+
+    await resourceManager.sendNotification(job);
 }
 
-module.exports = createJobProcess;
+module.exports = {
+    createJobProcess
+};

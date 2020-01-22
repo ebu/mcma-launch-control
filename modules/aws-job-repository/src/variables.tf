@@ -1,5 +1,5 @@
 #########################
-# Environment Variables
+# Module configuration
 #########################
 
 variable "module_prefix" {
@@ -12,20 +12,28 @@ variable "stage_name" {
   description = "Stage name for the API endpoint"
 }
 
-#########################
-# AWS Variables
-#########################
-
-variable "aws_account_id" {}
-variable "aws_region" {}
-
-#########################
-# Module configuration
-#########################
+variable "log_group_name" {
+  type        = "string"
+  description = "Log group name used by MCMA Event tracking"
+}
 
 variable "api_metrics_enabled" {
   type    = bool
   default = false
+}
+
+#########################
+# AWS Variables
+#########################
+
+variable "aws_account_id" {
+  type        = string
+  description = "Account ID to which this module is deployed"
+}
+
+variable "aws_region" {
+  type        = string
+  description = "AWS Region to which this module is deployed"
 }
 
 #########################
@@ -34,8 +42,7 @@ variable "api_metrics_enabled" {
 
 variable "service_registry" {
   type = object({
-    service_url       = string,
-    service_auth_type = string,
-    services_url      = string,
+    auth_type    = string,
+    services_url = string,
   })
 }

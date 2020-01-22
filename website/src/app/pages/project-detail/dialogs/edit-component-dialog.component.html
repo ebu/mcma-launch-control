@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <nb-card>
     <nb-card-header>
         <h5 style="width:50em">{{action}} Component</h5>
@@ -69,13 +70,23 @@
         <div class="form-group row" *ngFor="let variable of componentVariables">
             <label for="var_{{variable.name}}" class="label col-sm-2 col-form-label">{{variable.name}}:</label>
             <div class="col-sm-10">
-                <input #variableField
+                <input *ngIf="variable.type === 'string'"
+                       #variableField
                        id="var_{{variable.name}}"
                        type="text"
                        nbInput
                        fullWidth
                        [value]="variable.value"
                        (change)="onVariableChange(variable.name, variableField.value)">
+                <nb-select *ngIf="variable.type === 'object'"
+                           #variableField
+                           id="var_{{variable.name}}"
+                           fullWidth
+                           placeholder="Select Component"
+                           (selectedChange)="onVariableChange(variable.name, variableField.selected)"
+                           [(selected)]="variable.value">
+                    <nb-option *ngFor="let option of variable.options" [value]="option.value">{{option.name}}</nb-option>
+                </nb-select>
             </div>
         </div>
     </nb-card-body>

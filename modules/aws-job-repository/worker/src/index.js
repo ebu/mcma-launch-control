@@ -1,33 +1,51 @@
 //"use strict";
 const AWS = require("aws-sdk");
 
-const { Job } = require("@mcma/core");
+const { Job, EnvironmentVariableProvider } = require("@mcma/core");
 const { ResourceManagerProvider, AuthProvider } = require("@mcma/client");
-const { WorkerBuilder, WorkerRequest } = require("@mcma/worker");
+const { Worker, WorkerRequest, ProviderCollection } = require("@mcma/worker");
 const { DynamoDbTableProvider } = require("@mcma/aws-dynamodb");
+const { AwsCloudWatchLoggerProvider } = require("@mcma/aws-logger");
 require("@mcma/aws-client");
 
-const createJobProcess = require("./operations/create-job-process");
-const deleteJobProcess = require("./operations/delete-job-process");
-const processNotification = require("./operations/process-notification");
+const { createJobProcess } = require("./operations/create-job-process");
+const { deleteJobProcess } = require("./operations/delete-job-process");
+const { processNotification } = require("./operations/process-notification");
 
-const resourceManagerProvider = new ResourceManagerProvider(new AuthProvider().addAwsV4Auth(AWS.config));
+const authProvider = new AuthProvider().addAwsV4Auth(AWS);
 const dbTableProvider = new DynamoDbTableProvider(Job);
+const environmentVariableProvider = new EnvironmentVariableProvider();
+const loggerProvider = new AwsCloudWatchLoggerProvider("job-repository-worker", process.env.LogGroupName);
+const resourceManagerProvider = new ResourceManagerProvider(authProvider);
+
+const providerCollection = new ProviderCollection({
+    authProvider,
+    dbTableProvider,
+    environmentVariableProvider,
+    loggerProvider,
+    resourceManagerProvider
+});
 
 const worker =
-    new WorkerBuilder()
-        .handleOperation(createJobProcess(resourceManagerProvider, dbTableProvider))
-        .handleOperation(deleteJobProcess(resourceManagerProvider))
-        .handleOperation(processNotification(resourceManagerProvider, dbTableProvider))
-        .build();
+    new Worker(providerCollection)
+        .addOperation("CreateJobProcess", createJobProcess)
+        .addOperation("DeleteJobProcess", deleteJobProcess)
+        .addOperation("ProcessNotification", processNotification);
 
 exports.handler = async (event, context) => {
+    const logger = loggerProvider.get(event.tracker);
+
     try {
-        console.log(JSON.stringify(event, null, 2), JSON.stringify(context, null, 2));
+        logger.functionStart(context.awsRequestId);
+        logger.debug(event);
+        logger.debug(context);
 
         await worker.doWork(new WorkerRequest(event));
     } catch (error) {
-        console.log("Error occurred when handling action '" + event.operationName + "'");
-        console.log(error.toString());
+        logger.error("Error occurred when handling operation '" + event.operationName + "'");
+        logger.error(error.toString());
+    } finally {
+        logger.functionEnd(context.awsRequestId);
+        await loggerProvider.flush();
     }
 };

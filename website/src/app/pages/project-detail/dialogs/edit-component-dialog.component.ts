@@ -6,8 +6,10 @@ import { NbDialogRef } from "@nebular/theme";
 import { ModuleRepositoryData } from "../../../@core/data/module-repository";
 
 interface Variable {
+    type: string;
     name: string;
     value: string;
+    options?: { name: string, value: string }[];
 }
 
 @Component({
@@ -17,6 +19,7 @@ interface Variable {
 })
 export class EditComponentDialogComponent implements OnInit {
     @Input() component: McmaComponent;
+    @Input() projectComponents: McmaComponent[];
 
     action: string = "Add";
 
@@ -130,7 +133,17 @@ export class EditComponentDialogComponent implements OnInit {
 
             if (module) {
                 for (const param of module.inputParameters) {
-                    this.componentVariables.push({ name: param.name, value: null });
+                    let options;
+                    if (param.type === "object") {
+                        options = [];
+
+                        for (const component of this.projectComponents) {
+                            if (component.name !== this.component.name) {
+                                options.push({ name: component.displayName, value: "${module." + component.name + "}"});
+                            }
+                        }
+                    }
+                    this.componentVariables.push({ type: param.type, name: param.name, value: null, options: options });
                 }
             }
 

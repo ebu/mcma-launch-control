@@ -1,7 +1,7 @@
-output "service_url" {
-  value = local.service_url
+output "auth_type" {
+  value = local.service_auth_type
 }
 
-output "service_auth_type" {
-  value = local.service_auth_type
+output "jobs_url" {
+  value = "${local.service_url}/jobs"
 }
