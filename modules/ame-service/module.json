@@ -1,0 +1,96 @@
+{
+    "namespace": "ebu",
+    "name": "ame-service",
+    "provider": "aws",
+    "version": "0.0.1",
+    "displayName": "MediaInfo Ame Service",
+    "description": "Ame Service leveraging MediaInfo to extract metadata from media files",
+    "inputParameters": [
+        {
+            "name": "module_prefix",
+            "type": "string"
+        },
+        {
+            "name": "stage_name",
+            "type": "string"
+        },
+        {
+            "name": "log_group_name",
+            "type": "string"
+        },
+        {
+            "name": "aws_account_id",
+            "type": "string"
+        },
+        {
+            "name": "aws_region",
+            "type": "string"
+        },
+        {
+            "name": "service_registry",
+            "type": "object"
+        }
+    ],
+    "outputParameters": [
+        {
+            "name": "auth_type",
+            "type": "string"
+        },
+        {
+            "name": "job_assignments_url",
+            "type": "string"
+        }
+    ],
+    "deploymentActions": [
+        {
+            "type": "ManagedResource",
+            "data": {
+                "resourceName": "jobProfile",
+                "resource": {
+                    "@type": "JobProfile",
+                    "name": "ExtractTechnicalMetadata",
+                    "inputParameters": [
+                        {
+                            "@type": "JobParameter",
+                            "parameterName": "inputFile",
+                            "parameterType": "Locator"
+                        },
+                        {
+                            "@type": "JobParameter",
+                            "parameterName": "outputLocation",
+                            "parameterType": "Locator"
+                        }
+                    ],
+                    "outputParameters": [
+                        {
+                            "@type": "JobParameter",
+                            "parameterName": "outputFile",
+                            "parameterType": "Locator"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "ManagedResource",
+            "data": {
+                "resourceName": "service",
+                "resource": {
+                    "@type": "Service",
+                    "name": "MediaInfo Ame Service",
+                    "resources": [
+                        {
+                            "resourceType": "JobAssignment",
+                            "httpEndpoint": "${job_assignments_url}"
+                        }
+                    ],
+                    "authType": "${auth_type}",
+                    "jobType": "AmeJob",
+                    "jobProfiles": [
+                        "${extractTechnicalMetadataJobProfile}"
+                    ]
+                }
+            }
+        }
+    ]
+}

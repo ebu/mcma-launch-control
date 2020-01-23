@@ -1,0 +1,64 @@
+task copyModuleJSON(type: Copy) {
+    from "module.json"
+    into "build/staging"
+}
+
+task copyTerraform(type: Copy) {
+    from "src"
+    into "build/staging"
+}
+
+task copyApiHandler(type: Copy) {
+    dependsOn "api-handler:build"
+    from file("api-handler/build/dist/lambda.zip")
+    into "build/staging/lambdas"
+    rename { "api-handler.zip" }
+}
+
+task copyWorker(type: Copy) {
+    dependsOn "worker:build"
+    from file("worker/build/dist/lambda.zip")
+    into "build/staging/lambdas"
+    rename { "worker.zip" }
+}
+
+task copyMediaInfo(type: Copy) {
+    from "mediainfo"
+    into "build/staging/mediainfo"
+}
+
+task build(type: Zip) {
+    dependsOn copyModuleJSON
+    dependsOn copyApiHandler
+    dependsOn copyWorker
+    dependsOn copyMediaInfo
+    dependsOn copyTerraform
+    archiveName "module.zip"
+    destinationDir file("build/dist")
+    from "build/staging"
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+subprojects {
+    task copyNodeModules(type: Copy) {
+        dependsOn npmInstall
+        from "node_modules"
+        into "build/staging/node_modules"
+        exclude awsAvailableLibraries
+    }
+
+    task copySource(type: Copy) {
+        from "src"
+        into "build/staging/"
+    }
+
+    task build(type: Zip) {
+        dependsOn copySource, copyNodeModules
+        archiveName "lambda.zip"
+        destinationDir file("build/dist")
+        from "build/staging"
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
+    }
+}
