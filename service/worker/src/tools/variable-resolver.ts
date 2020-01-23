@@ -52,8 +52,12 @@ class VariableResolveNode {
 export class VariableResolver {
     private readonly map: Map<string, VariableResolveNode>;
 
-    constructor() {
+    constructor(vr?: VariableResolver) {
         this.map = new Map<string, VariableResolveNode>();
+
+        if (vr) {
+            this.putAll(vr.getAll());
+        }
     }
 
     has(name: string): boolean {
@@ -69,6 +73,16 @@ export class VariableResolver {
 
     put(variable: McmaVariable) {
         this.map.set(variable.name, new VariableResolveNode(variable));
+    }
+
+    getAll(): McmaVariable[] {
+        const list = [];
+
+        for (const variable of this.map.values()) {
+            list.push(variable);
+        }
+
+        return list;
     }
 
     putAll(variables: McmaVariable[]) {

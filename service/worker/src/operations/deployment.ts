@@ -4,7 +4,7 @@ import * as AWS from "aws-sdk";
 import axios, { AxiosError } from "axios";
 
 import { Exception, Resource } from "@mcma/core";
-import { AuthProvider, ResourceManager } from "@mcma/client";
+import { AuthProvider, ResourceManager, ResourceManagerConfig } from "@mcma/client";
 import "@mcma/aws-client";
 
 import {
@@ -14,6 +14,7 @@ import {
     McmaModule,
     McmaModuleDeploymentActionType,
     McmaProvider,
+    McmaProviderType,
     McmaVariable
 } from "@local/commons";
 import { DataController } from "@local/data";
@@ -64,7 +65,7 @@ function generateGitIgnore() {
 }
 
 function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], components: McmaComponent[]) {
-    const terraformProviders = [];
+    let terraformProviders;
 
     for (const provider of providers) {
         const variables = {};
@@ -78,10 +79,13 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
         const terraformProvider = {};
         terraformProvider[provider.type] = variables;
 
+        if (!terraformProviders) {
+            terraformProviders = [];
+        }
         terraformProviders.push(terraformProvider);
     }
 
-    const terraformModules = [];
+    let terraformModules;
 
     for (const component of components) {
         const variables = {};
@@ -95,6 +99,9 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
         const module = {};
         module[component.name] = variables;
 
+        if (!terraformModules) {
+            terraformModules = [];
+        }
         terraformModules.push(module);
     }
 
@@ -140,16 +147,21 @@ function generateTerraformTfVarsJson(project, deploymentConfig) {
 }
 
 function generateOutputsTfJson(components: McmaComponent[]) {
-
-    const outputTfJson = {
-        output: {}
-    };
+    let output;
 
     for (const component of components) {
-        outputTfJson.output[component.name] = {
+        if (!output) {
+            output = {};
+        }
+
+        output[component.name] = {
             value: "${module." + component.name + "}"
         };
     }
+
+    const outputTfJson = {
+        output: output
+    };
 
     return JSON.stringify(outputTfJson, null, 2);
 }
@@ -277,7 +289,97 @@ function generateDeployedComponents(deploymentId: string, components: McmaCompon
     return result;
 }
 
-async function processDeploymentActions(oldDeployedComponents: McmaDeployedComponent[], newDeployedComponents: McmaDeployedComponent[], modulesMap: Map<string, McmaModule>) {
+function createResourceManager(resourceManagerConfig: ResourceManagerConfig, projectVariables: VariableResolver, providers: McmaProvider[]) {
+    if (!resourceManagerConfig) {
+        throw new Exception("Unable to find a deployed Service Registry");
+    }
+
+    const authProvider = new AuthProvider();
+
+    for (const provider of providers) {
+        const providerVariables = new VariableResolver();
+        providerVariables.putAll(provider.variables);
+
+        switch (provider.type) {
+            case McmaProviderType.AWS:
+                authProvider.addAwsV4Auth({
+                    accessKey: projectVariables.resolve(providerVariables.get("access_key").value).value,
+                    secretKey: projectVariables.resolve(providerVariables.get("secret_key").value).value,
+                    region: projectVariables.resolve(providerVariables.get("region").value).value,
+                });
+                break;
+            case McmaProviderType.AzureRM:
+            case McmaProviderType.AzureAD:
+            case McmaProviderType.Google:
+            default:
+                break;
+        }
+    }
+
+    return new ResourceManager(resourceManagerConfig, authProvider);
+}
+
+async function executeComponentPostDeploymentActions(projectVariables: VariableResolver, providers: McmaProvider[], resourceManagerConfig: ResourceManagerConfig, module: McmaModule, deployedComponent: McmaDeployedComponent, oldDeployedComponent: McmaDeployedComponent) {
+    if (module.deploymentActions) {
+        const outputVariables = new VariableResolver();
+        outputVariables.putAll(deployedComponent.outputVariables);
+
+        const newResourceVariables = new VariableResolver();
+        newResourceVariables.putAll(deployedComponent.resources);
+
+        const oldResourceVariables = new VariableResolver();
+        if (oldDeployedComponent) {
+            oldResourceVariables.putAll(oldDeployedComponent.resources);
+        }
+
+        for (const action of module.deploymentActions) {
+            console.log("Processing post deploy action:", JSON.stringify(action, null, 2));
+
+            switch (action.type) {
+                case McmaModuleDeploymentActionType.ManagedResource:
+                    const resourceManager = createResourceManager(resourceManagerConfig, projectVariables, providers);
+
+                    const resourceName = action.data.resourceName;
+                    if (!resourceName) {
+                        throw new Exception("Property 'resourceName' missing in deployment action 'ManagedResource'");
+                    }
+
+                    let resource = action.data.resource;
+                    if (!resource) {
+                        throw new Exception("Property 'resource' missing in deployment action 'ManagedResource'");
+                    }
+
+                    resource = replaceVariables(resource, outputVariables);
+
+                    resource = replaceVariables(resource, newResourceVariables);
+
+                    if (!newResourceVariables.has(resourceName)) {
+                        if (oldResourceVariables.has(resourceName)) {
+                            console.log(JSON.stringify(oldResourceVariables.get(resourceName), null, 2));
+
+                            resource.id = oldResourceVariables.get(resourceName).value;
+                            resource = await resourceManager.update(resource);
+                        } else {
+                            resource = await resourceManager.create(resource);
+                        }
+
+                        console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id);
+                        let mcmaVariable = new McmaVariable({ name: resourceName, value: resource.id });
+                        newResourceVariables.put(mcmaVariable);
+                        deployedComponent.resources.push(mcmaVariable);
+                    }
+
+                    break;
+                case McmaModuleDeploymentActionType.RunScript:
+                    throw new Exception("Deployment action '" + action.type + "' not implemented");
+                default:
+                    throw new Exception("Unrecognized deployment action '" + action.type + "'");
+            }
+        }
+    }
+}
+
+async function processPostDeploymentActions(projectVariables: VariableResolver, providers: McmaProvider[], oldDeployedComponents: McmaDeployedComponent[], newDeployedComponents: McmaDeployedComponent[], modulesMap: Map<string, McmaModule>) {
     const resourceManagerConfig = getResourceManagerConfig(newDeployedComponents);
 
     const oldDeployedComponentsMap = new Map<string, McmaDeployedComponent>();
@@ -285,56 +387,31 @@ async function processDeploymentActions(oldDeployedComponents: McmaDeployedCompo
         oldDeployedComponentsMap.set(deployedComponent.name, deployedComponent);
     }
 
-    for (const deployedComponent of newDeployedComponents) {
-        const module = modulesMap.get(deployedComponent.name);
+    const componentsToBeProcessed = newDeployedComponents.slice();
+    let lastCount;
+    let errorMessage;
 
-        if (module.deploymentActions) {
-            for (const action of module.deploymentActions) {
-                console.log("Processing post deploy action:", JSON.stringify(action, null, 2));
+    do {
+        lastCount = componentsToBeProcessed.length;
+        errorMessage = undefined;
 
-                switch (action.type) {
-                    case McmaModuleDeploymentActionType.ManagedResource:
-                        if (!resourceManagerConfig) {
-                            throw new Exception("Failed to execute post deployment action. Unable to find a deployed Service Registry");
-                        }
-                        const resourceManager = new ResourceManager(resourceManagerConfig, new AuthProvider().addAwsV4Auth({
-                            accessKey: AWS_ACCESS_KEY,
-                            secretKey: AWS_SECRET_KEY,
-                            region: AWS_REGION
-                        }));
+        for (let i = componentsToBeProcessed.length - 1; i >= 0; i--) {
+            const deployedComponent = componentsToBeProcessed[i];
+            const module = modulesMap.get(deployedComponent.name);
+            const oldDeployedComponent = oldDeployedComponentsMap.get(deployedComponent.name);
 
-                        const vr = new VariableResolver();
-                        vr.putAll(deployedComponent.outputVariables);
-
-                        const resourceName = action.data.resourceName;
-                        if (!resourceName) {
-                            throw new Exception("Property 'resourceName' missing in deployment action 'ManagedResource'");
-                        }
-
-                        let resource = action.data.resource;
-                        if (!resource) {
-                            throw new Exception("Property 'resource' missing in deployment action 'ManagedResource'");
-                        }
-                        resource = replaceVariables(resource, vr);
-
-                        const oldDeployedComponent = oldDeployedComponentsMap.get(deployedComponent.name);
-                        if (oldDeployedComponent && oldDeployedComponent.resources && oldDeployedComponent.resources.find(r => r.name === resourceName)) {
-                            resource.id = oldDeployedComponent.resources.find(r => r.name === resourceName).value;
-                            resource = await resourceManager.update(resource);
-                        } else {
-                            resource = await resourceManager.create(resource);
-                        }
-
-                        console.log("Creating managed resource '" + resourceName + "' with id: " + resource.id);
-                        deployedComponent.resources.push(new McmaVariable({ name: resourceName, value: resource.id }));
-                        break;
-                    case McmaModuleDeploymentActionType.RunScript:
-                        throw new Exception("Deployment action '" + action.type + "' not implemented");
-                    default:
-                        throw new Exception("Unrecognized deployment action '" + action.type + "'");
-                }
+            try {
+                await executeComponentPostDeploymentActions(projectVariables, providers, resourceManagerConfig, module, deployedComponent, oldDeployedComponent);
+                componentsToBeProcessed.splice(i, 1);
+            } catch (error) {
+                console.warn(error);
+                errorMessage = error.message;
             }
         }
+    } while (componentsToBeProcessed.length > 0 && componentsToBeProcessed.length < lastCount);
+
+    if (componentsToBeProcessed.length > 0) {
+        throw new Exception("Error while executing post deployment actions: " + errorMessage);
     }
 }
 
@@ -362,9 +439,9 @@ export async function updateDeployment(providerCollection, workerRequest) {
             return;
         }
 
-        const vr = new VariableResolver();
-        vr.putAll(project.variables);
-        vr.putAll(deploymentConfig.variables);
+        const projectVariables = new VariableResolver();
+        projectVariables.putAll(project.variables);
+        projectVariables.putAll(deploymentConfig.variables);
 
         let errorMessage = null;
 
@@ -387,7 +464,7 @@ export async function updateDeployment(providerCollection, workerRequest) {
             const isNewRepository = await Git.isNew();
 
             await Git.writeFile(".gitignore", generateGitIgnore());
-            await Git.writeFile("main.tf.json", generateMainTfJson(vr, project.providers, components));
+            await Git.writeFile("main.tf.json", generateMainTfJson(projectVariables, project.providers, components));
             // await Git.writeFile("variables.tf.json", generateVariablesTfJson());
             // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
             await Git.writeFile("outputs.tf.json", generateOutputsTfJson(components));
@@ -423,7 +500,7 @@ export async function updateDeployment(providerCollection, workerRequest) {
 
                 console.log("Running post deployment actions");
                 try {
-                    await processDeploymentActions(oldDeployedComponents, newDeployedComponents, modulesMap);
+                    await processPostDeploymentActions(projectVariables, project.providers, oldDeployedComponents, newDeployedComponents, modulesMap);
                 } catch (error) {
                     console.error(error.toString());
                     errorMessage = error.message;
@@ -475,6 +552,10 @@ export async function deleteDeployment(providerCollection, workerRequest) {
             return;
         }
 
+        const vr = new VariableResolver();
+        vr.putAll(project.variables);
+        vr.putAll(deploymentConfig.variables);
+
         try {
             try {
                 console.log("Running pre destroy actions");
@@ -491,9 +572,24 @@ export async function deleteDeployment(providerCollection, workerRequest) {
             await Git.clone(repoUrl);
             await Git.config("Launch Control", "launch-control@mcma.ebu.ch");
 
+            const isNewRepository = await Git.isNew();
+
+            await Git.writeFile("main.tf.json", generateMainTfJson(vr, project.providers, []));
+            // await Git.writeFile("variables.tf.json", generateVariablesTfJson());
             // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+            await Git.writeFile("outputs.tf.json", generateOutputsTfJson([]));
+
+            await Git.addFiles();
+            if (isNewRepository || await Git.hasChanges()) {
+                if (!isNewRepository) {
+                    await Git.pull();
+                }
+                await Git.commit("Updating Terraform configuration");
+                await Git.push();
+            }
 
             await Terraform.init(deploymentConfig.name);
+            await Terraform.apply();
             await Terraform.destroy();
 
             await Git.addFiles();

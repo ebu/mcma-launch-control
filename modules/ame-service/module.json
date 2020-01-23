@@ -45,7 +45,7 @@
         {
             "type": "ManagedResource",
             "data": {
-                "resourceName": "jobProfile",
+                "resourceName": "job_profile",
                 "resource": {
                     "@type": "JobProfile",
                     "name": "ExtractTechnicalMetadata",
@@ -87,7 +87,7 @@
                     "authType": "${auth_type}",
                     "jobType": "AmeJob",
                     "jobProfiles": [
-                        "${extractTechnicalMetadataJobProfile}"
+                        "${job_profile}"
                     ]
                 }
             }
