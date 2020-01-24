@@ -61,14 +61,6 @@ resource "aws_lambda_function" "service_worker" {
 
   environment {
     variables = {
-      // TODO: Supply the variables through AWS Systems Manager Parameter Store instead of passing them here
-      GlobalPrefix = var.global_prefix
-
-      AwsAccountId = var.aws_account_id
-      AwsAccessKey = var.aws_access_key
-      AwsSecretKey = var.aws_secret_key
-      AwsRegion    = var.aws_region
-
       AwsCodeCommitUsername = var.aws_code_commit_username
       AwsCodeCommitPassword = var.aws_code_commit_password
     }

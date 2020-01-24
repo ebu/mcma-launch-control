@@ -27,13 +27,6 @@ const CodeCommit = new AWS.CodeCommit();
 
 const REPOSITORY_DIR = "/tmp/repo";
 
-const GLOBAL_PREFIX = process.env.GlobalPrefix;
-
-const AWS_ACCOUNT_ID = process.env.AwsAccountId;
-const AWS_ACCESS_KEY = process.env.AwsAccessKey;
-const AWS_SECRET_KEY = process.env.AwsSecretKey;
-const AWS_REGION = process.env.AwsRegion;
-
 const GIT_USERNAME = process.env.AwsCodeCommitUsername;
 const GIT_PASSWORD = process.env.AwsCodeCommitPassword;
 
@@ -64,16 +57,21 @@ function generateGitIgnore() {
         "terraform.tfvars.json\n";
 }
 
-function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], components: McmaComponent[]) {
+function generateMainTfJson(projectVariables: VariableResolver, providers: McmaProvider[], components: McmaComponent[], secureVariables: VariableResolver) {
     let terraformProviders;
 
     for (const provider of providers) {
         const variables = {};
 
         for (const variable of provider.variables) {
-            let value = variable.value;
-            if (value) {
-                variables[variable.name] = vr.resolve(value).value;
+            if (variable.value) {
+                const resolvedVariable = projectVariables.resolve(variable);
+                if (resolvedVariable.secure) {
+                    secureVariables.put(resolvedVariable);
+                    variables[variable.name] = "${var." + resolvedVariable.name + "}";
+                } else {
+                    variables[variable.name] = resolvedVariable.value;
+                }
             }
         }
         const terraformProvider = {};
@@ -91,7 +89,13 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
         const variables = {};
 
         for (const variable of component.variables) {
-            variables[variable.name] = vr.resolve(variable.value).value;
+            const resolvedVariable = projectVariables.resolve(variable);
+            if (resolvedVariable.secure) {
+                secureVariables.put(resolvedVariable);
+                variables[variable.name] = "${var." + resolvedVariable.name + "}";
+            } else {
+                variables[variable.name] = resolvedVariable.value;
+            }
         }
 
         variables["source"] = component.module.substring(0, component.module.length - 4) + "zip";
@@ -119,30 +123,31 @@ function generateMainTfJson(vr: VariableResolver, providers: McmaProvider[], com
     return JSON.stringify(mainTfJson, null, 2);
 }
 
-function generateVariablesTfJson() {
-    const variablesTfJson = {
-        variable: {
-            project_prefix: {},
-            stage_name: {},
-            aws_account_id: {},
-            aws_access_key: {},
-            aws_secret_key: {},
-            aws_region: {}
+function generateVariablesTfJson(secureVariables: VariableResolver) {
+    let variables;
+
+    for (const secureVariable of secureVariables.getAll()) {
+        if (!variables) {
+            variables = {};
         }
+
+        variables[secureVariable.name] = {};
+    }
+
+    const variablesTfJson = {
+        variable: variables
     };
 
     return JSON.stringify(variablesTfJson, null, 2);
 }
 
-function generateTerraformTfVarsJson(project, deploymentConfig) {
-    const terraformTfVarsJson = {
-        project_prefix: GLOBAL_PREFIX + "." + project.name + "." + deploymentConfig.name,
-        stage_name: deploymentConfig.name,
-        aws_account_id: AWS_ACCOUNT_ID,
-        aws_access_key: AWS_ACCESS_KEY,
-        aws_secret_key: AWS_SECRET_KEY,
-        aws_region: AWS_REGION
-    };
+function generateTerraformTfVarsJson(secureVariables: VariableResolver) {
+    const terraformTfVarsJson = {};
+
+    for (const secureVariable of secureVariables.getAll()) {
+        terraformTfVarsJson[secureVariable.name] = secureVariable.value;
+    }
+
     return JSON.stringify(terraformTfVarsJson, null, 2);
 }
 
@@ -210,7 +215,7 @@ function replaceVariables(value: any, vr: VariableResolver): any {
     }
 }
 
-async function processPreDestroyActions(components: McmaComponent[], oldDeployedComponents: McmaDeployedComponent[], oldModulesMap: Map<string, McmaModule>) {
+async function processPreDestroyActions(projectVariables: VariableResolver, providers: McmaProvider[], components: McmaComponent[], oldDeployedComponents: McmaDeployedComponent[], oldModulesMap: Map<string, McmaModule>) {
     const resourceManagerConfig = getResourceManagerConfig(oldDeployedComponents);
 
     const componentsMap = new Map<string, McmaComponent>();
@@ -227,14 +232,7 @@ async function processPreDestroyActions(components: McmaComponent[], oldDeployed
 
                 switch (action.type) {
                     case McmaModuleDeploymentActionType.ManagedResource:
-                        if (!resourceManagerConfig) {
-                            throw new Exception("Failed to execute post deployment action. Unable to find a deployed Service Registry");
-                        }
-                        const resourceManager = new ResourceManager(resourceManagerConfig, new AuthProvider().addAwsV4Auth({
-                            accessKey: AWS_ACCESS_KEY,
-                            secretKey: AWS_SECRET_KEY,
-                            region: AWS_REGION
-                        }));
+                        const resourceManager = createResourceManager(resourceManagerConfig, projectVariables, providers);
 
                         const resourceName = action.data.resourceName;
                         if (!resourceName) {
@@ -303,9 +301,9 @@ function createResourceManager(resourceManagerConfig: ResourceManagerConfig, pro
         switch (provider.type) {
             case McmaProviderType.AWS:
                 authProvider.addAwsV4Auth({
-                    accessKey: projectVariables.resolve(providerVariables.get("access_key").value).value,
-                    secretKey: projectVariables.resolve(providerVariables.get("secret_key").value).value,
-                    region: projectVariables.resolve(providerVariables.get("region").value).value,
+                    accessKey: projectVariables.resolve(providerVariables.get("access_key")).value,
+                    secretKey: projectVariables.resolve(providerVariables.get("secret_key")).value,
+                    region: projectVariables.resolve(providerVariables.get("region")).value,
                 });
                 break;
             case McmaProviderType.AzureRM:
@@ -355,8 +353,6 @@ async function executeComponentPostDeploymentActions(projectVariables: VariableR
 
                     if (!newResourceVariables.has(resourceName)) {
                         if (oldResourceVariables.has(resourceName)) {
-                            console.log(JSON.stringify(oldResourceVariables.get(resourceName), null, 2));
-
                             resource.id = oldResourceVariables.get(resourceName).value;
                             resource = await resourceManager.update(resource);
                         } else {
@@ -448,7 +444,7 @@ export async function updateDeployment(providerCollection, workerRequest) {
         try {
             try {
                 console.log("Running pre destroy actions");
-                await processPreDestroyActions(components, oldDeployedComponents, oldModulesMap);
+                await processPreDestroyActions(projectVariables, project.providers, components, oldDeployedComponents, oldModulesMap);
             } catch (error) {
                 console.error(error.toString());
             }
@@ -464,9 +460,12 @@ export async function updateDeployment(providerCollection, workerRequest) {
             const isNewRepository = await Git.isNew();
 
             await Git.writeFile(".gitignore", generateGitIgnore());
-            await Git.writeFile("main.tf.json", generateMainTfJson(projectVariables, project.providers, components));
-            // await Git.writeFile("variables.tf.json", generateVariablesTfJson());
-            // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+
+            const secureVariables = new VariableResolver();
+
+            await Git.writeFile("main.tf.json", generateMainTfJson(projectVariables, project.providers, components, secureVariables));
+            await Git.writeFile("variables.tf.json", generateVariablesTfJson(secureVariables));
+            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(secureVariables));
             await Git.writeFile("outputs.tf.json", generateOutputsTfJson(components));
 
             await Git.addFiles();
@@ -552,14 +551,14 @@ export async function deleteDeployment(providerCollection, workerRequest) {
             return;
         }
 
-        const vr = new VariableResolver();
-        vr.putAll(project.variables);
-        vr.putAll(deploymentConfig.variables);
+        const projectVariables = new VariableResolver();
+        projectVariables.putAll(project.variables);
+        projectVariables.putAll(deploymentConfig.variables);
 
         try {
             try {
                 console.log("Running pre destroy actions");
-                await processPreDestroyActions([], oldDeployedComponents, oldModulesMap);
+                await processPreDestroyActions(projectVariables, project.providers, [], oldDeployedComponents, oldModulesMap);
             } catch (error) {
                 console.error(error.toString());
             }
@@ -574,9 +573,11 @@ export async function deleteDeployment(providerCollection, workerRequest) {
 
             const isNewRepository = await Git.isNew();
 
-            await Git.writeFile("main.tf.json", generateMainTfJson(vr, project.providers, []));
-            // await Git.writeFile("variables.tf.json", generateVariablesTfJson());
-            // await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(project, deploymentConfig));
+            const secureVariables = new VariableResolver();
+
+            await Git.writeFile("main.tf.json", generateMainTfJson(projectVariables, project.providers, [], secureVariables));
+            await Git.writeFile("variables.tf.json", generateVariablesTfJson(secureVariables));
+            await Git.writeFile("terraform.tfvars.json", generateTerraformTfVarsJson(secureVariables));
             await Git.writeFile("outputs.tf.json", generateOutputsTfJson([]));
 
             await Git.addFiles();

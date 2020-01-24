@@ -78,8 +78,8 @@ export class VariableResolver {
     getAll(): McmaVariable[] {
         const list = [];
 
-        for (const variable of this.map.values()) {
-            list.push(variable);
+        for (const node of this.map.values()) {
+            list.push(node.variable);
         }
 
         return list;
@@ -117,7 +117,7 @@ export class VariableResolver {
         let state = 0;
         let start = 0;
         let value = "";
-        let secure = false;
+        let secure = node.variable.secure;
 
         for (let i = 0; i < str.length; i++) {
             const c = str.charAt(i);
