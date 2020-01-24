@@ -14,6 +14,12 @@ resource "aws_iam_policy" "dynamodb_policy" {
   policy      = file("${path.module}/policies/allow-full-dynamodb.json")
 }
 
+resource "aws_iam_policy" "api_gateway_policy" {
+  name        = "${var.module_prefix}.policy-api-gateway"
+  description = "Policy to allow invoking api gateway endpoints"
+  policy      = file("${path.module}/policies/allow-invoke-api-gateway.json")
+}
+
 ##################################
 # aws_iam_role : iam_for_exec_lambda
 ##################################
@@ -31,6 +37,11 @@ resource "aws_iam_role_policy_attachment" "role_policy_dynamodb" {
 resource "aws_iam_role_policy_attachment" "role_policy_log" {
   role       = aws_iam_role.iam_for_exec_lambda.name
   policy_arn = aws_iam_policy.log_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "role_policy_api_gateway" {
+  role       = aws_iam_role.iam_for_exec_lambda.name
+  policy_arn = aws_iam_policy.api_gateway_policy.arn
 }
 
 ##################################
