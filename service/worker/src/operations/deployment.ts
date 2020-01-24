@@ -265,15 +265,14 @@ async function processPreDestroyActions(projectVariables: VariableResolver, prov
     }
 }
 
-function generateDeployedComponents(deploymentId: string, components: McmaComponent[], terraformOutput: any): McmaDeployedComponent[] {
+function generateDeployedComponents(deploymentId: string, projectVariables: VariableResolver, components: McmaComponent[], terraformOutput: any): McmaDeployedComponent[] {
     const result: McmaDeployedComponent[] = [];
 
     for (const component of components) {
         const deployedComponent = new McmaDeployedComponent(component);
         deployedComponent.id = deploymentId + "/" + component.name;
 
-        //TODO replace inputVariables with resolved variables while variables keeps the original configuration copied from the component.
-        deployedComponent.inputVariables = deployedComponent.variables;
+        deployedComponent.inputVariables = deployedComponent.variables.map(v => projectVariables.resolve(v));
         for (const varName of Object.keys(terraformOutput[component.name].value)) {
             deployedComponent.outputVariables.push(new McmaVariable({
                 name: varName,
@@ -495,7 +494,7 @@ export async function updateDeployment(providerCollection, workerRequest) {
             }
 
             if (!errorMessage) {
-                const newDeployedComponents: McmaDeployedComponent[] = generateDeployedComponents(deploymentId, components, terraformOutput);
+                const newDeployedComponents: McmaDeployedComponent[] = generateDeployedComponents(deploymentId, projectVariables, components, terraformOutput);
 
                 console.log("Running post deployment actions");
                 try {
@@ -513,6 +512,18 @@ export async function updateDeployment(providerCollection, workerRequest) {
                 for (const deployedComponent of newDeployedComponents) {
                     await dc.setDeployedComponent(deployedComponent);
                 }
+            }
+
+            deployment.variables = [];
+            for (const variable of projectVariables.getAll()) {
+                deployment.variables.push(projectVariables.resolve(variable));
+            }
+
+            deployment.providers = [];
+            for (const provider of project.providers) {
+                const copy = new McmaProvider(provider);
+                copy.variables = copy.variables.map(v => projectVariables.resolve(v));
+                deployment.providers.push(copy);
             }
 
             deployment.status = errorMessage ? McmaDeploymentStatus.Error : McmaDeploymentStatus.OK;

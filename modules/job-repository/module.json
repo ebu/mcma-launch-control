@@ -51,30 +51,37 @@
                     "name": "Job Repository",
                     "resources": [
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "AmeJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "AIJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "CaptureJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "QAJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "TransferJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "TransformJob",
                             "httpEndpoint": "${jobs_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "WorkflowJob",
                             "httpEndpoint": "${jobs_url}"
                         }

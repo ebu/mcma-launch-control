@@ -1,0 +1,45 @@
+<nb-card>
+    <nb-card-header>
+        <div class="row show-grid">
+            <div class="col-md-12">
+                <h4>Deployment of project '{{project?.displayName}}' with configuration '{{deploymentConfig?.displayName}}'</h4>
+            </div>
+        </div>
+    </nb-card-header>
+
+    <nb-card-body>
+
+        <div class="row show-grid">
+            <div class="col-md-11">
+                <h6>Variables</h6>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="variableSettings"
+                         [source]="variableSource">
+        </ng2-smart-table>
+
+        <div class="row show-grid marginTop">
+            <div class="col-md-11">
+                <h6>Providers</h6>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="providerSettings"
+                         [source]="providerSource"
+                         (custom)="onViewProvider($event)">
+        </ng2-smart-table>
+
+        <div class="row show-grid marginTop">
+            <div class="col-md-11">
+                <h6>Components</h6>
+            </div>
+        </div>
+
+        <ng2-smart-table [settings]="componentSettings"
+                         [source]="componentSource"
+                         (custom)="onViewComponent($event)">
+        </ng2-smart-table>
+
+    </nb-card-body>
+</nb-card>

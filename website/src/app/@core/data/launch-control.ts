@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 
-import { McmaDeploymentConfig, McmaProject, McmaComponent, McmaDeployment } from "@local/commons";
+import { McmaDeploymentConfig, McmaProject, McmaComponent, McmaDeployment, McmaDeployedComponent } from "@local/commons";
 
 export abstract class LaunchControlData {
     abstract getDeploymentConfigs(): Observable<McmaDeploymentConfig[]>;
@@ -34,4 +34,6 @@ export abstract class LaunchControlData {
     abstract updateDeployment(projectName: string, deploymentName: string): Observable<McmaDeployment>;
 
     abstract deleteDeployment(projectName: string, deploymentName: string): Observable<any>;
+
+    abstract getDeployedComponents(projectName: string, deploymentName: string): Observable<McmaDeployedComponent[]>;
 }

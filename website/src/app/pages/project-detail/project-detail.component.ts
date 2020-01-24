@@ -1,6 +1,14 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import { McmaComponent, McmaDeployment, McmaDeploymentConfig, McmaDeploymentStatus, McmaProject, McmaProvider, McmaVariable } from "@local/commons";
+import { ActivatedRoute, Router } from "@angular/router";
+import {
+    McmaComponent,
+    McmaDeployment,
+    McmaDeploymentConfig,
+    McmaDeploymentStatus,
+    McmaProject,
+    McmaProvider,
+    McmaVariable,
+} from "@local/commons";
 import { iif, of } from "rxjs";
 import { map, switchMap, takeWhile } from "rxjs/operators";
 import { LaunchControlData } from "../../@core/data/launch-control";
@@ -155,25 +163,29 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     componentSource: LocalDataSource = new LocalDataSource();
 
     deploymentSettings = {
-        add: {
-            addButtonContent: "<i class=\"nb-plus\"></i>",
-            createButtonContent: "<i class=\"nb-checkmark\"></i>",
-            cancelButtonContent: "<i class=\"nb-close\"></i>",
-        },
-        edit: {
-            editButtonContent: "<i class=\"nb-loop\" title=\"Update\"></i>",
-            saveButtonContent: "<i class=\"nb-checkmark\"></i>",
-            cancelButtonContent: "<i class=\"nb-close\"></i>",
-        },
-        delete: {
-            deleteButtonContent: "<i class=\"nb-trash\" title=\"Delete\"></i>",
-        },
+        add: null,
+        edit: null,
+        delete: null,
 
         mode: "external",
         hideSubHeader: true,
 
         actions: {
             position: "right",
+            custom: [
+                {
+                    name: "view",
+                    title: "<i class=\"nb-search\" title=\"View\"></i>",
+                },
+                {
+                    name: "deploy",
+                    title: "<i class=\"nb-loop\" title=\"Deploy\"></i>",
+                },
+                {
+                    name: "destroy",
+                    title: "<i class=\"nb-trash\" title=\"Destroy\"></i>",
+                },
+            ],
         },
 
         filter: false,
@@ -197,7 +209,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             statusMessage: {
                 title: "Status Message",
                 type: "string",
-                width: "35%",
+                width: "30%",
             },
         },
 
@@ -211,7 +223,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
                 case McmaDeploymentStatus.Error:
                     return "";
                 default:
-                    return "disabled-trash";
+                    return "disabled-search disabled-trash";
             }
         },
     };
@@ -220,7 +232,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
     private deployments = [];
 
-    constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute, private dialogService: NbDialogService) {
+    constructor(private launchControlService: LaunchControlData, private route: ActivatedRoute, private dialogService: NbDialogService, private router: Router) {
     }
 
     ngOnInit() {
@@ -477,12 +489,18 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         ).subscribe(() => this.loadComponents());
     }
 
-    onUpdateDeployment(event) {
-        this.launchControlService.updateDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
-    }
-
-    onDeleteDeployment(event) {
-        this.launchControlService.deleteDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
+    onCustomDeployment(event) {
+        switch (event.action) {
+            case "view":
+                this.router.navigate(["pages/projects/", this.project.name, "deployments", event.data.name]);
+                break;
+            case "deploy":
+                this.launchControlService.updateDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
+                break;
+            case "destroy":
+                this.launchControlService.deleteDeployment(this.project.name, event.data.name).subscribe(() => this.loadDeployments());
+                break;
+        }
     }
 
 }

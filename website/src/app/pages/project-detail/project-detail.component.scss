@@ -12,4 +12,57 @@
     .marginTop {
         margin-top: 2em;
     }
+
+    ::ng-deep ng2-st-tbody-edit-delete {
+        display: flex !important;
+        height: 0 !important;
+    }
+
+    ::ng-deep ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom {
+        display: inline-block;
+        height: 100%;
+        padding-top: 8px;
+        width: 55px;
+        text-align: center;
+        font-size: 1.1em;
+        border-right: none;
+    }
+
+    ::ng-deep ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:hover {
+        color: #3366ff
+    }
+
+    ::ng-deep ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(3):hover {
+        color: #ff3d71
+    }
+
+    ::ng-deep .rotating-loop ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(2) {
+        pointer-events: none;
+        cursor: pointer;
+        animation: 2s linear infinite spin;
+    }
+
+    ::ng-deep .rotating-trash ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(3) {
+        pointer-events: none;
+        cursor: pointer;
+        animation: 2s linear infinite spin;
+    }
+
+    ::ng-deep .disabled-search ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(1) {
+        pointer-events: none;
+        cursor: pointer;
+        color: #ddd;
+    }
+
+    ::ng-deep .disabled-loop ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(2) {
+        pointer-events: none;
+        cursor: pointer;
+        color: #ddd;
+    }
+
+    ::ng-deep .disabled-trash ng2-st-tbody-custom a.ng2-smart-action.ng2-smart-action-custom-custom:nth-child(3) {
+        pointer-events: none;
+        cursor: pointer;
+        color: #ddd;
+    }
 }

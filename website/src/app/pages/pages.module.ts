@@ -9,6 +9,7 @@ import { PagesRoutingModule } from "./pages-routing.module";
 import { ProjectDetailModule } from "./project-detail/project-detail.module";
 import { DeploymentConfigsModule } from "./deployment-configs/deployment-configs.module";
 import { DeploymentConfigDetailModule } from "./deployment-config-detail/deployment-config-detail.module";
+import { DeploymentDetailModule } from "./deployment-detail/deployment-detail.module";
 
 @NgModule({
     imports: [
@@ -20,6 +21,7 @@ import { DeploymentConfigDetailModule } from "./deployment-config-detail/deploym
         ProjectDetailModule,
         DeploymentConfigsModule,
         DeploymentConfigDetailModule,
+        DeploymentDetailModule,
     ],
     declarations: [
         PagesComponent,

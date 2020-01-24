@@ -51,6 +51,7 @@
                     "name": "Job Processor Service",
                     "resources": [
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "JobProcess",
                             "httpEndpoint": "${job_processes_url}"
                         }

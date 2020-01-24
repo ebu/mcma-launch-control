@@ -68,8 +68,7 @@
 
         <ng2-smart-table [settings]="deploymentSettings"
                          [source]="deploymentSource"
-                         (edit)="onUpdateDeployment($event)"
-                         (delete)="onDeleteDeployment($event)">
+                         (custom)="onCustomDeployment($event)">
         </ng2-smart-table>
 
     </nb-card-body>

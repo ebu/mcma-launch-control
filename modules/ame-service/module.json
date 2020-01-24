@@ -80,6 +80,7 @@
                     "name": "MediaInfo Ame Service",
                     "resources": [
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "JobAssignment",
                             "httpEndpoint": "${job_assignments_url}"
                         }

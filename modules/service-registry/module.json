@@ -52,10 +52,12 @@
                     "name": "Service Registry",
                     "resources": [
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "Service",
                             "httpEndpoint": "${services_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "JobProfile",
                             "httpEndpoint": "${job_profiles_url}"
                         }

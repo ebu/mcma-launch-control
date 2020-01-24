@@ -51,10 +51,12 @@
                     "name": "Media Repository",
                     "resources": [
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "BMContent",
                             "httpEndpoint": "${bm_contents_url}"
                         },
                         {
+                            "@type": "ResourceEndpoint",
                             "resourceType": "BMEssence",
                             "httpEndpoint": "${bm_essences_url}"
                         }
