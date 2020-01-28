@@ -89,7 +89,7 @@ resource "aws_lambda_function" "api_handler" {
 
 resource "aws_lambda_function" "worker" {
   filename         = "${path.module}/lambdas/worker.zip"
-  function_name    = format("%.64s", "${var.module_prefix}-worker")
+  function_name    = format("%.64s", replace("${var.module_prefix}-worker", "/[^a-zA-Z0-9_]+/", "-" ))
   role             = aws_iam_role.iam_for_exec_lambda.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("${path.module}/lambdas/worker.zip")
