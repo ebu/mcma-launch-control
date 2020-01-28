@@ -89,7 +89,7 @@ resource "aws_lambda_function" "api_handler" {
 
 resource "aws_lambda_layer_version" "mediainfo" {
   filename = "${path.module}/mediainfo/MediaInfo_CLI_19.09_Lambda_AL2.zip"
-  layer_name = "${var.module_prefix}-mediainfo"
+  layer_name = format("%.140s", replace("${var.module_prefix}-mediainfo", "/[^a-zA-Z0-9_]+/", "-" ))
   source_code_hash = filebase64sha256("${path.module}/mediainfo/MediaInfo_CLI_19.09_Lambda_AL2.zip")
 }
 
